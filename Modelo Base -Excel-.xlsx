@@ -1,0 +1,197 @@
+/* =============================================================================
+ * MOTOR DE CÁLCULO — agrega a TABELA DE FATOS (modelo Excel) e deriva tudo.
+ * A base é uma tabela única: marca, molecula, periodo, canal, concentracao,
+ * PPP, unidades. Aqui reconstruímos as visões (molécula/marca/canal/corporação/
+ * segmento/concentração) e todos os indicadores (share, crescimento, LTM…).
+ * =========================================================================== */
+(function () {
+  const round = (v, d = 1) => { const p = Math.pow(10, d); return Math.round(v * p) / p; };
+  const LE1 = new Set(['0,25mg', '0,5mg', '1mg']); // Semaglutida até 1mg (injetável)
+  const molOrder = ['Tirzepatida', 'Semaglutida (até 1mg)', 'Semaglutida (>1mg)', 'Liraglutida'];
+
+  // --- ingestão: monta as estruturas a partir de RAW.FATOS (uma única vez) ---
+  function build(RAW) {
+    const per = RAW.META.periodos, pidx = {}; per.forEach((p, i) => pidx[p] = i);
+    const blank = () => per.map(() => 0);
+    const CO = RAW.COLUNAS || ['marca', 'molecula', 'periodo', 'canal', 'concentracao', 'PPP', 'unidades'];
+    const ix = {}; CO.forEach((c, i) => ix[c.toLowerCase()] = i);
+    const C = { marca: ix.marca ?? 0, molecula: ix.molecula ?? 1, corp: ix.corporacao, periodo: ix.periodo, canal: ix.canal, conc: ix.dosagem ?? ix.concentracao, target: ix.target, ppp: ix.ppp ?? CO.length - 2, un: ix.unidades ?? CO.length - 1 };
+    const CORP = RAW.CORP || {};
+    const corpOf = r => (C.corp != null ? r[C.corp] : null) || CORP[r[C.marca]] || '—';
+    const molLabel = r => r[C.molecula] === 'Semaglutida' ? 'Semaglutida (' + (LE1.has(r[C.conc]) ? 'até 1mg' : '>1mg') + ')' : r[C.molecula];
+    const add = (o, k, i, v) => { (o[k] = o[k] || blank())[i] += v; };
+
+    const V = { PPP: { molecula: {}, marca: {}, canal: {}, concentracao: {} }, Unidades: { molecula: {}, marca: {}, canal: {}, concentracao: {} } };
+    const SEG = { PPP: blank(), Unidades: blank() };
+    const baseMol = {}, baseCorp = {}, dirM = {}, totM = {}, doseAbs = {};
+    RAW.FATOS.forEach(r => {
+      const i = pidx[r[C.periodo]], p = r[C.ppp], u = r[C.un], m = r[C.marca], ml = molLabel(r), bm = r[C.molecula];
+      baseMol[m] = bm; baseCorp[m] = corpOf(r);
+      add(V.PPP.molecula, ml, i, p); add(V.Unidades.molecula, ml, i, u);
+      add(V.PPP.marca, m, i, p); add(V.Unidades.marca, m, i, u);
+      add(V.PPP.canal, r[C.canal], i, p); add(V.Unidades.canal, r[C.canal], i, u);
+      (V.PPP.concentracao[bm] = V.PPP.concentracao[bm] || {}); add(V.PPP.concentracao[bm], r[C.conc], i, p);
+      (V.Unidades.concentracao[bm] = V.Unidades.concentracao[bm] || {}); add(V.Unidades.concentracao[bm], r[C.conc], i, u);
+      dirM[m] = dirM[m] || blank(); totM[m] = totM[m] || blank(); totM[m][i] += p; if (r[C.canal] === 'Direto') dirM[m][i] += p;
+      (doseAbs[m] = doseAbs[m] || {}); add(doseAbs[m], r[C.conc], i, p);
+      const tv = C.target != null ? r[C.target] : null;
+      const isT = C.target != null ? (tv === 1 || tv === true || /^(1|sim|true|target|x)$/i.test(String(tv))) : (r[C.molecula] === 'Semaglutida' && LE1.has(r[C.conc]));
+      if (isT) { SEG.PPP[i] += p; SEG.Unidades[i] += u; }
+    });
+    // ordena moléculas na ordem canônica
+    ['PPP', 'Unidades'].forEach(u => {
+      const src = V[u].molecula, ord = {};
+      molOrder.forEach(k => { if (src[k]) ord[k] = src[k]; });
+      Object.keys(src).forEach(k => { if (!ord[k]) ord[k] = src[k]; });
+      V[u].molecula = ord;
+    });
+    // CANAL_MARCA (% Direto)
+    const CANAL_MARCA = {};
+    Object.keys(dirM).forEach(m => CANAL_MARCA[m] = dirM[m].map((d, i) => totM[m][i] ? round(d / totM[m][i] * 100, 1) : 0));
+    // CONC_PRODUTO (rep.% por dose)
+    const CONC_PRODUTO = {};
+    Object.keys(doseAbs).forEach(m => {
+      const tot = blank(); Object.values(doseAbs[m]).forEach(s => s.forEach((v, i) => tot[i] += v));
+      const o = {}; Object.keys(doseAbs[m]).forEach(dz => o[dz] = doseAbs[m][dz].map((v, i) => tot[i] ? round(v / tot[i] * 100, 1) : 0));
+      CONC_PRODUTO[m] = o;
+    });
+    // MAPA_MARCAS
+    const MAPA = {};
+    Object.keys(V.PPP.marca).forEach(m => MAPA[m] = { molecula: baseMol[m], corporacao: baseCorp[m] });
+
+    return { META: RAW.META, MAPA_MARCAS: MAPA, VENDAS: V, SEGTARGET: SEG, CANAL_MARCA, CONC_PRODUTO, PRECOS: buildPrecos(RAW), _C: C, _CORP: CORP };
+  }
+
+  // reconstrói a estrutura de preço (semanas/pdvs/pares) a partir da tabela tidy PRECOS_FATOS
+  function buildPrecos(RAW) {
+    if (!RAW.PRECOS_FATOS) return RAW.PRECOS;
+    const cp = RAW.COLUNAS_PRECO || ['marca', 'referencia', 'dosagem', 'periodo', 'rede', 'valor'];
+    const ci = {}; cp.forEach((c, i) => ci[c.toLowerCase()] = i);
+    const iM = ci.marca, iR = ci.referencia, iD = ci.dosagem, iP = ci.periodo, iRe = ci.rede, iV = ci.valor;
+    const rows = RAW.PRECOS_FATOS, sem = [], redes = [];
+    rows.forEach(r => { if (!sem.includes(r[iP])) sem.push(r[iP]); if (r[iM] !== r[iR] && r[iRe] && r[iRe] !== '—' && !redes.includes(r[iRe])) redes.push(r[iRe]); });
+    const last = sem[sem.length - 1], wIx = {}; sem.forEach((w, i) => wIx[w] = i); const rIx = {}; redes.forEach((p, i) => rIx[p] = i);
+    const parM = {};
+    rows.forEach(r => { const R = r[iR]; (parM[R] = parM[R] || { referencia: R, conc: new Set(), dz: {} }); if (r[iM] !== R) parM[R].conc.add(r[iM]); });
+    const round = (v, d) => { const p = Math.pow(10, d); return Math.round(v * p) / p; };
+    const pares = Object.values(parM).map(pm => {
+      const R = pm.referencia, dz = {};
+      rows.forEach(r => { if (r[iR] !== R) return; const d = r[iD];
+        const o = dz[d] || (dz[d] = { ref: 0, porPdv: redes.map(() => 0), evConc: sem.map(() => 0), evRef: sem.map(() => 0), _s: sem.map(() => ({ s: 0, n: 0 })) });
+        const wi = wIx[r[iP]];
+        if (r[iM] === R) { o.evRef[wi] = r[iV]; }
+        else { if (r[iP] === last && rIx[r[iRe]] != null) o.porPdv[rIx[r[iRe]]] = r[iV]; o._s[wi].s += r[iV]; o._s[wi].n++; }
+      });
+      Object.values(dz).forEach(o => { o.evConc = o._s.map(c => c.n ? round(c.s / c.n, 2) : 0); o.ref = o.evRef[o.evRef.length - 1] || 0; delete o._s; });
+      return { referencia: R, concorrente: [...pm.conc][0] || R, dosagens: dz };
+    });
+    return { semanas: sem, pdvs: redes, pares };
+  }
+
+  const CALC = {
+    _b: null,
+    get B() {
+      const RAW = window.BASE_EMAGRECIMENTO;
+      if (!this._b || this._raw !== RAW) { this._raw = RAW; this._b = RAW.FATOS ? build(RAW) : RAW; }
+      return this._b;
+    },
+    get periodos() { return this.B.META.periodos; },
+    get mapa() { return this.B.MAPA_MARCAS; },
+
+    raw(unidade, dimensao) {
+      const V = this.B.VENDAS[unidade];
+      if (dimensao === 'molecula' || dimensao === 'marca' || dimensao === 'canal') return { ...V[dimensao] };
+      if (dimensao === 'corporacao') {
+        const out = {};
+        for (const [marca, serie] of Object.entries(V.marca)) {
+          const corp = this.mapa[marca].corporacao;
+          if (!out[corp]) out[corp] = serie.map(() => 0);
+          serie.forEach((v, i) => (out[corp][i] += v));
+        }
+        return this.ordenar(out);
+      }
+      if (dimensao === 'segmento') {
+        const seg = (this.B.SEGTARGET && this.B.SEGTARGET[unidade]) || this.periodos.map(() => 0);
+        const tot = this.total(unidade);
+        return { 'Segmento target': seg.map(v => round(v, 2)), 'Outros': tot.map((v, i) => round(v - seg[i], 2)) };
+      }
+      if (dimensao === 'marcaTop') {
+        const m = V.marca, tot = this.total(unidade), keys = ['Mounjaro', 'Wegovy', 'Poviztra', 'Ozempic'], out = {};
+        keys.forEach(k => (out[k] = [...(m[k] || this.periodos.map(() => 0))]));
+        out['Outros'] = tot.map((v, i) => round(v - keys.reduce((s, k) => s + (m[k] ? m[k][i] : 0), 0), 2));
+        return out;
+      }
+      return {};
+    },
+
+    ordenar(obj) { return Object.fromEntries(Object.entries(obj).sort((a, b) => this.ltm(b[1]) - this.ltm(a[1]))); },
+
+    // agrega a tabela de fatos por 'groupBy' com filtros opcionais {canal, corporacao, molecula, marca}
+    agrupar(unidade, groupBy, filtro) {
+      filtro = filtro || {};
+      const R = this._raw, C = this.B._C, CORP = this.B._CORP || {}, per = this.periodos;
+      const pidx = {}; per.forEach((p, i) => pidx[p] = i);
+      const vIx = unidade === 'PPP' ? C.ppp : C.un;
+      const corpOf = r => (C.corp != null ? r[C.corp] : null) || CORP[r[C.marca]] || '—';
+      const keyOf = r => groupBy === 'corporacao' ? corpOf(r) : r[C[groupBy === 'concentracao' ? 'conc' : groupBy]];
+      const out = {};
+      R.FATOS.forEach(r => {
+        if (filtro.canal && r[C.canal] !== filtro.canal) return;
+        if (filtro.corporacao && corpOf(r) !== filtro.corporacao) return;
+        if (filtro.molecula && r[C.molecula] !== filtro.molecula) return;
+        if (filtro.marca && r[C.marca] !== filtro.marca) return;
+        const k = keyOf(r); if (k == null) return;
+        (out[k] = out[k] || per.map(() => 0))[pidx[r[C.periodo]]] += r[vIx];
+      });
+      return out;
+    },
+
+    total(unidade) {
+      const mol = this.B.VENDAS[unidade].molecula, t = this.periodos.map(() => 0);
+      Object.values(mol).forEach(s => s.forEach((v, i) => (t[i] += v)));
+      return t.map(v => round(v, 2));
+    },
+
+    share(unidade, dimensao) {
+      const raw = this.raw(unidade, dimensao);
+      const tot = this.periodos.map((_, i) => Object.values(raw).reduce((s, arr) => s + arr[i], 0));
+      const out = {};
+      for (const [k, arr] of Object.entries(raw)) out[k] = arr.map((v, i) => (tot[i] ? round((v / tot[i]) * 100, 1) : 0));
+      return out;
+    },
+
+    crescMA(arr) { return arr.map((v, i) => (i === 0 || !arr[i - 1] ? null : round((v / arr[i - 1] - 1) * 100, 1))); },
+    crescMAA(arr) { return arr.map((v, i) => (i < 12 || !arr[i - 12] ? null : round((v / arr[i - 12] - 1) * 100, 1))); },
+    cresc(arr) { return this.periodos.length > 12 ? this.crescMAA(arr) : this.crescMA(arr); },
+
+    ltm(arr) { return round(arr.slice(-12).reduce((s, v) => s + v, 0), 1); },
+    media(arr) { return round(arr.reduce((s, v) => s + v, 0) / arr.length, 1); },
+    ultimo(arr) { return arr[arr.length - 1]; },
+    penultimo(arr) { return arr[arr.length - 2]; },
+
+    precoMedia(dose) { return round(dose.porPdv.reduce((s, v) => s + v, 0) / dose.porPdv.length, 2); },
+    desconto(dose) { return round((this.precoMedia(dose) / dose.ref - 1) * 100, 1); },
+
+    fmtNum(v, d = 0) { return (v == null ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d })); },
+    fmtPct(v, d = 1) { return (v == null ? '—' : (v > 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }) + '%'); },
+    fmtR$(v, d = 0) { return 'R$ ' + this.fmtNum(v, d); },
+
+    cor(nome) {
+      const map = {
+        'Tirzepatida': '#074878', 'Semaglutida (até 1mg)': '#0062AA', 'Semaglutida (>1mg)': '#3E9BD6', 'Liraglutida': '#A9D0EE',
+        'Mounjaro': '#074878', 'Wegovy': '#0062AA', 'Poviztra': '#00BFDF', 'Ozempic': '#3E9BD6', 'Outros': '#C6D9E6',
+        'Novo Nordisk': '#0062AA', 'Lilly': '#074878', 'Eurofarma': '#00BFDF', 'NC Farma': '#A9D0EE',
+        'Rybelsus': '#7FB2D9', 'Extensior': '#5AA0CF', 'Saxenda/Victoza': '#0062AA', 'Olire/Lirux': '#00BFDF',
+        'Segmento target': '#0062AA', 'Wegovy_ref': '#074878', 'Ozempic_ref': '#074878',
+        'Share no mercado (%)': '#00BFDF', 'Cresc. mercado (%)': '#00BFDF', 'Preço ref.': '#074878', 'Preço conc.': '#0062AA',
+        'Direto': '#0062AA', 'Indireto': '#A9D0EE',
+        '0,25mg': '#A9D0EE', '0,5mg': '#3E9BD6', '1mg': '#0062AA', '>1mg': '#074878',
+        '2,5mg': '#A9D0EE', '5mg': '#7FB2D9', '7,5mg': '#3E9BD6', '10mg': '#0062AA', '12,5mg': '#0B3E68', '15mg': '#074878',
+        '3mg': '#A9D0EE', '7mg': '#3E9BD6', '14mg': '#074878',
+      };
+      return map[nome] || '#8FB4CE';
+    },
+  };
+
+  window.CALC = CALC;
+})();

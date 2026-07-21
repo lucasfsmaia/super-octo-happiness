@@ -1,0 +1,12 @@
+/* ============================================================
+   Hypera Pharma — Radius tokens
+   8px is the dominant radius. Pill = 800px.
+   ============================================================ */
+:root {
+  --radius-sm: 6px;
+  --radius: 8px;          /* default — buttons, cards, inputs */
+  --radius-md: 12px;
+  --radius-lg: 15px;
+  --radius-xl: 18px;      /* large feature cards */
+  --radius-pill: 800px;   /* pills, circular carousel buttons */
+}

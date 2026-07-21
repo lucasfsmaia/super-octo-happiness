@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <style>doc-page:not(:defined){visibility:hidden}</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0.75in" hint-size="794px,1123px">
+  <div style="font-family:'Asap',sans-serif; color:var(--hy-body); font-size:11.5pt; line-height:1.55;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--hy-blue); padding-bottom:14px; margin-bottom:26px;">
+      <div>
+        <div style="font-size:9pt; letter-spacing:.12em; text-transform:uppercase; color:var(--hy-cyan); font-weight:700;">Inteligência de Mercado · Farma</div>
+        <h1 style="font-size:23pt; font-weight:700; color:var(--hy-ink); margin:4px 0 0;">Estrutura da Base Única</h1>
+        <div style="font-size:11pt; color:var(--hy-muted); margin-top:2px;">Relatório de Mercado de Emagrecimento (GLP-1)</div>
+      </div>
+      <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:34px; width:auto;">
+    </div>
+
+    <p style="margin:0 0 18px;">Toda a apresentação nasce de <b>uma única fonte de dados</b>: o arquivo <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">base-emagrecimento.js</code>. Ele é uma <b>tabela de fatos</b> — o mesmo formato do export do IQVIA/Databricks e do Excel modelo. O analista não edita o arquivo à mão: preenche o Excel, gera a base pelo <b>Atualizador</b> e a apresentação se recalcula sozinha.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:0 0 26px;">
+      <div style="background:var(--hy-blue-bg); border-radius:10px; padding:16px 18px;">
+        <div style="font-size:10pt; font-weight:700; color:var(--hy-blue); margin-bottom:4px;">1 planilha</div>
+        <div style="font-size:10pt; color:var(--hy-body);">Excel com as abas <b>Dados</b> e <b>Preco</b> — o único lugar que o analista edita.</div>
+      </div>
+      <div style="background:var(--hy-blue-bg); border-radius:10px; padding:16px 18px;">
+        <div style="font-size:10pt; font-weight:700; color:var(--hy-blue); margin-bottom:4px;">2 vistas</div>
+        <div style="font-size:10pt; color:var(--hy-body);">PPP (R$) e Unidades saem das mesmas linhas, sem redigitar.</div>
+      </div>
+      <div style="background:var(--hy-blue-bg); border-radius:10px; padding:16px 18px;">
+        <div style="font-size:10pt; font-weight:700; color:var(--hy-blue); margin-bottom:4px;">0 cálculos manuais</div>
+        <div style="font-size:10pt; color:var(--hy-body);">Share, crescimento, LTM e mix são derivados pelo motor <b>calc.js</b>.</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:15pt; font-weight:700; color:var(--hy-ink); border-left:5px solid var(--hy-cyan); padding-left:12px; margin:0 0 12px;">1 · Princípio: uma tabela de fatos</h2>
+    <p style="margin:0 0 12px;">A base é uma <b>tabela longa (tidy)</b>: <b>uma linha por marca × molécula × período × canal × dosagem</b>, com os valores de PPP e unidades naquele recorte. Nenhum agregado é digitado — molécula, corporação, canal, segmento e dosagem são apenas colunas que o motor agrupa como precisar. Colar direto do export já funciona.</p>
+    <div style="overflow:hidden; border:1px solid var(--hy-border); border-radius:8px; margin:0 0 24px;">
+      <table style="width:100%; border-collapse:collapse; font-size:9pt;">
+        <thead><tr style="background:var(--hy-blue); color:#fff;">
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">marca</th>
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">molecula</th>
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">corporacao</th>
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">periodo</th>
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">canal</th>
+          <th style="text-align:left; padding:7px 9px; font-weight:600;">dosagem</th>
+          <th style="text-align:center; padding:7px 9px; font-weight:600;">target</th>
+          <th style="text-align:right; padding:7px 9px; font-weight:600;">PPP</th>
+          <th style="text-align:right; padding:7px 9px; font-weight:600;">unidades</th>
+        </tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--hy-border);"><td style="padding:6px 9px; font-weight:600; color:var(--hy-ink);">Mounjaro</td><td style="padding:6px 9px;">Tirzepatida</td><td style="padding:6px 9px;">Lilly</td><td style="padding:6px 9px;">jun/26</td><td style="padding:6px 9px;">Indireto</td><td style="padding:6px 9px;">5mg</td><td style="text-align:center; padding:6px 9px;">0</td><td style="text-align:right; padding:6px 9px;">181,454</td><td style="text-align:right; padding:6px 9px;">129,61</td></tr>
+          <tr style="border-bottom:1px solid var(--hy-border);"><td style="padding:6px 9px; font-weight:600; color:var(--hy-ink);">Wegovy</td><td style="padding:6px 9px;">Semaglutida</td><td style="padding:6px 9px;">Novo Nordisk</td><td style="padding:6px 9px;">jun/26</td><td style="padding:6px 9px;">Indireto</td><td style="padding:6px 9px;">1mg</td><td style="text-align:center; padding:6px 9px;">1</td><td style="text-align:right; padding:6px 9px;">120,3</td><td style="text-align:right; padding:6px 9px;">40,1</td></tr>
+          <tr><td style="padding:6px 9px; font-weight:600; color:var(--hy-ink);">Poviztra</td><td style="padding:6px 9px;">Semaglutida</td><td style="padding:6px 9px;">Eurofarma</td><td style="padding:6px 9px;">jun/26</td><td style="padding:6px 9px;">Direto</td><td style="padding:6px 9px;">&gt;1mg</td><td style="text-align:center; padding:6px 9px;">0</td><td style="text-align:right; padding:6px 9px;">39,722</td><td style="text-align:right; padding:6px 9px;">51,05</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="font-size:15pt; font-weight:700; color:var(--hy-ink); border-left:5px solid var(--hy-cyan); padding-left:12px; margin:0 0 12px;">2 · Anatomia do arquivo</h2>
+    <p style="margin:0 0 14px;">O <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">base-emagrecimento.js</code> tem cinco blocos — todos gerados pelo Atualizador:</p>
+
+    <div style="margin:0 0 14px;">
+      <div style="font-size:11.5pt; font-weight:700; color:var(--hy-blue); margin-bottom:6px;">META — cabeçalho do relatório</div>
+      <pre style="background:#0B2A44; color:#EDF6FC; border-radius:8px; padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:9pt; line-height:1.5; overflow-x:auto; margin:0;">META: {
+  referencia: 'jun/26',          // rótulo do mês mais recente
+  parcial: true,                 // mês ainda em fechamento?
+  atualizadoEm: '14/jul/26',
+  fonte: 'FMB IQVIA (30 dias) · Databricks',
+  periodos: ['jun/25', ..., 'jun/26']   // ordem cronológica dos meses
+}</pre>
+    </div>
+
+    <div style="margin:0 0 14px; break-inside:avoid;">
+      <div style="font-size:11.5pt; font-weight:700; color:var(--hy-blue); margin-bottom:6px;">CORP — corporação de cada marca</div>
+      <p style="margin:0 0 6px;">Dicionário marca → corporação. Redundante à coluna <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">corporacao</code> dos fatos; serve de fallback para marcas sem corporação preenchida.</p>
+      <pre style="background:#0B2A44; color:#EDF6FC; border-radius:8px; padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:9pt; line-height:1.5; overflow-x:auto; margin:0;">CORP: { 'Mounjaro': 'Lilly', 'Wegovy': 'Novo Nordisk', 'Poviztra': 'Eurofarma', ... }</pre>
+    </div>
+
+    <div style="margin:0 0 14px; break-inside:avoid;">
+      <div style="font-size:11.5pt; font-weight:700; color:var(--hy-blue); margin-bottom:6px;">COLUNAS + FATOS — a tabela de sell-out (o coração da base)</div>
+      <p style="margin:0 0 6px;"><code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">COLUNAS</code> nomeia a ordem dos campos; cada item de <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">FATOS</code> é uma linha nessa ordem. <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">target</code> = 1 marca a linha como segmento target (Semaglutida ≤ 1mg).</p>
+      <pre style="background:#0B2A44; color:#EDF6FC; border-radius:8px; padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:9pt; line-height:1.5; overflow-x:auto; margin:0;">COLUNAS: ['marca','molecula','corporacao','periodo','canal','dosagem','target','PPP','unidades'],
+FATOS: [
+  ['Mounjaro','Tirzepatida','Lilly','jun/26','Indireto','5mg',0,181.454,129.61],
+  ['Wegovy','Semaglutida','Novo Nordisk','jun/26','Indireto','1mg',1,120.3,40.1],
+  // uma linha por marca × molécula × período × canal × dosagem
+]</pre>
+    </div>
+
+    <div style="margin:0 0 22px; break-inside:avoid;">
+      <div style="font-size:11.5pt; font-weight:700; color:var(--hy-blue); margin-bottom:6px;">COLUNAS_PRECO + PRECOS_FATOS — acompanhamento de preço</div>
+      <p style="margin:0 0 6px;">Mesma ideia, tabela de fatos de preço: uma linha por marca × dosagem × período (semana) × rede (PDV). A referência de cada par (ex.: Poviztra → Wegovy) vem da coluna <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">referencia</code>.</p>
+      <pre style="background:#0B2A44; color:#EDF6FC; border-radius:8px; padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:9pt; line-height:1.5; overflow-x:auto; margin:0;">COLUNAS_PRECO: ['marca','referencia','dosagem','periodo','rede','valor'],
+PRECOS_FATOS: [
+  ['Poviztra','Wegovy','0,25mg','09/jun','Drogasil',744],
+  ['Poviztra','Wegovy','0,25mg','09/jun','Pacheco',744],
+  // ...
+]</pre>
+    </div>
+
+    <h2 style="font-size:15pt; font-weight:700; color:var(--hy-ink); border-left:5px solid var(--hy-cyan); padding-left:12px; margin:0 0 12px; break-before:page;">3 · O que é calculado automaticamente</h2>
+    <p style="margin:0 0 12px;">O motor <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">calc.js</code> deriva tudo abaixo a partir dos fatos brutos de sell-out e preço. <b>Nenhum destes valores é digitado na base.</b></p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 24px;">
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Agregações</b> — molécula, marca, canal, corporação e segmento, somando os fatos.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Market share (%)</b> — participação de cada entidade no total do período, em qualquer corte.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Crescimento MA</b> — variação vs. o mês anterior.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Crescimento MAA</b> — vs. o mesmo mês do ano anterior (quando há ≥ 13 meses).</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">LTM</b> — acumulado dos últimos 12 meses.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Mix de dosagem</b> — participação de cada dosagem dentro da molécula/produto.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Preço médio & desconto</b> — média entre PDVs e desconto vs. referência.</div>
+      <div style="border:1px solid var(--hy-border); border-radius:8px; padding:12px 16px;"><b style="color:var(--hy-blue);">Δ semanal</b> — variação de preço vs. a semana anterior.</div>
+    </div>
+
+    <h2 style="font-size:15pt; font-weight:700; color:var(--hy-ink); border-left:5px solid var(--hy-cyan); padding-left:12px; margin:0 0 12px;">4 · Como atualizar (rotina)</h2>
+    <ol style="margin:0 0 22px; padding-left:22px;">
+      <li style="margin-bottom:8px;">Abra o <b>Atualizador da Base</b> e clique em <b>Baixar modelo (Excel)</b>.</li>
+      <li style="margin-bottom:8px;">No Databricks/IQVIA, extraia o sell-out (uma linha por marca × molécula × período × canal × dosagem, com PPP e unidades) e os preços por rede; cole nas abas <b>Dados</b> e <b>Preco</b>.</li>
+      <li style="margin-bottom:8px;">Para um <b>novo mês</b>: basta acrescentar as linhas daquele período — o rótulo entra automaticamente em <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">META.periodos</code>.</li>
+      <li style="margin-bottom:8px;">Solte o Excel no Atualizador, confira o cabeçalho e clique em <b>Validar e gerar base</b> → <b>Baixar</b>.</li>
+      <li style="margin-bottom:0;">Substitua <code style="background:var(--hy-blue-bg); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">base-emagrecimento.js</code> no SharePoint — a apresentação já reflete os novos dados.</li>
+    </ol>
+
+    <div style="background:var(--hy-blue-bg); border-radius:10px; padding:18px 22px; break-inside:avoid;">
+      <div style="font-size:12pt; font-weight:700; color:var(--hy-ink); margin-bottom:8px;">Checklist de validação</div>
+      <ul style="margin:0; padding-left:20px;">
+        <li style="margin-bottom:5px;">Toda linha de <b>Dados</b> tem as <b>9 colunas</b> na ordem de <code style="background:#fff; padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">COLUNAS</code>.</li>
+        <li style="margin-bottom:5px;">Nomes de <b>molécula</b>, <b>canal</b> e <b>dosagem</b> escritos igual entre linhas (o motor agrupa por texto exato).</li>
+        <li style="margin-bottom:5px;">Recortes sem venda recebem <code style="background:#fff; padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:9.5pt;">0</code> em PPP/unidades — ou simplesmente não têm linha.</li>
+        <li style="margin-bottom:0;">O Atualizador aceita vírgula ou ponto decimal; a base gerada normaliza para ponto.</li>
+      </ul>
+    </div>
+
+  </div>
+</x-import>
+</x-dc>
+</body>
+</html>
