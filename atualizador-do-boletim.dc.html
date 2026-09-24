@@ -91,7 +91,6 @@
       <div style="border-top:1px solid #EFEFEF; margin-top:22px; padding-top:18px;">
         <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;">
           <div style="font-size:16px; font-weight:700; color:#292A2B;">Resumo montado</div>
-          <a href="Exemplo Resumo Teams.dc.html" style="font-size:14px; font-weight:600; color:#0062AA;">Ver Exemplo Resumo Teams</a>
         </div>
         <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:6px 0 16px;">É isto que o botão <b>Copiar resumo completo</b> leva para o Teams: cada parágrafo seguido do seu quadro. Os marcadores <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[HIGHLIGHTS]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[BU]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[CANAIS]]</code> e <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[RITMO]]</code> no texto acima dizem onde cada quadro entra — mova ou apague à vontade. O comparativo aparece a partir da segunda planilha carregada.</p>
         <div id="resumoDoc" style="overflow-x:auto; background:#F7FBFE; border:1px solid #EFEFEF; border-radius:8px; padding:18px;"></div>
@@ -272,7 +271,30 @@ class Component extends DCLogic {
 
   _v(id) { const el = this.$(id); return el ? el.value : ''; }
   _ck(id) { const el = this.$(id); return !!(el && el.checked); }
-  _num(v) { if (v == null || v === '' || v === '-') return null; if (typeof v === 'number') return v; const n = parseFloat(String(v).replace(/\./g, '').replace(',', '.').replace('%', '')); return isFinite(n) ? n : null; }
+  /**
+   * Número em qualquer convenção. Tendo ponto e vírgula, o último é o decimal.
+   * Dois ou mais pontos são sempre milhar (1.234.567). Com um ponto só, quem decide é o
+   * separador do arquivo: delimitado por vírgula o ponto é necessariamente decimal;
+   * delimitado por ponto e vírgula, 1.234 vale como milhar pela convenção pt-BR.
+   */
+  _num(v) {
+    if (v == null || v === '' || v === '-') return null;
+    if (typeof v === 'number') return v;
+    let t = String(v).trim().replace('%', '').replace(/\s|\u00a0/g, '');
+    if (!t || t === '-') return null;
+    const p = t.lastIndexOf('.'), c = t.lastIndexOf(',');
+    if (p >= 0 && c >= 0) {
+      t = c > p ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+    } else if (c >= 0) {
+      t = t.split(',').length > 2 ? t.replace(/,/g, '') : t.replace(',', '.');
+    } else if (t.split('.').length > 2) {
+      t = t.replace(/\./g, '');            // 1.234.567 — dois pontos nunca são decimal
+    } else if (p >= 0 && this._sepAtual !== ',' && /^-?\d{1,3}\.\d{3}$/.test(t)) {
+      t = t.replace('.', '');               // 1.234 só é milhar em arquivo ';'
+    }
+    const n = parseFloat(t);
+    return isFinite(n) ? n : null;
+  }
   _fmt(v, d) { return v == null ? '-' : v.toFixed(d == null ? 1 : d).replace('.', ','); }
   _pct(v) { return v == null ? '-' : v.toFixed(1).replace('.', ',') + '%'; }
   _cor(v) { return v == null ? '#8A8C8E' : (v < 0 ? '#B32B23' : '#17734A'); }
@@ -340,6 +362,7 @@ class Component extends DCLogic {
   /** AOA de uma aba. Aba vinda de CSV já carrega o AOA cru — evita o round-trip por planilha. */
   _aoa(X, ws) {
     if (!ws) return [];
+    this._sepAtual = ws.__sep || ';';
     if (ws.__aoa) return ws.__aoa;
     return X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
   }
@@ -639,6 +662,7 @@ class Component extends DCLogic {
     let fim = t.indexOf('\n', ini); if (fim < 0) fim = t.length;
     const prim = t.slice(ini, fim);
     const sep = (prim.split(';').length > prim.split(',').length) ? ';' : ',';
+    this._sepAtual = sep;
     const linhas = [];
     let campo = '', linha = [], aspas = false, vazia = true;
     const fecharCampo = () => { const v = campo.trim(); if (v !== '') vazia = false; linha.push(v); campo = ''; };
@@ -673,7 +697,7 @@ class Component extends DCLogic {
     const GRANDE = 15 * 1048576;
     const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
     const info = this.$('impInfo');
-    const grupos = {}, ordem = [], agregado = {};
+    const grupos = {}, ordem = [], agregado = {}, seps = {};
     this._datasBase = {};
     this._agregadas = [];
     let lidoMB = 0;
@@ -691,12 +715,13 @@ class Component extends DCLogic {
             if (info) info.textContent = 'Somando ' + a.name + ' — '
               + (lidoMB + feito).toFixed(0) + ' de ' + totalMB.toFixed(0) + ' MB';
           })
-        : a.text().then(t => ({ aoa: this._parseCSV(t), datas: null }));
+        : a.text().then(t => ({ aoa: this._parseCSV(t), datas: null, sep: this._sepAtual }));
       return p.then(r => {
         lidoMB += mb;
         if (r.datas && r.datas.length) this._datasBase[nome] = r.datas;
         if (r.agregado) { this._agregadas.push(a.name + ' → ' + (r.linhas || 0) + ' linhas'); agregado[nome] = true; }
         if (!grupos[nome]) { grupos[nome] = []; ordem.push(nome); }
+        if (r.sep) seps[nome] = r.sep;
         grupos[nome].push(r.aoa);
         return passo(i + 1);
       });
@@ -716,7 +741,7 @@ class Component extends DCLogic {
         });
         if (!linhas.length) return;
         wb.SheetNames.push(nome);
-        wb.Sheets[nome] = { __aoa: linhas, __trans: !!agregado[nome] };
+        wb.Sheets[nome] = { __aoa: linhas, __trans: !!agregado[nome], __sep: seps[nome] || ';' };
       });
       return wb;
     });
@@ -756,6 +781,7 @@ class Component extends DCLogic {
 
     const lerCabecalho = linha => {
       sep = (linha.split(';').length > linha.split(',').length) ? ';' : ',';
+      this._sepAtual = sep;
       const h = partir(linha).map(c => String(c || '').trim().toUpperCase().replace(/\s+/g, '_').replace(/^"|"$/g, ''));
       h.forEach((n, i) => {
         if (DIM[n]) { if (nomeDim.indexOf(DIM[n]) < 0) { nomeDim.push(DIM[n]); iDim.push(i); } }
