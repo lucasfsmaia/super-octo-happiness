@@ -358,8 +358,26 @@ class Component extends DCLogic {
     const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const derivado = [];
     const dias = vendas.map(v => v.data).filter(d => d > 0);
-    if (!dias.length) return derivado;
+    if (!dias.length) {
+      if (!M.dataCorte || /^\d{1,2}$/.test(String(M.dataCorte).trim())) {
+        const h = new Date(), d2 = n => String(n).padStart(2, '0');
+        M.dataCorte = d2(h.getDate()) + '/' + d2(h.getMonth() + 1) + '/' + String(h.getFullYear()).slice(-2);
+        derivado.push('data de corte ' + M.dataCorte + ' (hoje — a base não traz coluna de data)');
+      }
+      if (!M.referencia) {
+        const h = this._dataDe(this._serial(M.dataCorte)) || new Date();
+        M.referencia = MESES[h.getUTCMonth ? h.getUTCMonth() : h.getMonth()] + '/' + String(h.getUTCFullYear ? h.getUTCFullYear() : h.getFullYear()).slice(-2);
+        derivado.push('referência ' + M.referencia);
+      }
+      return derivado;
+    }
     let maxDia = 0; for (let i = 0; i < dias.length; i++) if (dias[i] > maxDia) maxDia = dias[i];
+    // "24" vira 24/09/26: o dia sozinho é completado com o mês e o ano do último dia da base
+    const soDia = /^\d{1,2}$/.test(String(M.dataCorte || '').trim());
+    if (soDia) {
+      const ref = this._dataDe(maxDia), d2 = n => String(n).padStart(2, '0');
+      M.dataCorte = d2(parseInt(M.dataCorte, 10)) + '/' + d2(ref.getUTCMonth() + 1) + '/' + String(ref.getUTCFullYear()).slice(-2);
+    }
     const corteSerial = this._serial(M.dataCorte) || maxDia;
     const dc = this._dataDe(corteSerial);
     const dd = n => String(n).padStart(2, '0');
@@ -541,12 +559,13 @@ class Component extends DCLogic {
           };
         });
         this._curvaBU = porBU;
+        this._semAAporBU = !bus.some(b => (porBU[b].aa || []).some(v => v));
         const tem = campo => dd.map(d => linhas.some(x => x.d === d && x[campo] != null));
         const soma = campo => dd.map(d => linhas.filter(x => x.d === d).reduce((a, x) => a + (x[campo] || 0), 0));
         const sAA = soma('aa'), sR = soma('real'), sP = soma('proj'), tR = tem('real'), tP = tem('proj');
         linhas.length = 0;
         dd.forEach((d, i) => linhas.push({ d, bu: null, aa: sAA[i], real: tR[i] ? sR[i] : null, proj: tP[i] ? sP[i] : null }));
-      } else this._curvaBU = null;
+      } else { this._curvaBU = null; this._semAAporBU = false; }
       const dias = linhas.sort((a, b) => a.d - b.d);
       const comReal = dias.filter(x => x.real != null);
       if (dias.length && comReal.length) {
@@ -626,6 +645,17 @@ class Component extends DCLogic {
       if (v.canal.indexOf('VD') === 0) a.projVD += v.proj; else a.projVI += v.proj;
     }));
     cota.forEach(v => chaves(v).forEach(k => { const a = pega(k); a.orc += v.orc; a.forecast += v.forecast || 0; }));
+    // Orçamento e forecast vêm de um arquivo só. Se o total sai de ordem de grandeza contra a
+    // projeção, o problema é de formato numérico na origem — publicar seria pior que omitir.
+    this._orcDescartado = null;
+    const T0 = mapa['T'];
+    if (T0 && T0.proj > 0 && T0.orc > 0) {
+      const razao = T0.orc / T0.proj;
+      if (razao > 10 || razao < 0.1) {
+        this._orcDescartado = { orc: T0.orc, proj: T0.proj, razao: razao };
+        Object.keys(mapa).forEach(k => { mapa[k].orc = 0; mapa[k].forecast = 0; });
+      }
+    }
     vendasAA.forEach(v => chaves(v).forEach(k => {
       const a = pega(k); a.realAA += v.real; if (!corteAA || v.data <= corteAA) a.realAAmtd += v.real;
     }));
@@ -994,6 +1024,8 @@ class Component extends DCLogic {
         if (!vendas.length) throw new Error('vendas sem linhas');
         if (!vendasAA.length) throw new Error('"vendas-aa" ausente ou vazio — sem ano anterior não há variação');
         const diasDe = nome => { const d = this._datasBase && nome ? this._datasBase[nome] : null; return d && d.length ? d.map(x => ({ data: x })) : null; };
+        // o cabeçalho da base anterior não vale para a base nova; sem meta.csv, tudo é derivado
+        if (!nomeMetaT) { M.dataCorte = ''; M.referencia = ''; M.diasUteis = null; M.diasUteisAA = null; }
         this._derivarMeta(M, diasDe(nomeVendas) || vendas, diasDe(nomeAA) || vendasAA);
         if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
         if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % da cota');
@@ -1003,7 +1035,8 @@ class Component extends DCLogic {
         this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
         this._lerCurva(X, wb, divisor);
       this._lerExtras(X, wb);
-        const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
+        // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
+        const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
         put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
         info.style.color = '#0a7d34';
@@ -1040,7 +1073,8 @@ class Component extends DCLogic {
       if (nomeMeta) {
         const mr = this._aoa(X, wb.Sheets[nomeMeta]);
         const M = {}; mr.forEach(r => { const k = String(r[0] || '').trim(); if (k) M[k] = r[1]; });
-        const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
+        // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
+        const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
         put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
         const n = k => this._num(M[k]);
@@ -1081,6 +1115,13 @@ class Component extends DCLogic {
     const nulos = this.fatos.filter(f => f[3] == null && f[8] == null).length;
     if (nulos) avisos.push(nulos + ' linhas sem valor e sem crescimento — serão exibidas como "-".');
     if (!this._curva) avisos.push('<b>curva</b> não preenchida — o gráfico de ritmo do mês da apresentação segue com a curva anterior.');
+    if (this._semAAporBU) avisos.push('<b>curva</b> sem <b>REALAA</b> por BU — as colunas BU MAIOR VAR e VAR DA BU do ritmo ficam indisponíveis. O total continua comparável.');
+    if (this._orcDescartado) {
+      const o = this._orcDescartado;
+      falhas.push('<b>orcamento</b> descartado: o total lido (R$ ' + this._fmt(o.orc) + ' mi) é ' + this._fmt(o.razao)
+        + '× a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O formato numérico do arquivo perdeu a posição do decimal. '
+        + 'Reexporte com <b>ponto como decimal e sem separador de milhar</b>. Até então o boletim sai sem orçamento e sem forecast.');
+    }
     const li = (t, c) => '<li style="margin-bottom:6px; color:' + c + ';">' + t + '</li>';
     el.innerHTML = '<div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:12px;">Validação</div>' +
       '<div style="display:flex; gap:26px; flex-wrap:wrap; font-size:15px; margin-bottom:' + (falhas.length || avisos.length ? '14px' : '0') + ';">' +
@@ -1119,6 +1160,16 @@ class Component extends DCLogic {
 
     const A = [];
     const add = (nivel, titulo, texto) => A.push({ nivel: nivel, titulo: titulo, texto: texto });
+    if (this._orcDescartado) {
+      const o = this._orcDescartado;
+      add('Crítico', 'Orçamento descartado por escala implausível',
+        'O total de orçamento lido em <b>orcamento.csv</b> soma R$ ' + this._fmt(o.orc) + ' mi, ' + this._fmt(o.razao)
+        + '× a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O arquivo mistura formatos numéricos (ex.: <b>475812.25</b> ao lado de '
+        + '<b>129.322.822.265.625</b>) e a posição do decimal não é recuperável. Orçamento e forecast saem do boletim até o arquivo ser '
+        + 'reexportado com ponto como decimal e sem separador de milhar.');
+    }
+    if (this._semAAporBU) add('Atenção', 'Curva sem ano anterior por BU',
+      'O <b>curva.csv</b> traz REALAA zerado nas linhas de BU, então a comparação do ritmo por BU fica indisponível. O ritmo total continua correto.');
     if (fora.length) {
       const p = fora[0];
       add(fora.some(l => Math.abs(l.cresc) >= 1000) ? 'Crítico' : 'Atenção',
@@ -1464,7 +1515,9 @@ class Component extends DCLogic {
         if (!temBU) return '';
       }
       const aa = (cv && cv.aa) || [], real = (cv && cv.real) || [], proj = (cv && cv.proj) || [];
-      const antS = ant && ant.curva ? serie(ant.curva) : null, atS = serie(cv) || [];
+      // só compara com a base anterior se o corte dela for outro: mesmo corte dá coluna idêntica
+      const cortesIguais = !!(ant && ant.corte) && ant.corte === this._corteTxt();
+      const antS = (ant && ant.curva && !cortesIguais) ? serie(ant.curva) : null, atS = serie(cv) || [];
       const S = {}, corteBU = {};
       nomes.forEach(b => { S[b] = serie(cb[b]) || []; corteBU[b] = (cb[b].real || []).length; });
       const dias = Math.max.apply(null, [(cv && cv.diasMes) || atS.length].concat(nomes.map(b => cb[b].diasMes || S[b].length)));
@@ -1511,7 +1564,8 @@ class Component extends DCLogic {
           const vb = (b0 != null && total != null) ? Math.round((total - b0) * 10) / 10 : null;
           let lider = null;
           if (temBU) {
-            nomes.forEach(b => {
+            const temAAporBU = nomes.some(b => (cb[b].aa || []).some(v => v));
+            if (temAAporBU) nomes.forEach(b => {
               const x = S[b][i], aB = (cb[b].aa || [])[i];
               if (x == null || aB == null) return;
               const dB = Math.round((x - aB) * 10) / 10;
