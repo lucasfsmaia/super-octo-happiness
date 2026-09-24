@@ -208,6 +208,7 @@ class Component extends DCLogic {
     box.style.display = 'block';
     box.innerHTML = [
       ['atualizador-do-boletim.dc.html', 'edit_note', 'Produção do boletim', 'Base do dia, validação do resumo e envio dos e-mails.'],
+      ['agregacao-power-query.dc.html', 'account_tree', 'Agregação no Power Query', 'Prepara os CSVs da extração no grão que o Atualizador lê.'],
       ['formato-da-base.dc.html', 'table_chart', 'Formato da base', 'Abas, colunas e regras de cálculo da planilha.'],
       ['modelo-base-boletim-sell-out.xlsx', 'download', 'Modelo da planilha', 'Arquivo base para preencher a extração do dia.']
     ].map(l => '<a href="' + l[0] + '" style="display:flex; align-items:flex-start; gap:12px; text-decoration:none; '

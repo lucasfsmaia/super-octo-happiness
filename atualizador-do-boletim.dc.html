@@ -35,7 +35,7 @@
 
     <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
       <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
-      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Tabela grande pode vir quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) — elas são unidas na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito.</div>
+      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Pode vir no grão bruto de SKU × dia: arquivo acima de 15 MB é lido em fatias e somado aqui mesmo, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
       <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
         <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivos<input id="inpFile" type="file" accept=".csv,.txt,.xlsx,.xls" multiple="multiple" style="display:none;"></label>
         <button id="btnModel" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Baixar modelo (CSV)</button>
@@ -302,7 +302,8 @@ class Component extends DCLogic {
     const derivado = [];
     const dias = vendas.map(v => v.data).filter(d => d > 0);
     if (!dias.length) return derivado;
-    const corteSerial = this._serial(M.dataCorte) || Math.max.apply(null, dias);
+    let maxDia = 0; for (let i = 0; i < dias.length; i++) if (dias[i] > maxDia) maxDia = dias[i];
+    const corteSerial = this._serial(M.dataCorte) || maxDia;
     const dc = this._dataDe(corteSerial);
     const dd = n => String(n).padStart(2, '0');
     if (!M.dataCorte) {
@@ -336,9 +337,16 @@ class Component extends DCLogic {
     return derivado;
   }
 
+  /** AOA de uma aba. Aba vinda de CSV já carrega o AOA cru — evita o round-trip por planilha. */
+  _aoa(X, ws) {
+    if (!ws) return [];
+    if (ws.__aoa) return ws.__aoa;
+    return X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+  }
+
   /** Lê uma aba transacional (DIA | BU | MARCA | SKU | CANAL | CLIENTE | valores). */
   _lerTrans(X, ws, divisor) {
-    const g = X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+    const g = this._aoa(X, ws);
     if (!g.length) return [];
     const head = g[0].map(c => String(c == null ? '' : c).trim().toUpperCase().replace(/\s+/g, '_'));
     const col = (...alt) => { for (const a of alt) { const i = head.indexOf(a); if (i >= 0) return i; } return -1; };
@@ -398,7 +406,7 @@ class Component extends DCLogic {
   _lerCurva(X, wb) {
     const nomeCurva = wb.SheetNames.find(n => /curva|ritmo/i.test(n));
     if (nomeCurva) {
-      const bruto = X.utils.sheet_to_json(wb.Sheets[nomeCurva], { header: 1, raw: true, defval: '' });
+      const bruto = this._aoa(X, wb.Sheets[nomeCurva]);
       const cab = (bruto[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
       const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
       const iD = Math.max(0, ci('DIA', 'DATA')), iBU = ci('BU'), iCanal = ci('CANAL'),
@@ -494,7 +502,7 @@ class Component extends DCLogic {
     const ler = (re, mapear) => {
       const nome = wb.SheetNames.find(n => re.test(n));
       if (!nome) return null;
-      const br = X.utils.sheet_to_json(wb.Sheets[nome], { header: 1, raw: true, defval: '' });
+      const br = this._aoa(X, wb.Sheets[nome]);
       const cab = (br[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
       const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
       const out = br.slice(1).map(r => mapear(r, ci)).filter(Boolean);
@@ -626,56 +634,200 @@ class Component extends DCLogic {
    * decimal chega inteiro em _num. Aceita ; ou , como separador e campos entre aspas.
    */
   _parseCSV(txt) {
-    const t = String(txt || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
-    const prim = t.split('\n')[0] || '';
+    const t = String(txt || '');
+    const ini = t.charCodeAt(0) === 0xFEFF ? 1 : 0;
+    let fim = t.indexOf('\n', ini); if (fim < 0) fim = t.length;
+    const prim = t.slice(ini, fim);
     const sep = (prim.split(';').length > prim.split(',').length) ? ';' : ',';
-    const linhas = []; let campo = '', linha = [], aspas = false;
-    for (let i = 0; i < t.length; i++) {
+    const linhas = [];
+    let campo = '', linha = [], aspas = false, vazia = true;
+    const fecharCampo = () => { const v = campo.trim(); if (v !== '') vazia = false; linha.push(v); campo = ''; };
+    const fecharLinha = () => { fecharCampo(); if (!vazia) linhas.push(linha); linha = []; vazia = true; };
+    for (let i = ini; i < t.length; i++) {
       const c = t[i];
       if (aspas) {
         if (c === '"') { if (t[i + 1] === '"') { campo += '"'; i++; } else aspas = false; }
         else campo += c;
       } else if (c === '"') aspas = true;
-      else if (c === sep) { linha.push(campo); campo = ''; }
-      else if (c === '\n') { linha.push(campo); linhas.push(linha); linha = []; campo = ''; }
-      else campo += c;
+      else if (c === sep) fecharCampo();
+      else if (c === '\n') fecharLinha();
+      else if (c !== '\r') campo += c;
     }
-    if (campo !== '' || linha.length) { linha.push(campo); linhas.push(linha); }
-    return linhas.filter(r => r.some(v => String(v).trim() !== '')).map(r => r.map(v => v.trim()));
+    if (campo !== '' || linha.length) fecharLinha();
+    return linhas;
   }
 
   /**
    * Um CSV por tabela (vendas.csv, vendas-aa.csv, projecao-atual.csv…), vários de uma vez.
    * Partes numeradas do mesmo nome (vendas-01, vendas-02) são emendadas numa tabela só.
-   * Monta a mesma estrutura de pasta de abas que o .xlsx produzia, então o resto do fluxo
-   * não muda.
+   * Arquivo acima de 15 MB não é carregado inteiro: passa por _csvAgregado, que lê em
+   * fatias e já soma no grão BU × marca × canal × cliente. Memória fica constante.
+   * Monta a mesma estrutura de pasta de abas que o .xlsx produzia, então o resto do
+   * fluxo não muda.
    */
   _wbDeCSVs(X, arqs) {
     const nomeTabela = n => n.replace(/\.[^.]+$/, '')
       .replace(/[ _-]*(parte|part|p)?[ _-]*\d+$/i, '')
       .replace(/[_-]+/g, ' ').trim() || 'vendas';
     const ordenados = arqs.slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { numeric: true }));
-    return Promise.all(ordenados.map(a => a.text().then(t => ({ nome: nomeTabela(a.name), texto: t }))))
-      .then(lidos => {
-        const grupos = {}, ordem = [];
-        lidos.forEach(l => { if (!grupos[l.nome]) { grupos[l.nome] = []; ordem.push(l.nome); } grupos[l.nome].push(l.texto); });
-        const wb = { SheetNames: [], Sheets: {} };
-        ordem.forEach(nome => {
-          const linhas = [];
-          let cab = null;
-          grupos[nome].forEach(txt => {
-            const aoa = this._parseCSV(txt);
-            if (!aoa.length) return;
-            const assina = r => r.map(c => String(c == null ? '' : c).trim().toUpperCase()).join('|');
-            if (cab == null) { cab = assina(aoa[0]); linhas.push.apply(linhas, aoa); }
-            else linhas.push.apply(linhas, assina(aoa[0]) === cab ? aoa.slice(1) : aoa);
-          });
-          if (!linhas.length) return;
-          wb.SheetNames.push(nome);
-          wb.Sheets[nome] = X.utils.aoa_to_sheet(linhas);
-        });
-        return wb;
+    const GRANDE = 15 * 1048576;
+    const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
+    const info = this.$('impInfo');
+    const grupos = {}, ordem = [];
+    this._datasBase = {};
+    this._agregadas = [];
+    let lidoMB = 0;
+
+    const passo = i => {
+      if (i >= ordenados.length) return Promise.resolve();
+      const a = ordenados[i], nome = nomeTabela(a.name), mb = (a.size || 0) / 1048576;
+      if (info) {
+        info.style.color = '#5D5F61';
+        info.textContent = (mb > 15 ? 'Somando ' : 'Lendo ') + a.name
+          + ' — ' + lidoMB.toFixed(0) + ' de ' + totalMB.toFixed(0) + ' MB';
+      }
+      const p = (a.size || 0) > GRANDE
+        ? this._csvAgregado(a, nome, (feito) => {
+            if (info) info.textContent = 'Somando ' + a.name + ' — '
+              + (lidoMB + feito).toFixed(0) + ' de ' + totalMB.toFixed(0) + ' MB';
+          })
+        : a.text().then(t => ({ aoa: this._parseCSV(t), datas: null }));
+      return p.then(r => {
+        lidoMB += mb;
+        if (r.datas && r.datas.length) this._datasBase[nome] = r.datas;
+        if (r.agregado) this._agregadas.push(a.name + ' → ' + (r.linhas || 0) + ' linhas');
+        if (!grupos[nome]) { grupos[nome] = []; ordem.push(nome); }
+        grupos[nome].push(r.aoa);
+        return passo(i + 1);
       });
+    };
+
+    return passo(0).then(() => {
+      const wb = { SheetNames: [], Sheets: {} };
+      ordem.forEach(nome => {
+        const linhas = [];
+        let cab = null;
+        grupos[nome].forEach(aoa => {
+          if (!aoa || !aoa.length) return;
+          const assina = r => r.map(c => String(c == null ? '' : c).trim().toUpperCase()).join('|');
+          const ini2 = cab == null ? 0 : (assina(aoa[0]) === cab ? 1 : 0);
+          if (cab == null) cab = assina(aoa[0]);
+          for (let i = ini2; i < aoa.length; i++) linhas.push(aoa[i]);
+        });
+        if (!linhas.length) return;
+        wb.SheetNames.push(nome);
+        wb.Sheets[nome] = { __aoa: linhas };
+      });
+      return wb;
+    });
+  }
+
+  /**
+   * Lê um CSV grande em fatias e devolve a tabela já somada no grão
+   * BU × marca × canal × cliente. SKU e data saem na soma — a data sobrevive
+   * como lista de dias distintos, que é tudo que o cabeçalho precisa dela.
+   * Campo entre aspas com separador dentro é tratado; quebra de linha dentro de
+   * aspas não (nenhuma extração do boletim produz isso).
+   */
+  _csvAgregado(arquivo, rotulo, aoAvancar) {
+    const FATIA = 6 * 1048576;
+    const DIM = { BU: 'BU', MARCA: 'MARCA', CANAL: 'CANAL', CLIENTE: 'CLIENTE', REDE: 'CLIENTE' };
+    const IGNORA = { SKU: 1, DATA: 1, DIA: 1, EAN: 1, PRODUTO: 1, DESCRICAO: 1 };
+    const VALOR_CONHECIDO = /^(VALOR_REAL|REAL|REALIZADO|PROJ_INICIAL|PROJETADO_INICIAL|VALOR_PROJETADO_INICIAL|PROJ_ATUAL|PROJETADO_ATUAL|VALOR_PROJETADO_ATUAL|ORCAMENTO|OR\u00c7AMENTO|ORC|FORECAST|FCST|ORCAMENTO_REPROJETADO)$/;
+    const dec = new TextDecoder('utf-8');
+    const mapa = new Map(), datas = new Set();
+    let resto = '', sep = ';', pronto = false, iData = -1;
+    let nomeDim = [], iDim = [], nomeVal = [], iVal = [], cands = [];
+
+    const partir = linha => {
+      if (linha.indexOf('"') < 0) return linha.split(sep);
+      const out = []; let campo = '', aspas = false;
+      for (let i = 0; i < linha.length; i++) {
+        const c = linha[i];
+        if (aspas) { if (c === '"') { if (linha[i + 1] === '"') { campo += '"'; i++; } else aspas = false; } else campo += c; }
+        else if (c === '"') aspas = true;
+        else if (c === sep) { out.push(campo); campo = ''; }
+        else campo += c;
+      }
+      out.push(campo);
+      return out;
+    };
+
+    const lerCabecalho = linha => {
+      sep = (linha.split(';').length > linha.split(',').length) ? ';' : ',';
+      const h = partir(linha).map(c => String(c || '').trim().toUpperCase().replace(/\s+/g, '_').replace(/^"|"$/g, ''));
+      h.forEach((n, i) => {
+        if (DIM[n]) { if (nomeDim.indexOf(DIM[n]) < 0) { nomeDim.push(DIM[n]); iDim.push(i); } }
+        else if (n === 'DATA' || n === 'DIA') { if (iData < 0) iData = i; }
+        else if (!IGNORA[n] && n) cands.push({ n: n, i: i });
+      });
+      if (!nomeDim.length) throw new Error(rotulo + ': nenhuma coluna de BU, marca, canal ou cliente no cabeçalho');
+    };
+
+    const definirValores = campos => {
+      cands.forEach(c => {
+        if (this._num(campos[c.i]) != null) { nomeVal.push(c.n); iVal.push(c.i); }
+      });
+      if (!nomeVal.length) throw new Error(rotulo + ': nenhuma coluna de valor numérico encontrada');
+      if (nomeVal.length === 1 && !VALOR_CONHECIDO.test(nomeVal[0])) nomeVal[0] = 'REAL';
+      pronto = true;
+    };
+
+    const trataLinha = linha => {
+      if (!linha) return;
+      const campos = partir(linha);
+      if (!pronto) definirValores(campos);
+      let chave = '';
+      for (let d = 0; d < iDim.length; d++) {
+        chave += (d ? '\u0001' : '') + String(campos[iDim[d]] || '').trim().toUpperCase();
+      }
+      let acc = mapa.get(chave);
+      if (!acc) { acc = new Float64Array(iVal.length); mapa.set(chave, acc); }
+      for (let v = 0; v < iVal.length; v++) {
+        const x = this._num(campos[iVal[v]]);
+        if (x != null) acc[v] += x;
+      }
+      if (iData >= 0 && datas.size < 2000) {
+        const d = campos[iData];
+        if (d) { const sv = this._serial(d); if (sv) datas.add(sv); }
+      }
+    };
+
+    const laco = off => {
+      if (off >= arquivo.size) {
+        const cauda = resto + dec.decode();
+        cauda.split('\n').forEach(l => trataLinha(l.replace(/\r$/, '')));
+        return Promise.resolve();
+      }
+      return arquivo.slice(off, off + FATIA).arrayBuffer().then(buf => {
+        let txt = resto + dec.decode(new Uint8Array(buf), { stream: true });
+        if (off === 0) txt = txt.replace(/^\uFEFF/, '');
+        const linhas = txt.split('\n');
+        resto = linhas.pop() || '';
+        let ini2 = 0;
+        if (off === 0 && linhas.length) { lerCabecalho(linhas[0].replace(/\r$/, '')); ini2 = 1; }
+        for (let i = ini2; i < linhas.length; i++) trataLinha(linhas[i].replace(/\r$/, ''));
+        if (aoAvancar) aoAvancar(Math.min(off + FATIA, arquivo.size) / 1048576);
+        return laco(off + FATIA);
+      });
+    };
+
+    return laco(0).then(() => {
+      const aoa = [nomeDim.concat(nomeVal)];
+      mapa.forEach((acc, chave) => {
+        const dims = chave.split('\u0001');
+        if (!dims[0]) return;
+        const linha = dims.slice();
+        let algum = false;
+        for (let v = 0; v < acc.length; v++) {
+          const x = Math.round(acc[v] * 100) / 100;
+          if (x !== 0) algum = true;
+          linha.push(x);
+        }
+        if (algum) aoa.push(linha);
+      });
+      return { aoa: aoa, datas: Array.from(datas), agregado: true, linhas: aoa.length - 1 };
+    });
   }
 
   _import(entrada) {
@@ -685,6 +837,21 @@ class Component extends DCLogic {
     const arqs = Array.isArray(entrada) ? entrada : [entrada];
     const csvs = arqs.filter(a => /\.(csv|txt)$/i.test(a.name));
     const rotulo = arqs.length === 1 ? arqs[0].name : arqs.length + ' arquivos';
+    const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
+    const maior = arqs.slice().sort((a, b) => (b.size || 0) - (a.size || 0))[0];
+    const maiorMB = maior ? (maior.size || 0) / 1048576 : 0;
+    if (!csvs.length && (totalMB > 60 || maiorMB > 40)) {
+      info.style.color = '#B32B23';
+      info.innerHTML = 'Base grande demais para o navegador: <b>' + totalMB.toFixed(0) + ' MB</b> no total'
+        + (maior ? ', sendo <b>' + maior.name + '</b> com ' + maiorMB.toFixed(0) + ' MB' : '') + '. '
+        + 'O leitor de .xlsx carrega a planilha inteira na memória. Exporte como CSV — aí a leitura é feita em fatias e o tamanho deixa de importar. '
+        + 'um CSV por tabela no grão <b>BU × marca × cliente × canal</b> fica abaixo de 20 MB. '
+        + '<a href="agregacao-power-query.dc.html" style="color:#0062AA;">Passo a passo da agregação</a> · '
+        + '<a href="formato-da-base.dc.html" style="color:#0062AA;">Formato da Base</a>.';
+      return;
+    }
+    info.style.color = '#5D5F61';
+    info.textContent = 'Lendo ' + rotulo + ' (' + totalMB.toFixed(1) + ' MB)…';
     const fonte = csvs.length
       ? this._wbDeCSVs(X, csvs)
       : arqs[0].arrayBuffer().then(ab => X.read(ab, { type: 'array' }));
@@ -692,13 +859,13 @@ class Component extends DCLogic {
       const f = { name: rotulo };
       const nomeVendas = wb.SheetNames.find(n => /^vendas$|venda/i.test(n) && !/aa/i.test(n));
       const cabTrans = nomeVendas
-        ? (X.utils.sheet_to_json(wb.Sheets[nomeVendas], { header: 1, raw: true, defval: '' })[0] || [])
+        ? (this._aoa(X, wb.Sheets[nomeVendas])[0] || [])
           .map(c => String(c).trim().toUpperCase()).join('|')
         : '';
       if (nomeVendas && /CANAL/.test(cabTrans) && /(DATA|DIA)/.test(cabTrans)) {
         const nomeMetaT = wb.SheetNames.find(n => /meta|cabe/i.test(n));
         const M = {};
-        if (nomeMetaT) X.utils.sheet_to_json(wb.Sheets[nomeMetaT], { header: 1, raw: true, defval: '' })
+        if (nomeMetaT) this._aoa(X, wb.Sheets[nomeMetaT])
           .forEach(r => { const k = String(r[0] || '').trim(); if (k && k !== 'campo') M[k] = r[1]; });
         const divisor = this._num(M.divisor) || 1000000;
         const topN = this._num(M.topMarcas) || 5;
@@ -713,7 +880,8 @@ class Component extends DCLogic {
         const cota = nomeProj && nomeOrc ? this._lerTrans(X, wb.Sheets[nomeOrc], divisor) : [];
         if (!vendas.length) throw new Error('vendas sem linhas');
         if (!vendasAA.length) throw new Error('"vendas-aa" ausente ou vazio — sem ano anterior não há variação');
-        this._derivarMeta(M, vendas, vendasAA);
+        const diasDe = nome => { const d = this._datasBase && nome ? this._datasBase[nome] : null; return d && d.length ? d.map(x => ({ data: x })) : null; };
+        this._derivarMeta(M, diasDe(nomeVendas) || vendas, diasDe(nomeAA) || vendasAA);
         if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
         if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % da cota');
         const corte = this._serial(M.dataCorte);
@@ -739,7 +907,7 @@ class Component extends DCLogic {
         return;
       }
       const nomeFatos = wb.SheetNames.find(n => /fato|dados|base/i.test(n)) || wb.SheetNames[0];
-      const rows = X.utils.sheet_to_json(wb.Sheets[nomeFatos], { header: 1, raw: true, defval: '' });
+      const rows = this._aoa(X, wb.Sheets[nomeFatos]);
       if (!rows.length) throw new Error('aba de fatos vazia');
       const head = rows[0].map(c => String(c == null ? '' : c).trim());
       const map = this.cols.map(c => head.findIndex(h => h.toLowerCase() === c.toLowerCase()));
@@ -756,7 +924,7 @@ class Component extends DCLogic {
       this.fatos = out; this._idx = null;
       const nomeMeta = wb.SheetNames.find(n => /meta|cabe/i.test(n));
       if (nomeMeta) {
-        const mr = X.utils.sheet_to_json(wb.Sheets[nomeMeta], { header: 1, raw: true, defval: '' });
+        const mr = this._aoa(X, wb.Sheets[nomeMeta]);
         const M = {}; mr.forEach(r => { const k = String(r[0] || '').trim(); if (k) M[k] = r[1]; });
         const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
@@ -768,7 +936,7 @@ class Component extends DCLogic {
       this._lerExtras(X, wb);
       const nomeDest = wb.SheetNames.find(n => /destaque/i.test(n));
       if (nomeDest) {
-        const dr = X.utils.sheet_to_json(wb.Sheets[nomeDest], { header: 1, raw: true, defval: '' }).slice(1);
+        const dr = this._aoa(X, wb.Sheets[nomeDest]).slice(1);
         const d = dr.map(r => [String(r[0] || '').trim(), this._num(r[1])]).filter(x => x[0]);
         if (d.length) this._destaques = d;
       }

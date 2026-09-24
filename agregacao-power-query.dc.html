@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agregação no Power Query — Boletim Sell Out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F4F7FA; }
+    a { color: #0062AA; }
+    a:hover { color: #08356E; }
+  </style>
+</helmet>
+
+<div style="font-family:Asap,Calibri,Arial,sans-serif; color:#292A2B; background:#F4F7FA; padding:0 0 80px;">
+
+  <div style="background:#0A3D80; background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%); border-bottom:3px solid #00BFDF; padding:38px 48px 34px;">
+    <div style="max-width:1100px; margin:0 auto;">
+      <div style="font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#9FD4F0; margin-bottom:10px;">Boletim Sell Out · Preparação da base</div>
+      <h1 style="margin:0 0 10px; font-size:40px; line-height:1.1; font-weight:700; color:#fff;">Agregação no Power Query</h1>
+      <p style="margin:0; font-size:17px; line-height:1.5; color:#D6E9F7; max-width:820px; text-wrap:pretty;">Os arquivos da extração vêm no grão de SKU × dia × cliente e somam 360 MB — o navegador não processa isso. Esta etapa soma o SKU e o dia no Excel e entrega sete CSVs pequenos no grão que o Atualizador espera.</p>
+    </div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:36px 48px 0;">
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:36px;">
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 20px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#B42318; margin-bottom:8px;">Hoje</div>
+        <div style="font-size:26px; font-weight:700; line-height:1;">360 MB</div>
+        <div style="font-size:14px; line-height:1.4; color:#5D5F61; margin-top:7px;">SKU × dia × cliente, seis arquivos de entrada</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 20px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0F7B4A; margin-bottom:8px;">Depois</div>
+        <div style="font-size:26px; font-weight:700; line-height:1;">~2 MB</div>
+        <div style="font-size:14px; line-height:1.4; color:#5D5F61; margin-top:7px;">BU × marca × cliente × canal</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 20px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">O que soma</div>
+        <div style="font-size:26px; font-weight:700; line-height:1;">SKU + dia</div>
+        <div style="font-size:14px; line-height:1.4; color:#5D5F61; margin-top:7px;">o boletim nunca abre nesse nível</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 20px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">O dia sobrevive</div>
+        <div style="font-size:26px; font-weight:700; line-height:1;">curva.csv</div>
+        <div style="font-size:14px; line-height:1.4; color:#5D5F61; margin-top:7px;">dia × BU × canal, ~200 linhas</div>
+      </div>
+    </div>
+
+    <div style="background:#EDF6FC; border-left:4px solid #00BFDF; border-radius:0 10px 10px 0; padding:18px 22px; margin-bottom:40px; font-size:15.5px; line-height:1.6; color:#08356E;">
+      <b>A troca central.</b> Sem o dia dentro de <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">vendas.csv</span>, o Atualizador não consegue mais deduzir a data de corte nem os dias úteis a partir da base. Por isso o <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">meta.csv</span> deixa de ser opcional: ele passa a carregar essas quatro informações. São quatro linhas digitadas uma vez por dia — bem mais barato que carregar 300 mil linhas de data.
+    </div>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">1. Preparar a pasta de trabalho</h2>
+    <p style="margin:0 0 14px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Abra uma pasta de trabalho nova do Excel e salve como <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">Agregador Boletim.xlsx</span> na mesma pasta dos arquivos da extração. Em <b>Dados → Obter Dados → Consulta em Branco</b>, abra o <b>Editor Avançado</b> e cole o código de cada consulta abaixo, uma consulta por bloco.</p>
+    <p style="margin:0 0 30px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">A primeira consulta é um parâmetro com o caminho da pasta. Crie-a antes das outras: todas dependem dela.</p>
+
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:34px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0; display:flex; justify-content:space-between; gap:12px;"><span>Consulta: Pasta</span><span style="color:#6E9ABF; text-transform:none; letter-spacing:0; font-weight:400;">ajuste o caminho</span></div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">"C:\Users\SEU.USUARIO\Downloads\Material_Boletim_21092026"</pre>
+    </div>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">2. Função de leitura</h2>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Uma função só para abrir qualquer um dos arquivos e padronizar os nomes das colunas. É o único lugar que você ajusta se a extração mudar de cabeçalho — as consultas seguintes só consomem o resultado dela.</p>
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0; display:flex; justify-content:space-between; gap:12px;"><span>Consulta: fnLer</span><span style="color:#6E9ABF; text-transform:none; letter-spacing:0; font-weight:400;">confira o bloco Renomear</span></div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">let
+    fn = (arquivo as text) as table =&gt;
+let
+    Fonte = Csv.Document(
+        File.Contents(Pasta &amp; "\" &amp; arquivo),
+        [Delimiter = ";", Encoding = 1252, QuoteStyle = QuoteStyle.Csv]
+    ),
+    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+
+    // Nomes da extração à esquerda, nomes do boletim à direita.
+    // MissingField.Ignore deixa passar arquivo que não tem alguma delas.
+    Renomear = Table.RenameColumns(Cabecalho, {
+        {"Data",              "DATA"},
+        {"Dt Venda",          "DATA"},
+        {"BU",                "BU"},
+        {"Unidade Negocio",   "BU"},
+        {"Marca",             "MARCA"},
+        {"Canal",             "CANAL"},
+        {"Cliente",           "CLIENTE"},
+        {"Rede",              "CLIENTE"},
+        {"Valor",             "VALOR"},
+        {"Valor Liquido",     "VALOR"}
+    }, MissingField.Ignore),
+
+    Chaves = List.Intersect({ {"DATA","BU","MARCA","CANAL","CLIENTE"}, Table.ColumnNames(Renomear) }),
+    Tipos = Table.TransformColumnTypes(
+        Renomear,
+        List.Transform(Chaves, each {_, type text}) &amp; { {"VALOR", type number} }
+    ),
+    Limpo = Table.TransformColumns(
+        Tipos,
+        List.Transform(Chaves, each {_, each Text.Upper(Text.Trim(_ ?? "")), type text})
+    ),
+    ValorZero = Table.ReplaceValue(Limpo, null, 0, Replacer.ReplaceValue, {"VALOR"})
+in
+    ValorZero
+in
+    fn</pre>
+    </div>
+    <p style="margin:0 0 34px; font-size:15px; line-height:1.6; color:#5D5F61; max-width:880px;">Se os arquivos estiverem em UTF-8 em vez de ANSI, troque <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">Encoding = 1252</span> por <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">65001</span>. Se o separador for vírgula, troque <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">Delimiter</span>. Os acentos na prévia dizem qual está certo.</p>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">3. As cinco tabelas agregadas</h2>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Todas seguem o mesmo desenho: ler, agrupar por BU × marca × canal × cliente, somar. O SKU e o dia desaparecem no agrupamento — é aí que os 360 MB viram 2 MB. Ajuste só os nomes de arquivo na primeira linha de cada uma.</p>
+
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0;">Consulta: vendas</div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">let
+    Fonte = fnLer("Vendas.csv"),
+    Agrupado = Table.Group(
+        Fonte,
+        {"BU", "MARCA", "CANAL", "CLIENTE"},
+        { {"REAL", each List.Sum([VALOR]), type number} }
+    ),
+    Arredondado = Table.TransformColumns(Agrupado, { {"REAL", each Number.Round(_, 2), type number} }),
+    SemZero = Table.SelectRows(Arredondado, each [REAL] &lt;&gt; 0)
+in
+    SemZero</pre>
+    </div>
+
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0; display:flex; justify-content:space-between; gap:12px;"><span>Consulta: vendas-aa</span><span style="color:#6E9ABF; text-transform:none; letter-spacing:0; font-weight:400;">recortado no mesmo dia do mês</span></div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">let
+    Fonte = fnLer("Vendas AA.csv"),
+
+    // O ano anterior entra inteiro: o boletim compara o mês cheio de AA
+    // com a projeção do mês cheio atual. O recorte MTD sai da curva.
+    Agrupado = Table.Group(
+        Fonte,
+        {"BU", "MARCA", "CANAL", "CLIENTE"},
+        { {"REAL", each List.Sum([VALOR]), type number} }
+    ),
+    Arredondado = Table.TransformColumns(Agrupado, { {"REAL", each Number.Round(_, 2), type number} }),
+    SemZero = Table.SelectRows(Arredondado, each [REAL] &lt;&gt; 0)
+in
+    SemZero</pre>
+    </div>
+
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0; display:flex; justify-content:space-between; gap:12px;"><span>Consultas: projecao-atual · projecao-inicial · orcamento</span><span style="color:#6E9ABF; text-transform:none; letter-spacing:0; font-weight:400;">três cópias, muda o arquivo e o nome da coluna</span></div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">// projecao-atual
+let
+    Fonte = fnLer("Projeções_atual.csv"),
+    Agrupado = Table.Group(Fonte, {"BU", "MARCA", "CANAL", "CLIENTE"},
+        { {"PROJ_ATUAL", each List.Sum([VALOR]), type number} }),
+    SemZero = Table.SelectRows(Agrupado, each [PROJ_ATUAL] &lt;&gt; 0)
+in
+    SemZero
+
+// projecao-inicial  →  arquivo "Projeções_inicial_rateada.csv", coluna PROJ_INICIAL
+// orcamento         →  arquivo "Orçamento.csv",                 coluna ORCAMENTO</pre>
+    </div>
+
+    <div style="background:#0E2A45; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+      <div style="padding:11px 20px; background:rgba(255,255,255,.07); font-size:12.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#9FD4F0; display:flex; justify-content:space-between; gap:12px;"><span>Consulta: curva</span><span style="color:#6E9ABF; text-transform:none; letter-spacing:0; font-weight:400;">a única que guarda o dia</span></div>
+      <pre style="margin:0; padding:18px 20px; overflow:auto; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.65; color:#DCE9F5;">let
+    // Dia × BU × canal, sem marca e sem cliente: umas 200 linhas.
+    Atual = Table.Group(
+        Table.AddColumn(fnLer("Vendas.csv"), "DIA", each Date.Day(Date.From([DATA])), Int64.Type),
+        {"DIA", "BU", "CANAL"},
+        { {"REAL", each List.Sum([VALOR]), type number} }
+    ),
+    Anterior = Table.Group(
+        Table.AddColumn(fnLer("Vendas AA.csv"), "DIA", each Date.Day(Date.From([DATA])), Int64.Type),
+        {"DIA", "BU", "CANAL"},
+        { {"REALAA", each List.Sum([VALOR]), type number} }
+    ),
+    Junto = Table.NestedJoin(Anterior, {"DIA","BU","CANAL"}, Atual, {"DIA","BU","CANAL"}, "a", JoinKind.FullOuter),
+    Expandido = Table.ExpandTableColumn(Junto, "a", {"REAL"}),
+    Ordenado = Table.Sort(Expandido, { {"DIA", Order.Ascending}, {"BU", Order.Ascending} }),
+    Zeros = Table.ReplaceValue(Ordenado, null, 0, Replacer.ReplaceValue, {"REAL", "REALAA"})
+in
+    Zeros</pre>
+    </div>
+    <p style="margin:0 0 34px; font-size:15px; line-height:1.6; color:#5D5F61; max-width:880px;">Se a coluna <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">DATA</span> vier como texto <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">dd/mm/aaaa</span>, troque <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">Date.From([DATA])</span> por <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px;">Date.FromText([DATA], [Format="dd/MM/yyyy"])</span>.</p>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">4. O meta.csv</h2>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Quatro linhas que substituem tudo que antes era deduzido das datas. Digite numa aba comum do Excel — não precisa de consulta — e salve como CSV.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:34px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px; font-family:'JetBrains Mono',monospace;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:11px 18px; font-family:Asap,sans-serif; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">campo</th>
+            <th align="left" style="padding:11px 18px; font-family:Asap,sans-serif; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">valor</th>
+            <th align="left" style="padding:11px 18px; font-family:Asap,sans-serif; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">o que é</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9;">referencia</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; color:#0F7B4A;">Setembro/26</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; font-family:Asap,sans-serif; color:#5D5F61;">mês do boletim</td></tr>
+          <tr><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9;">dataCorte</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; color:#0F7B4A;">21/09/26</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; font-family:Asap,sans-serif; color:#5D5F61;">último dia dentro da extração</td></tr>
+          <tr><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9;">diasUteis</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; color:#0F7B4A;">15</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; font-family:Asap,sans-serif; color:#5D5F61;">dias úteis realizados no mês</td></tr>
+          <tr><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9;">diasUteisAA</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; color:#0F7B4A;">16</td><td style="padding:10px 18px; border-bottom:1px solid #F1F5F9; font-family:Asap,sans-serif; color:#5D5F61;">mesmos dias no ano anterior</td></tr>
+          <tr><td style="padding:10px 18px;">divisor</td><td style="padding:10px 18px; color:#0F7B4A;">1000000</td><td style="padding:10px 18px; font-family:Asap,sans-serif; color:#5D5F61;">valores em R$ → R$ milhões</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">5. Exportar os CSVs</h2>
+    <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Cada consulta vai para uma aba: <b>Fechar e Carregar Para → Tabela → Nova Planilha</b>. Depois, com a aba ativa, <b>Arquivo → Salvar Como → CSV UTF-8 (delimitado por vírgula)</b>, uma aba por vez. O Excel salva só a aba ativa e avisa isso — é o comportamento esperado.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 24px; margin-bottom:24px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:12px;">Os sete arquivos, nesses nomes</div>
+      <div style="display:flex; flex-wrap:wrap; gap:9px;">
+        <sc-for list="{{ saidas }}" as="s" hint-placeholder-count="6">
+          <div style="background:#EDF6FC; border:1px solid #BEDFF3; border-radius:800px; padding:7px 16px; font-family:'JetBrains Mono',monospace; font-size:13.5px; color:#08356E;">{{ s }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <p style="margin:0 0 34px; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Solte os sete de uma vez no <a href="atualizador-do-boletim.dc.html">Atualizador</a>. O nome do arquivo é o que identifica a tabela, então ele importa — as colunas esperadas em cada um estão em <a href="formato-da-base.dc.html">Formato da Base</a>.</p>
+
+    <h2 style="margin:0 0 8px; font-size:27px; font-weight:700;">6. Conferir antes de subir</h2>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:6px 24px 10px; margin-bottom:24px;">
+      <sc-for list="{{ conferir }}" as="c" hint-placeholder-count="4">
+        <div style="display:flex; gap:14px; align-items:flex-start; padding:15px 0; border-bottom:1px solid #F1F5F9;">
+          <div style="width:8px; height:8px; border-radius:50%; background:#00BFDF; margin-top:8px; flex:none;"></div>
+          <div style="font-size:15.5px; line-height:1.55; color:#434445;">{{ c }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin:0; font-size:16px; line-height:1.6; color:#434445; max-width:880px;">Com a pasta de trabalho salva, os dias seguintes são só substituir os arquivos da extração na pasta e dar <b>Atualizar Tudo</b>. A agregação inteira leva de um a dois minutos.</p>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      saidas: ['vendas.csv', 'vendas-aa.csv', 'projecao-atual.csv', 'projecao-inicial.csv', 'orcamento.csv', 'curva.csv', 'meta.csv'],
+      conferir: [
+        'A soma de REAL em vendas.csv bate com o total da extração original. Se não bater, há linha com BU vazia caindo fora do agrupamento — o Atualizador descarta essas linhas.',
+        'Nenhum arquivo passa de 20 MB. Se vendas.csv ainda estiver grande, alguma coluna de grão fino sobrou no Table.Group.',
+        'As redes aparecem com a mesma grafia nos dois arquivos de venda. DROGASIL e DROGASIL SA viram dois clientes diferentes e produzem crescimento de 100% em um e −100% no outro.',
+        'As marcas também. É a causa mais comum dos alertas de variação implausível na validação.',
+        'O decimal pode sair com vírgula e o separador com ponto e vírgula. O Atualizador detecta os dois — não converta nada à mão.'
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
