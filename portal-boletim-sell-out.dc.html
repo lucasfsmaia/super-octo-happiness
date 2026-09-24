@@ -107,7 +107,6 @@ const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const SEMENTE = [{
   id: '2026-08-17',
   email: 'boletim-sell-out-email.html',
-  pdf: '',
   base: 'modelo-base-boletim-sell-out.xlsx'
 }];
 
@@ -169,12 +168,12 @@ class Component extends DCLogic {
       o.id = iso; o.ano = y; o.mes = m; o.dia = d;
       o.data = o.data || (String(d).padStart(2, '0') + '/' + String(m).padStart(2, '0') + '/' + String(y).slice(2));
       o.referencia = o.referencia || (cap(MES_LONGO[m - 1]) + '/' + String(y).slice(2));
-      const pasta = (this.props.pastaEdicoes || 'edicoes') + '/' + y + '/' + String(m).padStart(2, '0') + '/' + String(d).padStart(2, '0') + '/';
-      if (o.email === undefined) o.email = pasta + 'email.html';
-      if (o.pdf === undefined) o.pdf = pasta + 'apresentacao.pdf';
-      if (o.base === undefined) o.base = pasta + 'base.xlsx';
-      if (o.email2 === undefined) o.email2 = pasta + 'email-gestao-orcamentaria.html';
-      if (o.pdf2 === undefined) o.pdf2 = pasta + 'apresentacao-gestao-orcamentaria.pdf';
+      if (o.email === undefined) o.email = 'boletim-sell-out-email.html';
+      if (o.email2 === undefined) o.email2 = 'boletim-sell-out-email-gestao-orcamentaria.html';
+      // ?data= faz a apresentação resolver a base daquele dia (base-boletim-AAAA-MM-DD.js)
+      const isoDia = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      if (o.deck === undefined) o.deck = 'boletim-sell-out.dc.html?data=' + isoDia;
+      if (o.deck2 === undefined) o.deck2 = 'boletim-sell-out-gestao-orcamentaria.dc.html?data=' + isoDia;
       return o;
     }).filter(Boolean);
   }
@@ -277,12 +276,12 @@ class Component extends DCLogic {
   }
 
   /** Uma faixa de ações por grupo de envio. */
-  _grupo(rot, email, pdf, compacto, deck) {
+  _grupo(rot, email, compacto, deck) {
     return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">'
       + '<span style="font-size:' + (compacto ? '12px' : '12.5px') + '; font-weight:600; letter-spacing:.08em; text-transform:uppercase; '
       + 'color:#8A9199; min-width:' + (compacto ? '118px' : '132px') + ';">' + rot + '</span>'
       + (deck ? this._acao(deck, 'slideshow', 'Apresentação', false) : '')
-      + this._acao(email, 'mail', 'E-mail', false) + this._acao(pdf, 'picture_as_pdf', 'PDF', true) + '</div>';
+      + this._acao(email, 'mail', 'E-mail', false) + '</div>';
   }
 
   _rotulo(e) { return String(e.dia).padStart(2, '0') + ' de ' + MES_LONGO[e.mes - 1] + ' de ' + e.ano; }
@@ -303,8 +302,8 @@ class Component extends DCLogic {
         + '<div style="font-size:14px; color:#5D5F61; margin-top:4px;">' + this._rotulo(u)
         + (u.enviadoEm ? ' · publicado em ' + u.enviadoEm : '') + '</div>'
         + '</div><div style="display:flex; flex-direction:column; gap:9px;">'
-        + this._grupo('Comercial', u.email, u.pdf, false, 'boletim-sell-out.dc.html')
-        + this._grupo('Gestão Orçam.', u.email2, u.pdf2, false, 'boletim-sell-out-gestao-orcamentaria.dc.html')
+        + this._grupo('Comercial', u.email, false, u.deck)
+        + this._grupo('Gestão Orçam.', u.email2, false, u.deck2)
         + '</div></div>'
       : '';
 
@@ -372,8 +371,8 @@ class Component extends DCLogic {
     if (!vis.length) {
       this.$('lista').innerHTML = '<div style="background:#fff; border:1px dashed #CFE4F5; border-radius:12px; padding:38px 30px; text-align:center;">'
         + '<div style="font-size:16.5px; font-weight:600; color:#292A2B; margin-bottom:6px;">Nenhuma publicação neste recorte</div>'
-        + '<div style="font-size:14.5px; line-height:1.5; color:#5D5F61; max-width:600px; margin:0 auto;">O fluxo diário grava e-mail, apresentação e base em '
-        + '<b>' + (this.props.pastaEdicoes || 'edicoes') + '/ano/mês/dia/</b> e reescreve o <b>historico-boletim.json</b> na raiz do portal.</div></div>';
+        + '<div style="font-size:14.5px; line-height:1.5; color:#5D5F61; max-width:600px; margin:0 auto;">Cada publicação registrada no Atualizador aparece aqui e abre a '
+        + 'apresentação e o e-mail do dia.</div></div>';
       return;
     }
 
@@ -396,8 +395,8 @@ class Component extends DCLogic {
         + (e.enviadoEm ? '<div style="font-size:13.5px; color:#5D5F61; margin-top:2px;">publicado em ' + e.enviadoEm + '</div>' : '')
         + '</div></div>'
         + '<div style="display:flex; flex-direction:column; gap:8px;">'
-        + this._grupo('Comercial', e.email, e.pdf, true)
-        + this._grupo('Gestão Orçam.', e.email2, e.pdf2, true)
+        + this._grupo('Comercial', e.email, true, e.deck)
+        + this._grupo('Gestão Orçam.', e.email2, true, e.deck2)
         + '</div></div>';
     }).join('');
   }

@@ -285,8 +285,14 @@ class Component extends DCLogic {
       if (p >= 0 && c >= 0) { if (c > p) virgula++; else ponto++; }
       else if (c >= 0 && /,\d{1,2}$/.test(t)) virgula++;
       else if (p >= 0 && /\.\d{1,2}$/.test(t)) ponto++;
+      if (ponto >= 20 || virgula >= 20) break;
     }
     return ponto > virgula ? 'dot' : virgula > ponto ? 'comma' : null;
+  }
+
+  /** Valor numérico que serve de prova para _decimal: tem separador e não é data. */
+  _ehAmostra(v) {
+    return typeof v === 'string' && /^-?[\d.,]*[.,][\d.,]*\d$/.test(v) && v.indexOf('/') < 0;
   }
 
   /**
@@ -398,6 +404,9 @@ class Component extends DCLogic {
   }
 
   /** Lê uma aba transacional (DIA | BU | MARCA | SKU | CANAL | CLIENTE | valores). */
+  /** S, G e VIT NQ são as três sublinhas de SG nos CSVs da extração. */
+  get _ALIAS_BU() { return { 'S': 'SG', 'G': 'SG', 'VIT NQ': 'SG', 'VITNQ': 'SG', 'SMART': 'SG', 'GEN': 'SG' }; }
+
   _lerTrans(X, ws, divisor) {
     const g = this._aoa(X, ws);
     if (!g.length) return [];
@@ -409,6 +418,7 @@ class Component extends DCLogic {
       iPro = col('VALOR_PROJETADO_ATUAL', 'PROJ_ATUAL', 'PROJETADO_ATUAL'),
       iOrc = col('ORCAMENTO', 'ORÇAMENTO', 'ORC'),
       iFcst = col('FORECAST', 'FCST', 'ORCAMENTO_REPROJETADO');
+    this._divisor = divisor;
     const v = (r, i) => { const x = i < 0 ? null : this._num(r[i]); return x == null ? 0 : x / divisor; };
     const dim = x => { const t = String(x == null ? '' : x).trim().toUpperCase(); return /^(NULL|NULO|N\/A|NA|#N\/D|-)$/.test(t) ? '' : t; };
     const out = [];
@@ -457,10 +467,15 @@ class Component extends DCLogic {
   }
 
   /** Aba Curva (venda por dia corrido) -> acumulados do gráfico de ritmo do mês. */
-  _lerCurva(X, wb) {
+  _lerCurva(X, wb, divisor) {
     const nomeCurva = wb.SheetNames.find(n => /curva|ritmo/i.test(n));
     if (nomeCurva) {
-      const bruto = this._aoa(X, wb.Sheets[nomeCurva]);
+      const wsCv = wb.Sheets[nomeCurva];
+      const bruto = this._aoa(X, wsCv);
+      // CSV da extração vem em reais; curva preenchida à mão no .xlsx já vem em R$ mi
+      const dv = (wsCv && wsCv.__aoa) ? (divisor || this._divisor || 1) : 1;
+      const q = v => { const x = this._num(v); return x == null ? null : x / dv; };
+      const buCv = b => { const t = String(b || '').trim().toUpperCase(); return this._ALIAS_BU[t] || t; };
       const cab = (bruto[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
       const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
       const iD = Math.max(0, ci('DIA', 'DATA')), iBU = ci('BU'), iCanal = ci('CANAL'),
@@ -468,9 +483,9 @@ class Component extends DCLogic {
       const cAA = iAA < 0 ? 1 : iAA, cR = iR < 0 ? 2 : iR, cP = iP < 0 ? 3 : iP;
       const cr = bruto.slice(1);
       const linhas = cr.map(r => ({
-        d: this._num(r[iD]), bu: iBU < 0 ? null : String(r[iBU] || '').trim().toUpperCase(),
+        d: this._num(r[iD]), bu: iBU < 0 ? null : buCv(r[iBU]),
         canal: iCanal < 0 ? null : String(r[iCanal] || '').trim().toUpperCase(),
-        aa: this._num(r[cAA]), real: this._num(r[cR]), proj: this._num(r[cP])
+        aa: q(r[cAA]), real: q(r[cR]), proj: q(r[cP])
       })).filter(x => x.d);
       // com coluna CANAL, guarda também a curva de cada BU por canal
       this._curvaBUCanal = null;
@@ -758,11 +773,9 @@ class Component extends DCLogic {
         : a.text().then(t => {
             const aoa = this._parseCSV(t);
             const am = [];
-            for (let li = 1; li < aoa.length && am.length < 400; li++)
-              for (let ci = 0; ci < aoa[li].length; ci++) {
-                const cel = aoa[li][ci];
-                if (typeof cel === 'string' && /^-?[\d.,]*[.,][\d.,]*\d$/.test(cel)) am.push(cel);
-              }
+            for (let li = 1; li < aoa.length; li++)
+              for (let ci = 0; ci < aoa[li].length; ci++)
+                if (this._ehAmostra(aoa[li][ci])) am.push(aoa[li][ci]);
             return { aoa: aoa, datas: null, sep: this._sepAtual, dec: this._decimal(am) };
           });
       return p.then(r => {
@@ -899,10 +912,9 @@ class Component extends DCLogic {
       if (amostra.length > 1) {
         lerCabecalho(amostra[0].replace(/\r$/, ''));
         const vals = [];
-        for (let i = 1; i < amostra.length - 1 && vals.length < 600; i++) {
+        for (let i = 1; i < amostra.length - 1; i++) {
           const cs = partir(amostra[i].replace(/\r$/, ''));
-          for (let j = 0; j < cs.length; j++)
-            if (/^-?[\d.,]*[.,][\d.,]*\d$/.test(cs[j])) vals.push(cs[j]);
+          for (let j = 0; j < cs.length; j++) if (this._ehAmostra(cs[j])) vals.push(cs[j]);
         }
         this._decAtual = this._decimal(vals);
       }
@@ -989,7 +1001,7 @@ class Component extends DCLogic {
         const ag = this._agregar(vendas.filter(v => !corte || v.data <= corte), vendasAA, plano, M, topN, cota);
         this.fatos = ag.fatos; this._idx = null;
         this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
-        this._lerCurva(X, wb);
+        this._lerCurva(X, wb, divisor);
       this._lerExtras(X, wb);
         const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
@@ -1004,6 +1016,7 @@ class Component extends DCLogic {
         this._gerarAlertas();
         this._gerarCons();
         this._guardarFoto();
+        this._publicarBase(this._meta());
         this._gerarResumo();
         return;
       }
@@ -1047,6 +1060,7 @@ class Component extends DCLogic {
       this._gerarAlertas();
       this._gerarCons();
       this._guardarFoto();
+        this._publicarBase(this._meta());
       this._gerarResumo();
     }).catch(e => { info.style.color = '#B32B23'; info.textContent = 'Falha ao ler a base: ' + e.message; });
   }
@@ -1738,8 +1752,32 @@ class Component extends DCLogic {
     return M;
   }
 
+  /**
+   * Publica a base processada no navegador. O base-boletim.js prefere essa versão,
+   * então a apresentação e o simulador passam a mostrar os números do dia sem
+   * precisar substituir o arquivo no repositório e dar push.
+   */
+  _publicarBase(M) {
+    const b = { META: M, COLUNAS: this.cols, FATOS: this.fatos, geradoEm: new Date().toISOString() };
+    const iso = this._iso(M && M.dataCorte);
+    try {
+      localStorage.setItem('boletim.base.v1', JSON.stringify(b));
+      if (iso) localStorage.setItem('boletim.base.v1.' + iso, JSON.stringify(b));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /** dd/mm/aa|aaaa -> AAAA-MM-DD, para nomear a base do dia. */
+  _iso(txt) {
+    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(txt || '').trim());
+    if (!m) return null;
+    const a = m[3].length === 2 ? '20' + m[3] : m[3];
+    return a + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+  }
+
   _baseFile() {
     const M = this._meta();
+    this._publicarBase(M);
     return '/* BASE ÚNICA — Boletim Sell Out | Hypera Pharma\n' +
       ' * Grão: bu × marca × rede. Medidas: realAA, real, proj, projIni, orcAbs, forecast, cresc, vd, vi (+ % publicados pProj, pIni, pOrc).\n' +
       ' * marca = "TOTAL" -> linha agregada da BU · rede = "TOTAL" -> soma dos canais.\n' +
@@ -1793,17 +1831,18 @@ class Component extends DCLogic {
     const mes = Number(p[1]), dia = Number(p[0]);
     const mm = String(mes).padStart(2, '0'), dd = String(dia).padStart(2, '0');
     const id = ano + '-' + mm + '-' + dd;
-    const pasta = 'edicoes/' + ano + '/' + mm + '/' + dd + '/';
+    // sem fluxo automático: cada publicação abre a apresentação viva com ?data=,
+    // que resolve a base daquele dia
     const edicao = {
       id, ano, mes, dia,
       data: dd + '/' + mm + '/' + String(ano).slice(2),
       referencia: String(M.referencia || '').trim(),
       enviadoEm: new Date().toLocaleDateString('pt-BR'),
-      email: pasta + 'email.html',
-      pdf: pasta + 'apresentacao.pdf',
-      base: pasta + 'base.xlsx',
-      email2: pasta + 'email-gestao-orcamentaria.html',
-      pdf2: pasta + 'apresentacao-gestao-orcamentaria.pdf',
+      email: 'boletim-sell-out-email.html',
+      email2: 'boletim-sell-out-email-gestao-orcamentaria.html',
+      deck: 'boletim-sell-out.dc.html?data=' + id,
+      deck2: 'boletim-sell-out-gestao-orcamentaria.dc.html?data=' + id,
+      baseJs: 'base-boletim-' + id + '.js',
       destinatarios: (M.envio && M.envio.para) || ''
     };
     let hist = [];
@@ -1811,6 +1850,7 @@ class Component extends DCLogic {
     if (!Array.isArray(hist)) hist = [];
     hist = hist.filter(e => e && e.id !== id).concat([edicao]).sort((a, b) => a.id < b.id ? 1 : -1);
     try { localStorage.setItem(CHAVE, JSON.stringify(hist)); } catch (e) { /* modo privado */ }
+    this._dl('base-boletim-' + id + '.js', this._baseFile(), 'text/javascript');
     this._dl('email.html', this._emailFile(false), 'text/html');
     this._dl('email-gestao-orcamentaria.html', this._emailFile(true), 'text/html');
     this._dl('historico-boletim.json', JSON.stringify({ atualizadoEm: edicao.enviadoEm, edicoes: hist }, null, 2), 'application/json');
@@ -1818,7 +1858,11 @@ class Component extends DCLogic {
     st.innerHTML = '✓ envio de <b>' + edicao.data + '</b> arquivado. Coloque na pasta <b>' + pasta + '</b> do portal: '
       + '<b>email.html</b> e <b>email-gestao-orcamentaria.html</b> (baixados), '
       + '<b>apresentacao.pdf</b>, <b>apresentacao-gestao-orcamentaria.pdf</b> e <b>base.xlsx</b>. '
-      + 'O <b>historico-boletim.json</b> vai na raiz do portal. No dia a dia o fluxo do Power Automate grava isso sozinho.';
+      + 'O <b>historico-boletim.json</b> vai na raiz do portal.'
+      + '<br><br>A <b>apresentação</b> e o <b>simulador</b> já mostram esta base neste navegador. '
+      + 'Para que a equipe veja, comite na raiz do repositório o <b>base-boletim-' + id + '.js</b> baixado — '
+      + 'o portal abre a publicação deste dia com <b>?data=' + id + '</b> e a apresentação carrega esse arquivo. '
+      + 'Para que ele seja também a base padrão, copie-o sobre o <b>base-boletim.js</b>.';
   }
 
   _modelo() {

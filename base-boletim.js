@@ -8,7 +8,7 @@
  * 536 linhas de fato · fonte: Dados IQVIA | Base MDTR Diário · corte 15/08/26 (10 dias úteis).
  */
 window.BASE_BOLETIM = {
-  META: {"titulo":"Boletim Sell Out","subtitulo":"Resumo Executivo","referencia":"Agosto/26","dataCorte":"15/08/26","diasUteis":10,"diasUteisAA":11,"fonte":"Dados IQVIA | Base MDTR Diário","atualizadoEm":"15/ago/26","moeda":"R$ milhões (PX)","mtd":{"aa":{"vd":181.4,"vi":179.7,"total":361.1},"atual":{"vd":189.8,"vi":187.3,"total":377},"cresc":4.4},"mes":{"aa":{"vd":363.4,"vi":395.4,"total":758.8},"proj":{"vd":378,"vi":435,"total":813},"cresc":7.1,"cresVD":4,"cresVI":10},"destaques":[["TAMARINE",15.6],["ENGOV",9.3],["LISADOR",17.3],["DRAMIN",5.5],["PIELUS FORTE",130],["NOUVE",24.7],["DIPIRONA SODICA MG",45.8],["FLAVONID",23.2]],"consideracoes":"A projeção Total Hypera para agosto é 7,1% com seguintes destaques: Vitaminas Total SG — a projeção de VIT NQ é de R$ 13,8 milhões com crescimento de 8,0%. VI: representando 52,5% do total de vendas, alcançará R$ 7,3 milhões, refletindo uma queda de -17,1%. VD: com um aumento de 62,1%, contribuirá com R$ 6,6 milhões para o total.","curva":{"ano":2026,"mes":8,"diasMes":31,"diaAtual":15,"real":[22,37.2,65.9,94,121.5,148.5,178.6,200.4,215.5,243.8,271.7,298.9,325.6,355.4,377],"proj":[393.4,424.2,454.4,484,517,549.4,572.9,589,619.6,649.5,678.7,711.4,743.5,766.8,782.8,813],"aa":[21.6,36.5,64.6,92.1,119.1,145.5,174.9,196.3,211.1,238.9,266.1,292.8,318.9,348.1,369.3,383.9,411.5,438.4,464.8,494.3,523.2,544.2,558.7,585.9,612.6,638.7,667.9,696.5,717.3,731.6,758.6],"orcTotal":826.5},"links":{"hub":"https://app.powerbi.com/groups/ddd0da03-c7aa-4718-a584-f15ad9913600/reports/534124f0-a9c2-4444-88c0-1cca50d91f2c/ReportSection?experience=power-bi","executivos":"https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi","deck":"Boletim Sell Out.dc.html","pdf":"Boletim Sell Out.dc.html"},"assinatura":{"nome":"Renata Martins","area":"Hypera Pharma - Unidade Cidade Jardim","email":"renata.martins@hypera.com.br"}},
+  META: {"titulo":"Boletim Sell Out","subtitulo":"Resumo Executivo","referencia":"Agosto/26","dataCorte":"15/08/26","diasUteis":10,"diasUteisAA":11,"fonte":"Dados IQVIA | Base MDTR Diário","atualizadoEm":"15/ago/26","moeda":"R$ milhões (PX)","mtd":{"aa":{"vd":181.4,"vi":179.7,"total":361.1},"atual":{"vd":189.8,"vi":187.3,"total":377},"cresc":4.4},"mes":{"aa":{"vd":363.4,"vi":395.4,"total":758.8},"proj":{"vd":378,"vi":435,"total":813},"cresc":7.1,"cresVD":4,"cresVI":10},"destaques":[["TAMARINE",15.6],["ENGOV",9.3],["LISADOR",17.3],["DRAMIN",5.5],["PIELUS FORTE",130],["NOUVE",24.7],["DIPIRONA SODICA MG",45.8],["FLAVONID",23.2]],"consideracoes":"A projeção Total Hypera para agosto é 7,1% com seguintes destaques: Vitaminas Total SG — a projeção de VIT NQ é de R$ 13,8 milhões com crescimento de 8,0%. VI: representando 52,5% do total de vendas, alcançará R$ 7,3 milhões, refletindo uma queda de -17,1%. VD: com um aumento de 62,1%, contribuirá com R$ 6,6 milhões para o total.","curva":{"ano":2026,"mes":8,"diasMes":31,"diaAtual":15,"real":[22,37.2,65.9,94,121.5,148.5,178.6,200.4,215.5,243.8,271.7,298.9,325.6,355.4,377],"proj":[393.4,424.2,454.4,484,517,549.4,572.9,589,619.6,649.5,678.7,711.4,743.5,766.8,782.8,813],"aa":[21.6,36.5,64.6,92.1,119.1,145.5,174.9,196.3,211.1,238.9,266.1,292.8,318.9,348.1,369.3,383.9,411.5,438.4,464.8,494.3,523.2,544.2,558.7,585.9,612.6,638.7,667.9,696.5,717.3,731.6,758.6],"orcTotal":826.5},"links":{"hub":"https://app.powerbi.com/groups/ddd0da03-c7aa-4718-a584-f15ad9913600/reports/534124f0-a9c2-4444-88c0-1cca50d91f2c/ReportSection?experience=power-bi","executivos":"https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi","deck":"boletim-sell-out.dc.html","pdf":"boletim-sell-out.dc.html"},"assinatura":{"nome":"Renata Martins","area":"Hypera Pharma - Unidade Cidade Jardim","email":"renata.martins@hypera.com.br"}},
   COLUNAS: ["bu","marca","rede","realAA","real","proj","projIni","orcAbs","cresc","vd","vi","pProj","pIni","pOrc","forecast"],
   FATOS: [
     ["CH","TOTAL","TOTAL",216.5,98.7,220,221.3,229.7,null,43.8,56.2,1.6,2.2,6,224.9],
@@ -532,3 +532,74 @@ window.BASE_BOLETIM = {
     ["SG","DEMAIS","TOTAL",146.8,75.3,162.5,null,null,null,27.7,72.3,10.7,null,null,null]
   ]
 };
+
+/* Resolução da base, em ordem de precedência:
+ *   1. ?data=AAAA-MM-DD na URL  -> a base daquele dia (armazenamento local, ou o arquivo
+ *      base-boletim-AAAA-MM-DD.js do repositório)
+ *   2. a última base publicada pelo Atualizador neste navegador
+ *   3. a base do arquivo acima, que é a versão do repositório
+ * BOLETIM_LIMPAR_BASE_LOCAL() apaga o que foi publicado localmente. */
+(function () {
+  var RAIZ = 'boletim.base.v1';
+  var valida = function (b) {
+    return b && b.META && b.COLUNAS && b.COLUNAS.length && b.FATOS && b.FATOS.length;
+  };
+  var ler = function (chave) {
+    try { return JSON.parse(localStorage.getItem(chave) || 'null'); } catch (e) { return null; }
+  };
+  window.BOLETIM_LIMPAR_BASE_LOCAL = function () {
+    try {
+      var fora = [];
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(RAIZ) === 0) { fora.push(k); localStorage.removeItem(k); }
+      }
+      return fora.length + ' base(s) local(is) removida(s). Recarregue a página.';
+    } catch (e) { return 'Armazenamento indisponível.'; }
+  };
+  window.BOLETIM_DATAS_LOCAIS = function () {
+    var out = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(RAIZ + '.') === 0) out.push(k.slice(RAIZ.length + 1));
+      }
+    } catch (e) {}
+    return out.sort().reverse();
+  };
+
+  var data = null;
+  try {
+    var m = /[?&]data=(\d{4}-\d{2}-\d{2})/.exec(window.location.search || '');
+    if (m) data = m[1];
+  } catch (e) {}
+
+  var escolhida = null;
+  if (data) {
+    escolhida = ler(RAIZ + '.' + data);
+    if (!valida(escolhida)) {
+      // arquivo do dia versionado no repositório
+      try {
+        var req = new XMLHttpRequest();
+        req.open('GET', 'base-boletim-' + data + '.js', false);
+        req.send(null);
+        if (req.status === 200 || req.status === 0) {
+          var guarda = window.BASE_BOLETIM;
+          new Function(req.responseText).call(window);
+          if (valida(window.BASE_BOLETIM) && window.BASE_BOLETIM !== guarda) {
+            escolhida = window.BASE_BOLETIM;
+            window.BASE_BOLETIM = guarda;
+          }
+        }
+      } catch (e) { /* arquivo do dia ausente — cai para a base do repositório */ }
+    }
+    if (!valida(escolhida)) window.BASE_BOLETIM_DATA_AUSENTE = data;
+  }
+  if (!valida(escolhida)) escolhida = ler(RAIZ);
+
+  if (valida(escolhida)) {
+    window.BASE_BOLETIM = escolhida;
+    window.BASE_BOLETIM_LOCAL = true;
+    window.BASE_BOLETIM_DATA = data || null;
+  }
+})();
