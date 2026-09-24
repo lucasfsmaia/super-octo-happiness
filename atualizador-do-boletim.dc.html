@@ -272,29 +272,58 @@ class Component extends DCLogic {
   _v(id) { const el = this.$(id); return el ? el.value : ''; }
   _ck(id) { const el = this.$(id); return !!(el && el.checked); }
   /**
-   * Número em qualquer convenção. Tendo ponto e vírgula, o último é o decimal.
-   * Dois ou mais pontos são sempre milhar (1.234.567). Com um ponto só, quem decide é o
-   * separador do arquivo: delimitado por vírgula o ponto é necessariamente decimal;
-   * delimitado por ponto e vírgula, 1.234 vale como milhar pela convenção pt-BR.
+   * 'dot' | 'comma' | null — qual caractere é o decimal numa amostra de valores.
+   * Só conta como prova o que é inequívoco: separador seguido de 1 ou 2 dígitos no fim
+   * (0.0, 475812.25, 1.234,56), ou os dois caracteres presentes, onde o último é o decimal.
+   */
+  _decimal(amostras) {
+    let ponto = 0, virgula = 0;
+    for (let i = 0; i < amostras.length; i++) {
+      const t = String(amostras[i] == null ? '' : amostras[i]).trim();
+      if (!t || !/^-?[\d.,]+$/.test(t)) continue;
+      const p = t.lastIndexOf('.'), c = t.lastIndexOf(',');
+      if (p >= 0 && c >= 0) { if (c > p) virgula++; else ponto++; }
+      else if (c >= 0 && /,\d{1,2}$/.test(t)) virgula++;
+      else if (p >= 0 && /\.\d{1,2}$/.test(t)) ponto++;
+    }
+    return ponto > virgula ? 'dot' : virgula > ponto ? 'comma' : null;
+  }
+
+  /**
+   * Número em qualquer convenção. Conhecendo o decimal do arquivo (_decAtual), o último
+   * separador desse tipo é o decimal e todo o resto é milhar — é o que resolve
+   * 261.132.015.625 = 261132015,625 sem confundir com 1.234.567 = 1234567.
+   * Sem essa informação, cai na heurística: tendo ponto e vírgula o último vence; dois ou
+   * mais pontos são milhar; um ponto só depende do separador de campo do arquivo.
    */
   _num(v) {
     if (v == null || v === '' || v === '-') return null;
     if (typeof v === 'number') return v;
     let t = String(v).trim().replace('%', '').replace(/\s|\u00a0/g, '');
-    if (!t || t === '-') return null;
+    if (!t || t === '-' || /^(null|nulo|n\/a|na|#n\/d)$/i.test(t)) return null;
+    const dec = this._decAtual;
+    if (dec === 'dot' || dec === 'comma') {
+      const d = dec === 'dot' ? '.' : ',', outro = dec === 'dot' ? /,/g : /\./g;
+      t = t.replace(outro, '');
+      const k = t.lastIndexOf(d);
+      if (k >= 0) t = t.slice(0, k).split(d).join('') + '.' + t.slice(k + 1);
+      const n = parseFloat(t);
+      return isFinite(n) ? n : null;
+    }
     const p = t.lastIndexOf('.'), c = t.lastIndexOf(',');
     if (p >= 0 && c >= 0) {
       t = c > p ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
     } else if (c >= 0) {
       t = t.split(',').length > 2 ? t.replace(/,/g, '') : t.replace(',', '.');
     } else if (t.split('.').length > 2) {
-      t = t.replace(/\./g, '');            // 1.234.567 — dois pontos nunca são decimal
+      t = t.replace(/\./g, '');
     } else if (p >= 0 && this._sepAtual !== ',' && /^-?\d{1,3}\.\d{3}$/.test(t)) {
-      t = t.replace('.', '');               // 1.234 só é milhar em arquivo ';'
+      t = t.replace('.', '');
     }
     const n = parseFloat(t);
     return isFinite(n) ? n : null;
   }
+
   _fmt(v, d) { return v == null ? '-' : v.toFixed(d == null ? 1 : d).replace('.', ','); }
   _pct(v) { return v == null ? '-' : v.toFixed(1).replace('.', ',') + '%'; }
   _cor(v) { return v == null ? '#8A8C8E' : (v < 0 ? '#B32B23' : '#17734A'); }
@@ -363,6 +392,7 @@ class Component extends DCLogic {
   _aoa(X, ws) {
     if (!ws) return [];
     this._sepAtual = ws.__sep || ';';
+    this._decAtual = ws.__dec || null;
     if (ws.__aoa) return ws.__aoa;
     return X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
   }
@@ -380,15 +410,16 @@ class Component extends DCLogic {
       iOrc = col('ORCAMENTO', 'ORÇAMENTO', 'ORC'),
       iFcst = col('FORECAST', 'FCST', 'ORCAMENTO_REPROJETADO');
     const v = (r, i) => { const x = i < 0 ? null : this._num(r[i]); return x == null ? 0 : x / divisor; };
+    const dim = x => { const t = String(x == null ? '' : x).trim().toUpperCase(); return /^(NULL|NULO|N\/A|NA|#N\/D|-)$/.test(t) ? '' : t; };
     const out = [];
     g.slice(1).forEach(r => {
-      const bu = iBU < 0 ? '' : String(r[iBU] || '').trim().toUpperCase(); if (!bu) return;
+      const bu = iBU < 0 ? '' : dim(r[iBU]); if (!bu) return;
       out.push({
         data: iData < 0 ? 0 : (typeof r[iData] === 'number' ? r[iData] : this._serial(r[iData])), bu,
-        marca: iMar < 0 ? 'NÃO INFORMADA' : String(r[iMar] || '').trim().toUpperCase(),
+        marca: dim(iMar < 0 ? '' : r[iMar]) || 'NÃO INFORMADA',
         sku: iSku < 0 ? '' : String(r[iSku] || '').trim(),
-        canal: iCan < 0 ? 'VD' : String(r[iCan] || '').trim().toUpperCase(),
-        cliente: iCli < 0 ? 'OUTROS' : String(r[iCli] || '').trim().toUpperCase(),
+        canal: dim(iCan < 0 ? '' : r[iCan]) || 'VD',
+        cliente: dim(iCli < 0 ? '' : r[iCli]) || 'OUTROS',
         real: v(r, iReal), projIni: v(r, iIni), proj: v(r, iPro), orc: v(r, iOrc), forecast: v(r, iFcst)
       });
     });
@@ -555,9 +586,18 @@ class Component extends DCLogic {
   _agregar(vendas, vendasAA, plano, M, topN, cota) {
     const corteAA = this._serial(M.dataCorteAA);
     // SG chega na planilha quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas
-    const SUB_SG = ['SG - GENÉRICOS', 'SG - GENERICOS', 'SG - SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'VIT NEO QUIMICA'];
-    const canonSub = b => b === 'SG - GENERICOS' ? 'SG - GENÉRICOS' : (b === 'VIT NEO QUIMICA' ? 'VIT NEO QUÍMICA' : b);
-    const norm = arr => arr.map(v => Object.assign({}, v, { sub: canonSub(v.bu), bu: SUB_SG.indexOf(v.bu) >= 0 ? 'SG' : v.bu }));
+    // Cada extração escreve as sublinhas com um código próprio: a planilha usa nome longo,
+    // os CSVs de orçamento e projeção usam S, G e VIT NQ. Os três apontam para a mesma sub-BU.
+    const ALIAS_SUB = {
+      'S': 'SG - SMART (EX-VIT)', 'SMART': 'SG - SMART (EX-VIT)', 'SG - SMART': 'SG - SMART (EX-VIT)',
+      'SG - SMART (EX-VIT)': 'SG - SMART (EX-VIT)',
+      'G': 'SG - GENÉRICOS', 'GEN': 'SG - GENÉRICOS', 'GENERICOS': 'SG - GENÉRICOS',
+      'GENÉRICOS': 'SG - GENÉRICOS', 'SG - GENERICOS': 'SG - GENÉRICOS', 'SG - GENÉRICOS': 'SG - GENÉRICOS',
+      'VIT NQ': 'VIT NEO QUÍMICA', 'VITNQ': 'VIT NEO QUÍMICA', 'VIT': 'VIT NEO QUÍMICA',
+      'VIT NEO QUIMICA': 'VIT NEO QUÍMICA', 'VIT NEO QUÍMICA': 'VIT NEO QUÍMICA'
+    };
+    const canonSub = b => ALIAS_SUB[b] || b;
+    const norm = arr => arr.map(v => { const sub = canonSub(v.bu); return Object.assign({}, v, { sub: sub, bu: ALIAS_SUB[v.bu] ? 'SG' : v.bu }); });
     vendas = norm(vendas); vendasAA = norm(vendasAA); plano = norm(plano || []); cota = norm(cota || []);
     const z = () => ({ realAA: 0, realAAmtd: 0, real: 0, proj: 0, projIni: 0, orc: 0, forecast: 0, projVD: 0, projVI: 0 });
     const mapa = {}, pega = k => (mapa[k] = mapa[k] || z());
@@ -697,7 +737,7 @@ class Component extends DCLogic {
     const GRANDE = 15 * 1048576;
     const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
     const info = this.$('impInfo');
-    const grupos = {}, ordem = [], agregado = {}, seps = {};
+    const grupos = {}, ordem = [], agregado = {}, seps = {}, decs = {};
     this._datasBase = {};
     this._agregadas = [];
     let lidoMB = 0;
@@ -715,13 +755,23 @@ class Component extends DCLogic {
             if (info) info.textContent = 'Somando ' + a.name + ' — '
               + (lidoMB + feito).toFixed(0) + ' de ' + totalMB.toFixed(0) + ' MB';
           })
-        : a.text().then(t => ({ aoa: this._parseCSV(t), datas: null, sep: this._sepAtual }));
+        : a.text().then(t => {
+            const aoa = this._parseCSV(t);
+            const am = [];
+            for (let li = 1; li < aoa.length && am.length < 400; li++)
+              for (let ci = 0; ci < aoa[li].length; ci++) {
+                const cel = aoa[li][ci];
+                if (typeof cel === 'string' && /^-?[\d.,]*[.,][\d.,]*\d$/.test(cel)) am.push(cel);
+              }
+            return { aoa: aoa, datas: null, sep: this._sepAtual, dec: this._decimal(am) };
+          });
       return p.then(r => {
         lidoMB += mb;
         if (r.datas && r.datas.length) this._datasBase[nome] = r.datas;
         if (r.agregado) { this._agregadas.push(a.name + ' → ' + (r.linhas || 0) + ' linhas'); agregado[nome] = true; }
         if (!grupos[nome]) { grupos[nome] = []; ordem.push(nome); }
         if (r.sep) seps[nome] = r.sep;
+        if (r.dec) decs[nome] = r.dec;
         grupos[nome].push(r.aoa);
         return passo(i + 1);
       });
@@ -741,7 +791,7 @@ class Component extends DCLogic {
         });
         if (!linhas.length) return;
         wb.SheetNames.push(nome);
-        wb.Sheets[nome] = { __aoa: linhas, __trans: !!agregado[nome], __sep: seps[nome] || ';' };
+        wb.Sheets[nome] = { __aoa: linhas, __trans: !!agregado[nome], __sep: seps[nome] || ';', __dec: decs[nome] || null };
       });
       return wb;
     });
@@ -809,6 +859,7 @@ class Component extends DCLogic {
       let chave = '';
       for (let d = 0; d < iDim.length; d++) {
         let v = String(campos[iDim[d]] || '').trim().toUpperCase();
+        if (/^(NULL|NULO|N\/A|NA|#N\/D)$/.test(v)) v = '';
         if (iData >= 0 && d === 0) {
           const sv = this._serial(v);
           v = sv ? String(sv) : '';
@@ -843,7 +894,21 @@ class Component extends DCLogic {
       });
     };
 
-    return laco(0).then(() => {
+    return arquivo.slice(0, 262144).arrayBuffer().then(buf => {
+      const amostra = new TextDecoder('utf-8').decode(new Uint8Array(buf)).replace(/^\uFEFF/, '').split('\n');
+      if (amostra.length > 1) {
+        lerCabecalho(amostra[0].replace(/\r$/, ''));
+        const vals = [];
+        for (let i = 1; i < amostra.length - 1 && vals.length < 600; i++) {
+          const cs = partir(amostra[i].replace(/\r$/, ''));
+          for (let j = 0; j < cs.length; j++)
+            if (/^-?[\d.,]*[.,][\d.,]*\d$/.test(cs[j])) vals.push(cs[j]);
+        }
+        this._decAtual = this._decimal(vals);
+      }
+      nomeDim = []; iDim = []; cands = []; iData = -1;
+      return laco(0);
+    }).then(() => {
       const aoa = [nomeDim.concat(nomeVal)];
       mapa.forEach((acc, chave) => {
         const dims = chave.split('\u0001');
@@ -858,7 +923,7 @@ class Component extends DCLogic {
         }
         if (algum) aoa.push(linha);
       });
-      return { aoa: aoa, datas: Array.from(datas), agregado: true, linhas: aoa.length - 1 };
+      return { aoa: aoa, datas: Array.from(datas), agregado: true, linhas: aoa.length - 1, sep: sep, dec: this._decAtual };
     });
   }
 
