@@ -35,7 +35,7 @@
 
     <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
       <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
-      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Pode vir no grão bruto de SKU × dia: arquivo acima de 15 MB é lido em fatias e somado aqui mesmo, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
+      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Pode vir no grão bruto de SKU: arquivo acima de 15 MB é lido em fatias e somado por BU × marca × canal × cliente × dia, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
       <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
         <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivos<input id="inpFile" type="file" accept=".csv,.txt,.xlsx,.xls" multiple="multiple" style="display:none;"></label>
         <button id="btnModel" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Baixar modelo (CSV)</button>
@@ -352,7 +352,7 @@ class Component extends DCLogic {
     const col = (...alt) => { for (const a of alt) { const i = head.indexOf(a); if (i >= 0) return i; } return -1; };
     const iData = col('DATA', 'DIA'), iBU = col('BU'), iMar = col('MARCA'), iSku = col('SKU'),
       iCan = col('CANAL'), iCli = col('CLIENTE', 'REDE'), iReal = col('VALOR_REAL', 'REAL'),
-      iIni = col('VALOR_PROJETADO_INICIAL', 'PROJ_INICIAL', 'PROJETADO_INICIAL'),
+      iIni = col('VALOR_PROJETADO_INICIAL', 'PROJ_INICIAL', 'PROJETADO_INICIAL', 'VALOR_PROJETADO_REAL', 'VALOR_PROJETADO_RATEADO'),
       iPro = col('VALOR_PROJETADO_ATUAL', 'PROJ_ATUAL', 'PROJETADO_ATUAL'),
       iOrc = col('ORCAMENTO', 'ORÇAMENTO', 'ORC'),
       iFcst = col('FORECAST', 'FCST', 'ORCAMENTO_REPROJETADO');
@@ -393,7 +393,7 @@ class Component extends DCLogic {
         const k = chave(o);
         if (!mapa[k]) { mapa[k] = Object.assign({}, o, { projIni: 0, proj: 0 }); ordem.push(k); }
         // numa aba dedicada o valor pode vir na coluna específica ou na genérica
-        const v = o[campo] || o.proj || o.projIni || 0;
+        const v = o[campo] || o.proj || o.projIni || o.real || 0;
         mapa[k][campo] = v;
       });
     };
@@ -673,7 +673,7 @@ class Component extends DCLogic {
     const GRANDE = 15 * 1048576;
     const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
     const info = this.$('impInfo');
-    const grupos = {}, ordem = [];
+    const grupos = {}, ordem = [], agregado = {};
     this._datasBase = {};
     this._agregadas = [];
     let lidoMB = 0;
@@ -695,7 +695,7 @@ class Component extends DCLogic {
       return p.then(r => {
         lidoMB += mb;
         if (r.datas && r.datas.length) this._datasBase[nome] = r.datas;
-        if (r.agregado) this._agregadas.push(a.name + ' → ' + (r.linhas || 0) + ' linhas');
+        if (r.agregado) { this._agregadas.push(a.name + ' → ' + (r.linhas || 0) + ' linhas'); agregado[nome] = true; }
         if (!grupos[nome]) { grupos[nome] = []; ordem.push(nome); }
         grupos[nome].push(r.aoa);
         return passo(i + 1);
@@ -716,7 +716,7 @@ class Component extends DCLogic {
         });
         if (!linhas.length) return;
         wb.SheetNames.push(nome);
-        wb.Sheets[nome] = { __aoa: linhas };
+        wb.Sheets[nome] = { __aoa: linhas, __trans: !!agregado[nome] };
       });
       return wb;
     });
@@ -733,7 +733,8 @@ class Component extends DCLogic {
     const FATIA = 6 * 1048576;
     const DIM = { BU: 'BU', MARCA: 'MARCA', CANAL: 'CANAL', CLIENTE: 'CLIENTE', REDE: 'CLIENTE' };
     const IGNORA = { SKU: 1, DATA: 1, DIA: 1, EAN: 1, PRODUTO: 1, DESCRICAO: 1 };
-    const VALOR_CONHECIDO = /^(VALOR_REAL|REAL|REALIZADO|PROJ_INICIAL|PROJETADO_INICIAL|VALOR_PROJETADO_INICIAL|PROJ_ATUAL|PROJETADO_ATUAL|VALOR_PROJETADO_ATUAL|ORCAMENTO|OR\u00c7AMENTO|ORC|FORECAST|FCST|ORCAMENTO_REPROJETADO)$/;
+    // DATA entra no grão como serial; SKU é o único eixo que a soma descarta.
+    const VALOR_CONHECIDO = /^(VALOR_REAL|REAL|REALIZADO|PROJ_INICIAL|PROJETADO_INICIAL|VALOR_PROJETADO_INICIAL|VALOR_PROJETADO_REAL|VALOR_PROJETADO_RATEADO|PROJ_ATUAL|PROJETADO_ATUAL|VALOR_PROJETADO_ATUAL|ORCAMENTO|OR\u00c7AMENTO|ORC|FORECAST|FCST|ORCAMENTO_REPROJETADO)$/;
     const dec = new TextDecoder('utf-8');
     const mapa = new Map(), datas = new Set();
     let resto = '', sep = ';', pronto = false, iData = -1;
@@ -758,10 +759,12 @@ class Component extends DCLogic {
       const h = partir(linha).map(c => String(c || '').trim().toUpperCase().replace(/\s+/g, '_').replace(/^"|"$/g, ''));
       h.forEach((n, i) => {
         if (DIM[n]) { if (nomeDim.indexOf(DIM[n]) < 0) { nomeDim.push(DIM[n]); iDim.push(i); } }
-        else if (n === 'DATA' || n === 'DIA') { if (iData < 0) iData = i; }
+        else if ((n === 'DATA' || n === 'DIA') && iData < 0) iData = i;
         else if (!IGNORA[n] && n) cands.push({ n: n, i: i });
       });
-      if (!nomeDim.length) throw new Error(rotulo + ': nenhuma coluna de BU, marca, canal ou cliente no cabeçalho');
+      if (iData >= 0) { nomeDim.unshift('DATA'); iDim.unshift(iData); }
+      if (!nomeDim.length || (nomeDim.length === 1 && nomeDim[0] === 'DATA'))
+        throw new Error(rotulo + ': nenhuma coluna de BU, marca, canal ou cliente no cabeçalho');
     };
 
     const definirValores = campos => {
@@ -779,17 +782,19 @@ class Component extends DCLogic {
       if (!pronto) definirValores(campos);
       let chave = '';
       for (let d = 0; d < iDim.length; d++) {
-        chave += (d ? '\u0001' : '') + String(campos[iDim[d]] || '').trim().toUpperCase();
+        let v = String(campos[iDim[d]] || '').trim().toUpperCase();
+        if (iData >= 0 && d === 0) {
+          const sv = this._serial(v);
+          v = sv ? String(sv) : '';
+          if (sv && datas.size < 2000) datas.add(sv);
+        }
+        chave += (d ? '\u0001' : '') + v;
       }
       let acc = mapa.get(chave);
       if (!acc) { acc = new Float64Array(iVal.length); mapa.set(chave, acc); }
       for (let v = 0; v < iVal.length; v++) {
         const x = this._num(campos[iVal[v]]);
         if (x != null) acc[v] += x;
-      }
-      if (iData >= 0 && datas.size < 2000) {
-        const d = campos[iData];
-        if (d) { const sv = this._serial(d); if (sv) datas.add(sv); }
       }
     };
 
@@ -816,8 +821,9 @@ class Component extends DCLogic {
       const aoa = [nomeDim.concat(nomeVal)];
       mapa.forEach((acc, chave) => {
         const dims = chave.split('\u0001');
-        if (!dims[0]) return;
+        if (!dims[iData >= 0 ? 1 : 0]) return;
         const linha = dims.slice();
+        if (iData >= 0) linha[0] = Number(linha[0]) || 0;
         let algum = false;
         for (let v = 0; v < acc.length; v++) {
           const x = Math.round(acc[v] * 100) / 100;
@@ -862,7 +868,11 @@ class Component extends DCLogic {
         ? (this._aoa(X, wb.Sheets[nomeVendas])[0] || [])
           .map(c => String(c).trim().toUpperCase()).join('|')
         : '';
-      if (nomeVendas && /CANAL/.test(cabTrans) && /(DATA|DIA)/.test(cabTrans)) {
+      const wsV = nomeVendas ? wb.Sheets[nomeVendas] : null;
+      const ehTrans = (wsV && wsV.__trans)
+        || (/CANAL/.test(cabTrans) && /(DATA|DIA)/.test(cabTrans))
+        || (/BU/.test(cabTrans) && /(CLIENTE|REDE)/.test(cabTrans) && !/REALAA/.test(cabTrans));
+      if (nomeVendas && ehTrans) {
         const nomeMetaT = wb.SheetNames.find(n => /meta|cabe/i.test(n));
         const M = {};
         if (nomeMetaT) this._aoa(X, wb.Sheets[nomeMetaT])
