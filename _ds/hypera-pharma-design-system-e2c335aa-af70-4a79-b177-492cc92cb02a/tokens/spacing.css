@@ -1,0 +1,21 @@
+/* ============================================================
+   Hypera Pharma — Spacing tokens (base-4 / 8 scale)
+   ============================================================ */
+:root {
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Component conventions */
+  --btn-padding: 8px 24px;
+  --card-padding: 24px;
+  --section-padding: 64px;
+  --container-max: 1200px;
+}

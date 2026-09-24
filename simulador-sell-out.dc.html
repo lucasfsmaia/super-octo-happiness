@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/radii.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/shadows.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
+  <script src="base-boletim.js?v=20260918d"></script>
+  <style>
+    body { margin:0; background:#F5F9FC; font-family:'Asap',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+    a { color:#0062AA; text-decoration:none; }
+    a:hover { color:#074878; text-decoration:underline; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:#F5F9FC; font-family:'Asap',system-ui,sans-serif;">
+  <div style="max-width:1240px; margin:0 auto; padding:28px 30px 80px;">
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:28px; flex-wrap:wrap; border-bottom:3px solid #0062AA; padding-bottom:14px;">
+      <div>
+        <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:28px; width:auto; display:block; margin-bottom:12px;">
+        <div style="font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#00BFDF;">Boletim sell out</div>
+        <div style="font-size:34px; font-weight:700; color:#292A2B; line-height:1.1; margin-top:3px;">Simulador</div>
+      </div>
+      <div id="uMeta" style="font-size:12.5px; color:#5D5F61; text-align:right; line-height:1.7;"></div>
+    </div>
+
+    <div id="uTabs" style="display:flex; gap:4px; margin:18px 0 14px; flex-wrap:wrap;"></div>
+    <div id="uControles" style="position:relative; display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; background:#fff; border:1px solid #EFEFEF; border-radius:8px; padding:14px 18px; margin-bottom:16px; box-shadow:0 1px 2px rgba(7,72,120,.06);"></div>
+    <div id="uAviso"></div>
+    <div id="uCen" style="margin-bottom:16px;"></div>
+    <div id="uKpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-bottom:20px;"></div>
+    <div id="uGraficos"></div>
+    <div id="uTabela"></div>
+    <div id="uRodape" style="font-size:12.5px; line-height:1.7; color:#5D5F61; border-top:1px solid #EFEFEF; margin-top:26px; padding-top:14px;"></div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;corteInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;TT&quot;,&quot;CPS&quot;,&quot;CH&quot;,&quot;PP&quot;,&quot;SC&quot;,&quot;SG&quot;],&quot;default&quot;:&quot;TT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Painel&quot;},&quot;escalaComum&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Painel&quot;}}">
+const CORTES = [
+  ['TT', 'Hypera', ['CH', 'PP', 'SC', 'SG']],
+  ['CPS', 'Marcas', ['CH', 'PP', 'SC']],
+  ['CH', 'CH', ['CH']],
+  ['PP', 'PP', ['PP']],
+  ['SC', 'SC', ['SC']],
+  ['SG', 'SG', ['SG']]
+];
+const BLUE = '#0062AA', NAVY = '#074878', CYAN = '#00BFDF', LIGHT = '#A9D0EE';
+const INK = '#292A2B', MUTED = '#5D5F61', LINE = '#EFEFEF', POS = '#17784C', NEG = '#B32B23', SUAVE = '#FBFDFE';
+const BUS = ['CH', 'PP', 'SC', 'SG'];
+const CANAIS = ['VD', 'VI'];
+const SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const COLS = [
+  ['realAA', 'Mês AA'], ['real', 'Realizado'], ['proj', 'Projeção'],
+  ['cresc', 'Cresc. acum.'], ['pProj', 'Cresc. proj.'],
+  ['orcAbs', 'Orçamento'], ['pOrc', 'vs orç.'], ['forecast', 'Forecast']
+];
+
+class Component extends DCLogic {
+  state = {
+    corte: 'TT', canal: 'TOTAL', visao: 'bu', ver: 'ambos',
+    marcas: {}, clientes: {}, filtro: null, abertos: {},
+    // simulação guardada por recorte: a de cada BU sobe para Marcas e Hypera
+    sim: {},
+    // venda simulada (valor absoluto) por linha da tabela: marca, cliente, canal
+    simLinha: {},
+    // seções recolhidas, para encurtar a rolagem
+    dobra: { graficos: false, dias: true, tabela: false }
+  };
+
+  componentDidMount() { this._esperar(); }
+  _esperar(n = 0) {
+    if (window.BASE_BOLETIM && document.getElementById('uTabela')) return this._iniciar();
+    if (n > 150) return; setTimeout(() => this._esperar(n + 1), 60);
+  }
+  $(id) { return document.getElementById(id); }
+
+  _iniciar() {
+    const B = window.BASE_BOLETIM;
+    this.M = B.META || {};
+    this.F = (B.FATOS || []).map(f => { const o = {}; B.COLUNAS.forEach((c, i) => o[c] = f[i]); return o; });
+    this.idx = {};
+    this.F.forEach(o => this.idx[o.bu + '|' + o.marca + '|' + o.rede] = o);
+    this.state.corte = this.props.corteInicial || 'TT';
+    this._montarCurvas();
+    this._cabecalho();
+    this._cenRestaurar();
+    this._pintar();
+  }
+
+  // ---------- cenários salvos ----------
+  _CHAVE = 'fmb.sellout.cenarios.v1';
+  _CHAVE_R = 'fmb.sellout.rascunho.v1';
+  _cenTudo() {
+    try { return JSON.parse(localStorage.getItem(this._CHAVE) || '{}') || {}; } catch (e) { return {}; }
+  }
+  _cenGravarTudo(o) {
+    try { localStorage.setItem(this._CHAVE, JSON.stringify(o)); return true; } catch (e) { return false; }
+  }
+  _cenSnapshot() {
+    const s = this.state;
+    return {
+      ref: (this.M && this.M.referencia) || '', quando: new Date().toISOString(),
+      corte: s.corte, canal: s.canal, visao: s.visao, ver: s.ver,
+      marcas: s.marcas, clientes: s.clientes, sim: s.sim, simLinha: s.simLinha
+    };
+  }
+  _cenAplicar(d) {
+    if (!d) return;
+    const s = this.state;
+    ['corte', 'canal', 'visao', 'ver'].forEach(k => { if (d[k]) s[k] = d[k]; });
+    s.marcas = d.marcas || {}; s.clientes = d.clientes || {};
+    s.sim = d.sim || {}; s.simLinha = d.simLinha || {};
+    s.filtro = null;
+  }
+  _cenRestaurar() {
+    try {
+      const r = JSON.parse(localStorage.getItem(this._CHAVE_R) || 'null');
+      if (r && r.ref === ((this.M && this.M.referencia) || '')) this._cenAplicar(r);
+    } catch (e) { }
+  }
+  _cenRascunho() {
+    try { localStorage.setItem(this._CHAVE_R, JSON.stringify(this._cenSnapshot())); } catch (e) { }
+  }
+  _cenAviso(txt, cor) {
+    const el = this.$('cenMsg'); if (!el) return;
+    el.style.color = cor || '#0a7d34'; el.innerHTML = txt;
+    clearTimeout(this._tc); this._tc = setTimeout(() => { if (this.$('cenMsg') === el) el.textContent = ''; }, 5000);
+  }
+  _cenSalvar() {
+    const inp = this.$('cenNome'), nome = String(inp.value || '').trim();
+    if (!nome) { this._cenAviso('Dê um nome ao cenário antes de salvar.', '#B32B23'); inp.focus(); return; }
+    const t = this._cenTudo();
+    const novo = !t[nome];
+    t[nome] = this._cenSnapshot();
+    if (!this._cenGravarTudo(t)) return this._cenAviso('O navegador não permitiu gravar o cenário.', '#B32B23');
+    this._cenSel = nome; this._pintarCen();
+    this._cenAviso((novo ? 'Cenário <b>' : 'Cenário <b>') + nome + '</b> ' + (novo ? 'salvo.' : 'atualizado.'));
+  }
+  _cenAbrir(nome) {
+    const d = this._cenTudo()[nome];
+    if (!d) return;
+    this._cenAplicar(d); this._cenSel = nome; this._cenRascunho(); this._pintar();
+    this._cenAviso('Cenário <b>' + nome + '</b> aberto.');
+  }
+  _cenExcluir(nome) {
+    const t = this._cenTudo();
+    if (!t[nome]) return;
+    delete t[nome]; this._cenGravarTudo(t);
+    if (this._cenSel === nome) this._cenSel = '';
+    this._pintarCen(); this._cenAviso('Cenário <b>' + nome + '</b> excluído.', MUTED);
+  }
+  _cenBaixar() {
+    const nome = String((this.$('cenNome').value || this._cenSel || 'cenario')).trim();
+    const pacote = { tipo: 'cenario-sellout', versao: 1, nome: nome, dados: this._cenSnapshot() };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(pacote, null, 1)], { type: 'application/json' }));
+    a.download = 'cenario-' + nome.replace(/[^\w\-]+/g, '-').toLowerCase() + '.json';
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    this._cenAviso('Arquivo gerado. Salve no SharePoint para compartilhar.');
+  }
+  _cenCarregarArquivo(f) {
+    if (!f) return;
+    f.text().then(txt => {
+      let p; try { p = JSON.parse(txt); } catch (e) { return this._cenAviso('Arquivo inválido.', '#B32B23'); }
+      const d = p && p.dados ? p.dados : p;
+      if (!d || (!d.sim && !d.simLinha)) return this._cenAviso('Esse arquivo não é um cenário do simulador.', '#B32B23');
+      const nome = String(p.nome || 'cenário importado');
+      const t = this._cenTudo(); t[nome] = d; this._cenGravarTudo(t);
+      this._cenAplicar(d); this._cenSel = nome; this._cenRascunho(); this._pintar();
+      const outraRef = d.ref && this.M.referencia && d.ref !== this.M.referencia;
+      this._cenAviso('Cenário <b>' + nome + '</b> carregado.' + (outraRef ? ' <b style="color:#B32B23">Atenção: foi criado sobre a base de ' + d.ref + '.</b>' : ''));
+    });
+  }
+  _cenZerar() {
+    this.state.sim = {}; this.state.simLinha = {}; this._cenSel = '';
+    this._cenRascunho(); this._pintar();
+  }
+  _pintarCen() {
+    const el = this.$('cenBarra') ? this.$('cenBarra').parentNode : this.$('uCen');
+    if (!el) return;
+    const t = this._cenTudo(), nomes = Object.keys(t).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const ativa = this._simAtiva();
+    const bt = (id, txt, primario) => '<button data-cen="' + id + '" style="font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; border-radius:8px; padding:8px 14px; border:1px solid '
+      + (primario ? BLUE : '#D7E3EE') + '; background:' + (primario ? BLUE : '#fff') + '; color:' + (primario ? '#fff' : BLUE) + ';">' + txt + '</button>';
+    el.innerHTML = '<div id="cenBarra" style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; padding:13px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">'
+      + '<span style="font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:' + MUTED + '; margin-right:2px;">Cenário</span>'
+      + '<input id="cenNome" value="' + String(this._cenSel || '').replace(/"/g, '&quot;') + '" placeholder="nome do cenário" style="font-family:inherit; font-size:13.5px; color:' + INK + '; border:1px solid #D7E3EE; border-radius:8px; padding:8px 11px; width:210px;">'
+      + bt('salvar', 'Salvar', true)
+      + (nomes.length ? '<select id="cenSel" style="font-family:inherit; font-size:13.5px; color:' + INK + '; border:1px solid #D7E3EE; border-radius:8px; padding:8px 11px;">'
+        + '<option value="">abrir salvo…</option>'
+        + nomes.map(n => '<option value="' + n.replace(/"/g, '&quot;') + '"' + (n === this._cenSel ? ' selected' : '') + '>' + n + '</option>').join('')
+        + '</select>' + bt('excluir', 'Excluir') : '')
+      + '<span style="flex:1"></span>'
+      + bt('baixar', 'Exportar para compartilhar')
+      + '<label style="font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; border-radius:8px; padding:8px 14px; border:1px solid #D7E3EE; background:#fff; color:' + BLUE + ';">Importar cenário recebido<input id="cenArq" type="file" accept="application/json,.json" style="display:none"></label>'
+      + (ativa ? bt('zerar', 'Zerar simulação') : '')
+      + '</div>'
+      + '<div id="cenMsg" style="font-size:12.5px; margin-top:7px; min-height:16px;"></div>';
+    el.querySelectorAll('button[data-cen]').forEach(b => b.onclick = () => {
+      const a = b.dataset.cen;
+      if (a === 'salvar') this._cenSalvar();
+      else if (a === 'baixar') this._cenBaixar();
+      else if (a === 'zerar') this._cenZerar();
+      else if (a === 'excluir') { const s = this.$('cenSel'); if (s && s.value) this._cenExcluir(s.value); else this._cenAviso('Escolha um cenário salvo para excluir.', '#B32B23'); }
+    });
+    const nm = this.$('cenNome');
+    if (nm) {
+      nm.oninput = () => { this._cenSel = nm.value; };
+      nm.onkeydown = e => { if (e.key === 'Enter') this._cenSalvar(); };
+    }
+    const sel = this.$('cenSel');
+    if (sel) sel.onchange = () => { if (sel.value) this._cenAbrir(sel.value); };
+    const arq = this.$('cenArq');
+    if (arq) arq.onchange = () => { this._cenCarregarArquivo(arq.files[0]); arq.value = ''; };
+  }
+
+  // ---------- consultas ----------
+  _o(bu, marca, rede) { return this.idx[bu + '|' + marca + '|' + rede] || {}; }
+  _fato(bu) { return this._o(bu, 'TOTAL', 'TOTAL'); }
+  _corte() { return CORTES.find(c => c[0] === this.state.corte) || CORTES[0]; }
+  _busEscopo() { return this._corte()[2].filter(b => this._fato(b).bu); }
+  _redes() {
+    const s = [];
+    this.F.forEach(o => {
+      if (o.bu === 'TOTAL' && o.marca === 'TOTAL' && o.rede !== 'TOTAL' && CANAIS.indexOf(o.rede) < 0 && s.indexOf(o.rede) < 0) s.push(o.rede);
+    });
+    return s;
+  }
+  _marcas(bu) {
+    const s = [];
+    this.F.forEach(o => { if (o.bu === bu && o.marca !== 'TOTAL' && o.marca !== 'TOTAL PB' && s.indexOf(o.marca) < 0) s.push(o.marca); });
+    return s.sort((a, b) => (this._o(bu, b, 'TOTAL').proj || 0) - (this._o(bu, a, 'TOTAL').proj || 0));
+  }
+  _marcasEscopo() {
+    const escopo = this._busEscopo();
+    if (escopo.length > 1) return escopo.map(b => [b, this._marcas(b)]).filter(g => g[1].length);
+    const s = [];
+    escopo.forEach(b => this._marcas(b).forEach(m => { if (s.indexOf(m) < 0) s.push(m); }));
+    return s;
+  }
+  _temValor(o) { return o && (o.realAA != null || o.real != null || o.proj != null); }
+  /** Soma linhas do escopo, campo a campo — "—" onde nenhuma delas traz o valor. */
+  _agg(lista) {
+    lista = lista.filter(o => o && o.bu);
+    if (!lista.length) return {};
+    const soma = campo => {
+      const v = lista.filter(o => o[campo] != null);
+      return v.length ? Math.round(v.reduce((a, o) => a + o[campo], 0) * 10) / 10 : null;
+    };
+    const o = { bu: 'ESCOPO', realAA: soma('realAA'), real: soma('real'), proj: soma('proj'), orcAbs: soma('orcAbs'), forecast: soma('forecast') };
+    const varia = (v, b) => (v != null && b) ? Math.round((v / b - 1) * 1000) / 10 : null;
+    o.pProj = varia(o.proj, o.realAA);
+    o.pOrc = varia(o.orcAbs, o.realAA);
+    o.cresc = lista.length === 1 ? lista[0].cresc : null;
+    return o;
+  }
+  /** Linha de nível 0 de um cliente ou canal: total Hypera no recorte TT, soma do escopo nos demais. */
+  _topo(rede) {
+    if (this.state.corte === 'TT') return this._o('TOTAL', 'TOTAL', rede);
+    return this._agg(this._busEscopo().map(bu => this._o(bu, 'TOTAL', rede)));
+  }
+  _selVazia(m) { return !Object.keys(m).some(k => m[k]); }
+  _passaMarca(m) { return this._selVazia(this.state.marcas) || !!this.state.marcas[m]; }
+  _passaCliente(c) { return this._selVazia(this.state.clientes) || !!this.state.clientes[c]; }
+
+  // ---------- curvas ----------
+  _diaria(c) {
+    if (!c) return null;
+    const dif = (arr, base) => arr.map((v, i) => Math.round(((v || 0) - (i ? (arr[i - 1] || 0) : (base || 0))) * 100) / 100);
+    const real = c.real || [], proj = c.proj || [], aa = c.aa || [];
+    const ultReal = real.length ? real[real.length - 1] : 0;
+    return {
+      diasMes: c.diasMes || Math.max(aa.length, real.length + proj.length),
+      corte: real.length, aa: dif(aa, 0), real: dif(real, 0), proj: dif(proj, ultReal)
+    };
+  }
+  _escala(d, k) {
+    if (!d) return null;
+    const m = v => Math.round(v * k * 100) / 100;
+    return { diasMes: d.diasMes, corte: d.corte, aa: d.aa.map(m), real: d.real.map(m), proj: d.proj.map(m) };
+  }
+  _somaC(lista) {
+    lista = lista.filter(Boolean);
+    if (!lista.length) return null;
+    const diasMes = Math.max.apply(null, lista.map(d => d.diasMes));
+    const corte = Math.min.apply(null, lista.map(d => d.corte));
+    const som = (campo, n) => {
+      const out = new Array(n).fill(0);
+      lista.forEach(d => { for (let i = 0; i < n; i++) out[i] += (d[campo][i] || 0); });
+      return out.map(v => Math.round(v * 100) / 100);
+    };
+    return { diasMes, corte, aa: som('aa', diasMes), real: som('real', corte), proj: som('proj', diasMes - corte) };
+  }
+  _soma1(arr, n) { return (arr || []).slice(0, n === undefined ? undefined : n).reduce((a, b) => a + (b || 0), 0); }
+
+  _montarCurvas() {
+    const M = this.M, cv = M.curva, cb = M.curvaBU, cbc = M.curvaBUCanal;
+    this.rateado = false;
+    const total = this._diaria(cv);
+    const bus = {};
+    const projT = BUS.reduce((a, b) => a + (this._fato(b).proj || 0), 0);
+    BUS.forEach(b => {
+      let porCanal = null, tot = null;
+      if (cbc && cbc[b]) {
+        porCanal = { VD: this._diaria(cbc[b].VD), VI: this._diaria(cbc[b].VI) };
+        tot = this._somaC([porCanal.VD, porCanal.VI]);
+      }
+      if (!tot && cb && cb[b]) tot = this._diaria(cb[b]);
+      if (!tot && total) {
+        const proj = this._fato(b).proj;
+        if (proj && projT) { tot = this._escala(total, proj / projT); this.rateado = true; }
+      }
+      if (tot) bus[b] = { total: tot, VD: porCanal && porCanal.VD, VI: porCanal && porCanal.VI, semCanal: !porCanal };
+    });
+    // sem canal na base: ajusta o mix VD/VI de cada BU por um fator único, para cada BU
+    // fechar em si e a soma reproduzir o mix publicado do total
+    const semCanal = Object.keys(bus).filter(b => bus[b].semCanal);
+    if (semCanal.length) {
+      const t = this._fato('Total s/ Cobertura').bu ? this._fato('Total s/ Cobertura') : this._fato('Total');
+      const vol = d => this._soma1(d.aa) + this._soma1(d.real) + this._soma1(d.proj);
+      const vdBU = {}; semCanal.forEach(b => { const f = this._fato(b); vdBU[b] = f.vd != null ? f.vd / 100 : null; });
+      let k = 1;
+      if (t.vd != null && total) {
+        const somaPond = semCanal.reduce((a, b) => a + (vdBU[b] == null ? 0 : vol(bus[b].total) * vdBU[b]), 0);
+        if (somaPond) k = (vol(total) * (t.vd / 100)) / somaPond;
+      }
+      semCanal.forEach(b => {
+        if (vdBU[b] == null) return;
+        const vd = Math.max(0, Math.min(1, vdBU[b] * k));
+        bus[b].VD = this._escala(bus[b].total, vd);
+        bus[b].VI = this._escala(bus[b].total, 1 - vd);
+        this.rateado = true;
+      });
+    }
+    this.bus = bus; this.total = total;
+  }
+
+  /** Base (sem simulação) e cenário do recorte: cada BU entra já simulada, e o recorte
+   *  pode ter uma simulação própria por cima da soma. */
+  _curvasDoCorte() {
+    const c = this._corte(), chave = c[0];
+    const crus = c[2].map(b => this.bus[b]).filter(Boolean);
+    const base = {
+      Total: (chave === 'TT' && this.total) ? this.total : this._somaC(crus.map(m => m.total)),
+      VD: this._somaC(crus.map(m => m.VD)),
+      VI: this._somaC(crus.map(m => m.VI))
+    };
+    const simsBU = c[2].map(b => this._buSimulada(b)).filter(Boolean);
+    const Total = c[2].some(b => this._simAtivaEm(b)) ? this._somaC(simsBU.map(m => m.total)) : base.Total;
+    const VD = this._somaC(simsBU.map(m => m.VD)), VI = this._somaC(simsBU.map(m => m.VI));
+    // num recorte de uma só BU a chave é a própria BU: a curva já vem simulada acima,
+    // então não se reaplica a simulação do recorte por cima dela
+    let T = Total, D = VD, I = VI;
+    if (!(c[2].length === 1 && c[2][0] === chave)) {
+      const fat = this._fatoresSim(Total, chave);
+      T = this._aplicaSim(Total, chave); D = this._aplicaFat(VD, fat); I = this._aplicaFat(VI, fat);
+    }
+    // ajustes de marca, cliente e canal entram como delta de mês espalhado nos dias futuros
+    const delta = this._deltaLinhas();
+    if (delta) {
+      const fd = this._fatoresDelta(T, delta);
+      T = this._aplicaFat(T, fd); D = this._aplicaFat(D, fd); I = this._aplicaFat(I, fd);
+    }
+    return { rotulo: c[1], base: base, Total: T, VD: D, VI: I };
+  }
+
+  // ---------- formatação ----------
+  _n(v, d) {
+    if (v === null || v === undefined || isNaN(v)) return '<span style="color:#C3CDD6;">—</span>';
+    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d === undefined ? 1 : d, maximumFractionDigits: d === undefined ? 1 : d });
+  }
+  _nn(v) { return (v === null || v === undefined || isNaN(v)) ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+  _p(v) {
+    if (v === null || v === undefined || isNaN(v)) return '<span style="color:#C3CDD6;">—</span>';
+    return '<span style="color:' + (v < 0 ? NEG : POS) + '; font-weight:600;">' + (v > 0 ? '+' : '') + this._nn(v) + '%</span>';
+  }
+  _cel(o, campo) {
+    const v = o ? o[campo] : null;
+    return (campo === 'cresc' || campo === 'pProj' || campo === 'pOrc') ? this._p(v) : this._n(v);
+  }
+  _fds(dia) {
+    const c = this.M.curva || {};
+    if (!c.ano || !c.mes) return false;
+    const w = new Date(c.ano, c.mes - 1, dia).getDay();
+    return w === 0 || w === 6;
+  }
+  _diaSemana(dia) {
+    const c = this.M.curva || {};
+    if (!c.ano || !c.mes) return '';
+    return SEM[new Date(c.ano, c.mes - 1, dia).getDay()];
+  }
+  /** Seção com cabeçalho clicável: recolhe para encurtar a rolagem. */
+  _secao(id, titulo, resumo, html) {
+    const aberto = !this.state.dobra[id];
+    return '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; box-shadow:0 1px 3px rgba(7,72,120,.06); margin-bottom:18px; overflow:hidden;">'
+      + '<div data-dobra="' + id + '" style="display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer; background:' + (aberto ? '#fff' : SUAVE) + '; border-bottom:' + (aberto ? '1px solid ' + LINE : 'none') + ';">'
+      + '<span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border:1px solid #CFE4F5; border-radius:5px; color:' + BLUE + '; font-size:11px; line-height:1;">' + (aberto ? '−' : '+') + '</span>'
+      + '<span style="font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:' + BLUE + ';">' + titulo + '</span>'
+      + '<span style="font-size:12.5px; color:' + MUTED + ';">' + (resumo || '') + '</span></div>'
+      + (aberto ? '<div style="padding:16px 18px 18px;">' + html + '</div>' : '') + '</div>';
+  }
+  _painel(titulo, html) {
+    return '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; padding:18px 20px 20px; margin-bottom:18px; box-shadow:0 1px 3px rgba(7,72,120,.06);">'
+      + '<div style="font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:' + BLUE + '; margin-bottom:6px;">' + titulo + '</div>' + html + '</div>';
+  }
+
+  // ---------- gráfico ----------
+  _grafico(titulo, d, teto) {
+    const bloco = html => '<div style="margin-bottom:20px;"><div style="font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:' + NAVY + '; margin-bottom:6px;">' + titulo + '</div>' + html + '</div>';
+    if (!d) return bloco('<div style="padding:22px 0; font-size:14px; color:' + MUTED + ';">Sem série diária para este recorte na base atual.</div>');
+    const W = 1060, H = 300, mL = 46, mR = 14, mT = 14, mB = 34;
+    const n = d.diasMes, faixa = (W - mL - mR) / n;
+    const topo = Math.ceil((teto || Math.max.apply(null, d.aa.concat(d.real, d.proj, [1]))) / 5) * 5;
+    const y = v => H - mB - (Math.max(0, v) / topo) * (H - mT - mB);
+    const cx = i => mL + faixa * (i + 0.5);
+    let s = '';
+    for (let i = 0; i < n; i++) if (this._fds(i + 1)) s += '<rect x="' + (mL + faixa * i).toFixed(1) + '" y="' + mT + '" width="' + faixa.toFixed(1) + '" height="' + (H - mB - mT) + '" fill="#EDF6FC"></rect>';
+    [0, .25, .5, .75, 1].forEach(f => {
+      const v = topo * f;
+      s += '<line x1="' + mL + '" x2="' + (W - mR) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#E6EEF5" stroke-width="1"></line>'
+        + '<text x="' + (mL - 7) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="' + MUTED + '">' + v.toFixed(0) + '</text>';
+    });
+    d.aa.forEach((v, i) => s += '<rect x="' + (mL + faixa * i + faixa * 0.16).toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + (faixa * 0.68).toFixed(1) + '" height="' + Math.max(0, H - mB - y(v)).toFixed(1) + '" fill="' + LIGHT + '" rx="1.5"></rect>');
+    const cam = (arr, off) => arr.map((v, i) => (i ? 'L' : 'M') + cx(i + off).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    if (d.proj.length) {
+      const emenda = d.real.length ? 'M' + cx(d.corte - 1).toFixed(1) + ' ' + y(d.real[d.real.length - 1]).toFixed(1) + ' L' + cx(d.corte).toFixed(1) + ' ' + y(d.proj[0]).toFixed(1) + ' ' : '';
+      s += '<path d="' + emenda + cam(d.proj, d.corte) + '" fill="none" stroke="' + BLUE + '" stroke-width="2.2" stroke-dasharray="6 5"></path>';
+    }
+    if (d.real.length) {
+      s += '<path d="' + cam(d.real, 0) + '" fill="none" stroke="' + NAVY + '" stroke-width="2.6"></path>';
+      d.real.forEach((v, i) => s += '<circle cx="' + cx(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="2.6" fill="' + NAVY + '"></circle>');
+      s += '<line x1="' + (mL + faixa * d.corte).toFixed(1) + '" x2="' + (mL + faixa * d.corte).toFixed(1) + '" y1="' + mT + '" y2="' + (H - mB) + '" stroke="' + CYAN + '" stroke-width="1.5" stroke-dasharray="4 4"></line>';
+    }
+    for (let i = 0; i < n; i++) {
+      s += '<text x="' + cx(i).toFixed(1) + '" y="' + (H - mB + 14) + '" text-anchor="middle" font-size="9.5" fill="' + (this._fds(i + 1) ? BLUE : MUTED) + '">' + (i + 1) + '</text>'
+        + '<text x="' + cx(i).toFixed(1) + '" y="' + (H - mB + 26) + '" text-anchor="middle" font-size="8" fill="#9AA7B2">' + this._diaSemana(i + 1) + '</text>';
+    }
+    const aaT = this._soma1(d.aa), realT = this._soma1(d.real), fimT = realT + this._soma1(d.proj);
+    const aaAte = this._soma1(d.aa, d.corte);
+    const resumo = '<div style="display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:' + MUTED + '; margin:2px 0 12px;">'
+      + '<span>Mês AA <b style="color:' + INK + ';">' + this._nn(aaT) + '</b></span>'
+      + '<span>Realizado até o corte <b style="color:' + INK + ';">' + this._nn(realT) + '</b> · vs AA ' + this._p(aaAte ? (realT / aaAte - 1) * 100 : null) + '</span>'
+      + '<span>Projeção do mês <b style="color:' + INK + ';">' + this._nn(fimT) + '</b> · vs AA ' + this._p(aaT ? (fimT / aaT - 1) * 100 : null) + '</span></div>';
+    const leg = [
+      ['<span style="width:14px; height:10px; border-radius:2px; background:' + LIGHT + ';"></span>', 'Ano anterior (barras)'],
+      ['<span style="width:14px; height:3px; border-radius:2px; background:' + NAVY + ';"></span>', 'Realizado'],
+      ['<span style="width:16px; height:3px; background:repeating-linear-gradient(90deg,' + BLUE + ' 0 6px, transparent 6px 10px);"></span>', 'Projeção']
+    ].map(l => '<span style="display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:' + MUTED + ';">' + l[0] + l[1] + '</span>').join('');
+    return bloco(resumo + '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%; height:auto; display:block;">' + s + '</svg>'
+      + '<div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:8px;">' + leg + '</div>');
+  }
+
+  // ---------- simulação dos dias futuros ----------
+  _sim(chave) { return this.state.sim[chave] || { ajuste: 0, dias: {} }; }
+  _simAtivaEm(chave) { const s = this._sim(chave); return s.ajuste !== 0 || Object.keys(s.dias).length > 0; }
+  /** Ativa no recorte quando ele próprio foi simulado ou quando alguma BU dentro dele foi. */
+  _simAtiva(chave) {
+    const k = chave || this.state.corte;
+    const c = CORTES.find(x => x[0] === k) || this._corte();
+    return this._simAtivaEm(k) || c[2].some(b => this._simAtivaEm(b)) || this._linhasAjustadas().length > 0;
+  }
+  _simDia(chave, dia, base) {
+    const s = this._sim(chave);
+    if (s.dias[dia] != null) return s.dias[dia];
+    return Math.round(base * (1 + s.ajuste / 100) * 100) / 100;
+  }
+  _aplicaSim(d, chave) {
+    if (!d || !this._simAtivaEm(chave)) return d;
+    return Object.assign({}, d, { proj: d.proj.map((v, i) => this._simDia(chave, d.corte + i + 1, v)) });
+  }
+  /** Fator de cada dia futuro no cenário (simulado ÷ base), para VD e VI seguirem o total. */
+  _fatoresSim(total, chave) {
+    const f = {};
+    if (!total || !this._simAtivaEm(chave)) return f;
+    const s = this._sim(chave);
+    total.proj.forEach((v, i) => {
+      const dia = total.corte + i + 1;
+      f[dia] = v ? this._simDia(chave, dia, v) / v : (1 + s.ajuste / 100);
+    });
+    return f;
+  }
+  _aplicaFat(d, f) {
+    if (!d || !Object.keys(f).length) return d;
+    return Object.assign({}, d, { proj: d.proj.map((v, i) => { const k = f[d.corte + i + 1]; return Math.round(v * (k == null ? 1 : k) * 100) / 100; }) });
+  }
+  // ---- simulação de linhas: marca, cliente e canal ----
+  _kLinha(o) { return o.bu + '|' + o.marca + '|' + o.rede; }
+  /** Valor absoluto digitado para a linha (projeção simulada do mês), se houver. */
+  _valLinha(o) { const v = this.state.simLinha[this._kLinha(o)]; return v == null ? null : v; }
+  _projCen(o) { const v = this._valLinha(o); return v != null ? v : (o.proj == null ? null : o.proj); }
+  _deltaLinha(o) { const v = this._valLinha(o); return (v == null || o.proj == null) ? 0 : Math.round((v - o.proj) * 10) / 10; }
+  /** Linha aberta para simulação: folhas de marca, cliente e canal — nunca as de total,
+   *  que já têm o slider do recorte. */
+  _simulavel(o) {
+    if (!o || o.proj == null || this.idx[this._kLinha(o)] !== o) return false;
+    if (['Total', 'Total s/ Cobertura', 'COBERTURA'].indexOf(o.bu) >= 0) return false;
+    return !(o.marca === 'TOTAL' && o.rede === 'TOTAL');
+  }
+  _noEscopo(o) {
+    const escopo = this._busEscopo();
+    return o.bu === 'TOTAL' ? this.state.corte === 'TT' : escopo.indexOf(o.bu) >= 0;
+  }
+  /** b está dentro de a? Usado para não contar o mesmo volume duas vezes. */
+  _dentro(a, b) {
+    if (a === b) return false;
+    if (a.bu === 'TOTAL' && b.bu !== 'TOTAL') return a.rede === 'TOTAL' || a.rede === b.rede;
+    if (a.bu !== b.bu) return false;
+    if (a.marca === 'TOTAL' && b.marca !== 'TOTAL') return a.rede === 'TOTAL' || a.rede === b.rede;
+    if (a.marca === b.marca && a.rede === 'TOTAL' && b.rede !== 'TOTAL') return true;
+    return false;
+  }
+  _ajustes() {
+    const chaves = Object.keys(this.state.simLinha).filter(k => {
+      const o = this.idx[k];
+      return o && this._simulavel(o) && this._noEscopo(o) && this._deltaLinha(o) !== 0;
+    });
+    const usadas = [], ignoradas = [];
+    chaves.forEach(k => {
+      const o = this.idx[k];
+      (chaves.some(k2 => this._dentro(o, this.idx[k2])) ? ignoradas : usadas).push(k);
+    });
+    return { usadas, ignoradas };
+  }
+  /** Soma das diferenças pedidas, sem contar duas vezes níveis sobrepostos. */
+  _deltaLinhas() {
+    const d = this._ajustes().usadas.reduce((a, k) => a + this._deltaLinha(this.idx[k]), 0);
+    return Math.round(d * 10) / 10;
+  }
+  _linhasAjustadas() { return this._ajustes().usadas; }
+  /** Espalha um delta de mês pelos dias não realizados, na proporção da projeção. */
+  _fatoresDelta(total, delta) {
+    const f = {};
+    if (!total || !delta) return f;
+    const soma = this._soma1(total.proj);
+    if (!soma) return f;
+    const k = (soma + delta) / soma;
+    total.proj.forEach((v, i) => f[total.corte + i + 1] = k);
+    return f;
+  }
+
+  /** Curvas de uma BU com a simulação dela aplicada. */
+  _buSimulada(b) {
+    const o = this.bus[b];
+    if (!o) return null;
+    const fat = this._fatoresSim(o.total, b);
+    return { total: this._aplicaSim(o.total, b), VD: this._aplicaFat(o.VD, fat), VI: this._aplicaFat(o.VI, fat) };
+  }
+  _orcEscopo() {
+    if (this.state.corte === 'TT') {
+      const t = this._fato('Total s/ Cobertura').bu ? this._fato('Total s/ Cobertura') : this._fato('Total');
+      return t.orcAbs != null ? t.orcAbs : (this.M.curva || {}).orcTotal;
+    }
+    return this._agg(this._busEscopo().map(b => this._fato(b))).orcAbs;
+  }
+
+  /** Venda por dia do recorte, com os dias futuros abertos para simulação. */
+  _tabelaDias() {
+    const c = this._curvasDoCorte(), d = c.Total, base = c.base.Total;
+    if (!d) return '<div style="padding:8px 0 4px; font-size:14px; color:' + MUTED + ';">A base não traz a curva diária deste ciclo.</div>';
+    const chave = this._corte()[0], sim = this._sim(chave);
+    const vd = c.VD, vi = c.VI;
+    const serie = (x, i) => x ? (i < x.corte ? x.real[i] : x.proj[i - x.corte]) : null;
+    let accSim = 0, accAA = 0, accReal = 0;
+    const cab = ['Dia', '', 'AA', 'VD', 'VI', 'Realizado', 'Projeção', 'Simulado', 'Acum.', 'Acum. AA', 'vs AA'];
+    const th = cab.map((t, i) => '<th style="text-align:' + (i < 2 ? 'left' : 'right') + '; font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:' + NAVY + '; padding:8px 10px; white-space:nowrap; position:sticky; top:0;">' + t + '</th>').join('');
+    let linhas = '';
+    for (let i = 0; i < d.diasMes; i++) {
+      const dia = i + 1, futuro = i >= d.corte;
+      const aa = d.aa[i] == null ? null : d.aa[i];
+      const real = futuro ? null : d.real[i];
+      const proj = futuro ? (base ? base.proj[i - base.corte] : null) : null;
+      const cen = futuro ? d.proj[i - d.corte] : real;
+      accSim += cen || 0; accAA += aa || 0; if (!futuro) accReal += real || 0;
+      const fds = this._fds(dia);
+      const fundo = fds ? '#EDF6FC' : (futuro ? SUAVE : '#fff');
+      const td = (h, extra) => '<td style="text-align:right; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; white-space:nowrap;' + (extra || '') + '">' + h + '</td>';
+      const inp = futuro
+        ? '<input type="number" step="0.1" data-dia="' + dia + '" value="' + (cen == null ? '' : cen) + '" style="font-family:inherit; font-size:12.5px; width:74px; text-align:right; padding:4px 7px; border:1px solid ' + (sim.dias[dia] != null ? BLUE : '#D7E3EE') + '; border-radius:6px; color:' + INK + '; background:#fff;">'
+        : '<span style="color:#C3CDD6;">—</span>';
+      linhas += '<tr>'
+        + '<td style="text-align:left; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-weight:600; color:' + INK + ';">' + dia + '</td>'
+        + '<td style="text-align:left; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-size:12px; color:' + (fds ? BLUE : MUTED) + ';">' + this._diaSemana(dia) + '</td>'
+        + td(this._n(aa)) + td(this._n(serie(vd, i))) + td(this._n(serie(vi, i)))
+        + td(real == null ? '<span style="color:#C3CDD6;">—</span>' : '<b>' + this._nn(real) + '</b>')
+        + td(this._n(proj)) + td(inp)
+        + td(this._nn(accSim)) + td(this._nn(accAA))
+        + td(this._p(accAA ? (accSim / accAA - 1) * 100 : null))
+        + '</tr>';
+    }
+    const aaT = this._soma1(d.aa), fimT = accSim;
+    const projOrig = base ? this._soma1(base.real) + this._soma1(base.proj) : null;
+    const orc = this._orcEscopo();
+    const tf = (h, al) => '<td style="text-align:' + (al || 'right') + '; padding:8px 10px; background:' + NAVY + '; color:#fff; font-weight:700; white-space:nowrap;">' + h + '</td>';
+    const rodape = '<tr>' + tf('Mês', 'left') + tf('') + tf(this._nn(aaT))
+      + tf(vd ? this._nn(this._soma1(vd.real) + this._soma1(vd.proj)) : '—')
+      + tf(vi ? this._nn(this._soma1(vi.real) + this._soma1(vi.proj)) : '—')
+      + tf(this._nn(accReal)) + tf(this._nn(projOrig)) + tf(this._nn(fimT)) + tf(this._nn(fimT)) + tf(this._nn(aaT))
+      + tf('<span style="color:#fff;">' + (aaT ? (fimT / aaT - 1 > 0 ? '+' : '') + this._nn((fimT / aaT - 1) * 100) + '%' : '—') + '</span>') + '</tr>';
+
+    const cartao = (rot, valor, sub) => '<div style="border:1px solid ' + LINE + '; border-radius:8px; padding:11px 14px; background:' + SUAVE + ';">'
+      + '<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:' + MUTED + ';">' + rot + '</div>'
+      + '<div style="font-size:19px; font-weight:700; color:' + INK + '; font-variant-numeric:tabular-nums;">' + valor + '</div>'
+      + '<div style="font-size:12px; color:' + MUTED + ';">' + sub + '</div></div>';
+    const herdadas = this._corte()[2].filter(b => b !== chave && this._simAtivaEm(b));
+    const aj = this._ajustes(), dLin = this._deltaLinhas(), nLin = aj.usadas.length;
+    const painelSim = '<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; border:1px solid #CFE4F5; background:#FBFDFE; border-radius:8px; padding:13px 16px; margin-bottom:14px;">'
+      + '<div><label style="display:block; font-size:11.5px; font-weight:600; color:' + MUTED + '; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Ajuste dos dias futuros</label>'
+      + '<div style="display:flex; align-items:center; gap:12px;">'
+      + '<input id="uSlider" type="range" min="-30" max="30" step="1" value="' + sim.ajuste + '" style="width:220px; accent-color:' + BLUE + ';">'
+      + '<b style="font-size:15px; color:' + (sim.ajuste < 0 ? NEG : (sim.ajuste > 0 ? POS : INK)) + '; min-width:52px;">' + (sim.ajuste > 0 ? '+' : '') + sim.ajuste + '%</b></div></div>'
+      + '<div style="font-size:12.5px; line-height:1.5; color:' + MUTED + '; max-width:330px;">O ajuste vale para todos os dias não realizados de <b>' + this._corte()[1] + '</b>. Digite em <b>Simulado</b> para fixar um dia.'
+      + (herdadas.length ? ' Já inclui a simulação de <b>' + herdadas.join(', ') + '</b>.' : '')
+      + ' Na tabela abaixo, digite em <b>Venda simulada</b> o valor previsto do mês de uma marca, cliente ou canal — a diferença soma nos dias futuros.'
+      + (aj.ignoradas.length ? '<div style="color:#8A6A12; margin-top:6px;">Ignorado na soma por sobreposição: <b>'
+        + aj.ignoradas.map(k => k.split('|').filter(p => p !== 'TOTAL').join(' · ')).join('; ') + '</b>.</div>' : '') + '</div>'
+      + '<button id="uSimZero" style="margin-left:auto; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:' + BLUE + '; background:#fff; border:1px solid #CFE4F5; border-radius:8px; padding:8px 15px;">Voltar à projeção</button></div>'
+      + '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-bottom:14px;">'
+      + cartao('Projeção da base', this._nn(projOrig), 'vs AA ' + (aaT ? this._nn((projOrig / aaT - 1) * 100) + '%' : '—'))
+      + cartao('Cenário simulado', this._nn(fimT), 'vs AA ' + (aaT ? this._nn((fimT / aaT - 1) * 100) + '%' : '—'))
+      + cartao('Diferença', (fimT - projOrig > 0 ? '+' : '') + this._nn(fimT - projOrig), 'em relação à projeção')
+      + cartao('Orçamento', orc == null ? '—' : this._nn(orc), orc == null ? 'sem orçamento no recorte' : 'gap ' + (fimT - orc > 0 ? '+' : '') + this._nn(fimT - orc))
+      + cartao('Ajustes de linha', (dLin > 0 ? '+' : '') + this._nn(dLin), nLin ? nLin + (nLin > 1 ? ' linhas ajustadas' : ' linha ajustada') : 'marca, cliente ou canal na tabela')
+      + '</div>';
+
+    return painelSim
+      + '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; overflow:auto; max-height:60vh;">'
+      + '<table style="width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums;">'
+      + '<thead><tr>' + th + '</tr></thead><tbody>' + linhas + '</tbody><tfoot>' + rodape + '</tfoot></table></div>';
+  }
+
+  // ---------- tabela ----------
+  _linha(o, rotulo, nivel, chave, temFilhos) {
+    const aberto = !!this.state.abertos[chave];
+    const fundo = nivel === 0 ? '#EDF6FC' : (nivel === 1 ? '#fff' : SUAVE);
+    const peso = nivel === 0 ? '700' : (nivel === 1 ? '600' : '400');
+    const tg = temFilhos
+      ? '<span style="display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; margin-right:9px; border:1px solid #CFE4F5; border-radius:4px; background:#fff; color:' + BLUE + '; font-size:10px; line-height:1;">' + (aberto ? '−' : '+') + '</span>'
+      : '<span style="display:inline-block; width:17px; margin-right:9px;"></span>';
+    let tds = COLS.map(c => '<td style="text-align:right; padding:7px 11px; border-bottom:1px solid ' + LINE + '; white-space:nowrap; background:' + fundo + ';">' + this._cel(o, c[0]) + '</td>').join('');
+    // simulação da linha: % sobre a projeção da marca, cliente ou canal
+    const editavel = this._simulavel(o);
+    const dl = editavel ? this._deltaLinha(o) : 0;
+    const cel = h => '<td style="text-align:right; padding:5px 11px; border-bottom:1px solid ' + LINE + '; white-space:nowrap; background:' + fundo + ';">' + h + '</td>';
+    const ign = dl && this._igSet && this._igSet[this._kLinha(o)];
+    tds += cel(editavel
+      ? '<input type="number" step="0.1" data-lin="' + this._kLinha(o) + '" value="' + this._projCen(o) + '"'
+        + (ign ? ' title="ignorado na soma: há linhas ajustadas dentro desta"' : '')
+        + ' style="font-family:inherit; font-size:12.5px; width:78px; text-align:right; padding:4px 7px; border:1px solid ' + (dl ? (ign ? '#E0B040' : BLUE) : '#D7E3EE') + '; border-radius:6px; color:' + INK + '; background:#fff;">'
+      : '<span style="color:#C3CDD6;">—</span>');
+    // crescimento projetado no cenário: venda simulada contra o mês do ano anterior
+    const cen = editavel ? this._projCen(o) : null;
+    // ancorado no crescimento da base: só o efeito do ajuste entra, senão a coluna
+    // discordaria de "Cresc. proj." por causa do arredondamento da base
+    const crescCen = cen == null || !o.realAA ? null
+      : Math.round((o.pProj != null ? o.pProj + (cen - o.proj) / o.realAA * 100 : (cen / o.realAA - 1) * 100) * 10) / 10;
+    tds += cel(crescCen == null ? '<span style="color:#C3CDD6;">—</span>'
+      : (dl ? '<b style="color:' + (ign ? '#8A6A12' : (crescCen < 0 ? NEG : POS)) + ';">' + (crescCen > 0 ? '+' : '') + this._nn(crescCen) + '%</b>'
+        : this._p(crescCen)));
+    return '<tr ' + (temFilhos ? 'data-k="' + chave + '" style="cursor:pointer;"' : '') + '>'
+      + '<td style="text-align:left; padding:7px 11px 7px ' + (12 + nivel * 20) + 'px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; color:' + INK + '; font-weight:' + peso + '; white-space:nowrap;">'
+      + tg + rotulo + '</td>' + tds + '</tr>';
+  }
+  _tabelaHtml(linhas) {
+    const th = ['Recorte'].concat(COLS.map(c => c[1]), ['Venda simulada', 'Cresc. cenário']).map((c, i) =>
+      '<th style="text-align:' + (i ? 'right' : 'left') + '; font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:' + NAVY + '; padding:9px 11px; white-space:nowrap; position:sticky; top:0;">' + c + '</th>').join('');
+    return '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; box-shadow:0 1px 3px rgba(7,72,120,.06); overflow:auto; max-height:70vh;">'
+      + '<table style="width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums;">'
+      + '<thead><tr>' + th + '</tr></thead><tbody>' + linhas + '</tbody></table></div>';
+  }
+
+  _tabela() {
+    const canal = this.state.canal, escopo = this._busEscopo(), redes = this._redes().filter(r => this._passaCliente(r));
+    const totNome = this._fato('Total s/ Cobertura').bu ? 'Total s/ Cobertura' : 'Total';
+    let h = '';
+    if (this.state.visao === 'bu') {
+      const oTot = this.state.corte === 'TT'
+        ? (canal === 'TOTAL' ? this._o(totNome, 'TOTAL', 'TOTAL') : this._o('TOTAL', 'TOTAL', canal)) : null;
+      if (oTot) h += this._linha(oTot, 'Hypera', 0, 'tot', false);
+      escopo.forEach(bu => {
+        const marcas = this._marcas(bu).filter(m => this._passaMarca(m));
+        h += this._linha(this._o(bu, 'TOTAL', canal), bu, 0, 'bu:' + bu, marcas.length > 0);
+        if (!this.state.abertos['bu:' + bu]) return;
+        marcas.forEach(m => {
+          const k = 'm:' + bu + '|' + m;
+          const filhos = redes.filter(r => this._temValor(this._o(bu, m, r)) || this._o(bu, m, r).cresc != null);
+          h += this._linha(this._o(bu, m, canal === 'TOTAL' ? 'TOTAL' : canal), m, 1, k, canal === 'TOTAL' && filhos.length > 0);
+          if (canal === 'TOTAL' && this.state.abertos[k]) {
+            filhos.forEach(r => h += this._linha(this._o(bu, m, r), r, 2, k + '|' + r, false));
+            CANAIS.forEach(c => { const o = this._o(bu, m, c); if (this._temValor(o) || o.cresc != null) h += this._linha(o, c === 'VD' ? 'Venda direta' : 'Venda indireta', 2, k + '|' + c, false); });
+          }
+        });
+      });
+    } else if (this.state.visao === 'cliente') {
+      redes.forEach(r => {
+        const k = 'c:' + r;
+        h += this._linha(this._topo(r), r + (this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1]), 0, k, true);
+        if (!this.state.abertos[k]) return;
+        escopo.forEach(bu => {
+          const marcas = this._marcas(bu).filter(m => this._passaMarca(m) && (this._temValor(this._o(bu, m, r)) || this._o(bu, m, r).cresc != null));
+          const kb = k + '|' + bu;
+          h += this._linha(this._o(bu, 'TOTAL', r), bu, 1, kb, marcas.length > 0);
+          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._o(bu, m, r), m, 2, kb + '|' + m, false));
+        });
+      });
+    } else {
+      CANAIS.forEach(c => {
+        const k = 'n:' + c;
+        h += this._linha(this._topo(c), (c === 'VD' ? 'Venda direta (VD)' : 'Venda indireta (VI)')
+          + (this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1]), 0, k, true);
+        if (!this.state.abertos[k]) return;
+        escopo.forEach(bu => {
+          const marcas = this._marcas(bu).filter(m => this._passaMarca(m) && (this._temValor(this._o(bu, m, c)) || this._o(bu, m, c).cresc != null));
+          const kb = k + '|' + bu;
+          h += this._linha(this._o(bu, 'TOTAL', c), bu, 1, kb, marcas.length > 0);
+          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._o(bu, m, c), m, 2, kb + '|' + m, false));
+        });
+      });
+    }
+    if (!h) h = '<tr><td colspan="' + (COLS.length + 3) + '" style="padding:28px; text-align:center; color:' + MUTED + ';">Nenhuma linha atende aos filtros.</td></tr>';
+    const visoes = [['bu', 'BU e marca'], ['cliente', 'Cliente'], ['canal', 'Canal']].map(v => {
+      const on = this.state.visao === v[0];
+      return '<button data-visao="' + v[0] + '" style="font-family:inherit; font-size:13.5px; font-weight:600; padding:8px 16px; border:none; cursor:pointer; background:'
+        + (on ? BLUE : '#fff') + '; color:' + (on ? '#fff' : MUTED) + ';">' + v[1] + '</button>';
+    }).join('');
+    const topo = '<div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px;">'
+      + '<div style="display:inline-flex; border:1px solid #D7E3EE; border-radius:8px; overflow:hidden;">' + visoes + '</div>'
+      + '<div style="margin-left:auto; display:flex; gap:9px;">'
+      + '<button id="uAbrir" style="font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:' + BLUE + '; background:#fff; border:1px solid ' + BLUE + '; border-radius:8px; padding:8px 15px;">Abrir todos</button>'
+      + '<button id="uFechar" style="font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:' + BLUE + '; background:#fff; border:1px solid #CFE4F5; border-radius:8px; padding:8px 15px;">Fechar</button>'
+      + '</div></div>';
+    return topo + this._tabelaHtml(h);
+  }
+
+  // ---------- controles ----------
+  _dropdown(id, rotulo, lista, sel) {
+    const n = Object.keys(sel).filter(k => sel[k]).length;
+    const aberto = this.state.filtro === id;
+    const opcao = x => '<label style="display:flex; align-items:center; gap:9px; padding:6px 10px; font-size:13.5px; color:' + INK + '; cursor:pointer; border-radius:6px;">'
+      + '<input type="checkbox" data-sel="' + id + '" value="' + x + '"' + (sel[x] ? ' checked' : '') + ' style="accent-color:' + BLUE + '; width:15px; height:15px;">' + x + '</label>';
+    // com mais de uma BU no recorte, as marcas vêm agrupadas por BU
+    const grupo = g => '<div style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:' + BLUE + '; background:#EDF6FC; border-radius:6px; padding:5px 10px; margin:6px 0 3px;">' + g + '</div>';
+    const itens = Array.isArray(lista[0])
+      ? lista.map(g => grupo(g[0]) + g[1].map(opcao).join('')).join('')
+      : lista.map(opcao).join('');
+    return '<div style="position:relative;">'
+      + '<label style="display:block; font-size:11.5px; font-weight:600; color:' + MUTED + '; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;">' + rotulo + '</label>'
+      + '<button data-abre="' + id + '" style="font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer; color:' + (n ? '#fff' : BLUE) + '; background:' + (n ? BLUE : '#fff') + '; border:1px solid ' + (n ? BLUE : '#D7E3EE') + '; border-radius:8px; padding:8px 16px; min-width:150px; text-align:left;">'
+      + (n ? n + ' selecionad' + (n > 1 ? 'os' : 'o') : 'Todos') + ' <span style="opacity:.6; margin-left:6px;">▾</span></button>'
+      + (aberto ? '<div style="position:absolute; z-index:20; top:100%; left:0; margin-top:6px; width:270px; max-height:320px; overflow:auto; background:#fff; border:1px solid #D7E3EE; border-radius:8px; box-shadow:0 12px 30px rgba(7,72,120,.18); padding:8px;">'
+        + '<div style="display:flex; gap:8px; padding:2px 6px 8px;">'
+        + '<button data-limpa="' + id + '" style="font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; color:' + BLUE + '; background:#fff; border:1px solid #CFE4F5; border-radius:6px; padding:5px 10px;">Limpar</button>'
+        + '<button data-fecha="1" style="font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; color:' + MUTED + '; background:#fff; border:1px solid #EFEFEF; border-radius:6px; padding:5px 10px;">Fechar</button></div>'
+        + itens + '</div>' : '')
+      + '</div>';
+  }
+
+  _cabecalho() {
+    const M = this.M;
+    this.$('uMeta').innerHTML = '<b style="color:' + INK + '; font-size:14px;">' + (M.referencia || '') + '</b><br>corte ' + (M.dataCorte || '')
+      + '<br>' + (M.fonte || '') + '<br>' + (M.moeda || 'R$ milhões');
+    this.$('uRodape').innerHTML = 'Gráficos: venda diária do recorte — barras no mesmo dia do ano anterior, linha cheia realizado, tracejada projeção, fundo azul no fim de semana. '
+      + 'Tabela: clique na linha para abrir o nível seguinte; os filtros de marca e cliente valem para a tabela.'
+      + ' · <a href="portal-boletim-sell-out.dc.html">Portal do boletim</a>'
+      + (M.links && M.links.deck ? ' · <a href="' + M.links.deck + '">Apresentação</a>' : '');
+  }
+
+  _pintar() {
+    this.$('uTabs').innerHTML = CORTES.map(c => {
+      const on = this.state.corte === c[0];
+      return '<button data-c="' + c[0] + '" style="font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; background:none; border:none; border-bottom:3px solid '
+        + (on ? BLUE : 'transparent') + '; color:' + (on ? BLUE : MUTED) + '; padding:9px 16px;">' + c[1] + '</button>';
+    }).join('');
+
+    const rot = t => '<label style="display:block; font-size:11.5px; font-weight:600; color:' + MUTED + '; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;">' + t + '</label>';
+    const seg = (id, opcoes, atual) => '<div style="display:inline-flex; border:1px solid #D7E3EE; border-radius:8px; overflow:hidden;">'
+      + opcoes.map(o => {
+        const on = atual === o[0];
+        return '<button data-' + id + '="' + o[0] + '" style="font-family:inherit; font-size:13.5px; font-weight:600; padding:8px 16px; border:none; cursor:pointer; background:'
+          + (on ? BLUE : '#fff') + '; color:' + (on ? '#fff' : MUTED) + ';">' + o[1] + '</button>';
+      }).join('') + '</div>';
+    this.$('uControles').innerHTML =
+      (this.state.visao === 'bu' ? '<div>' + rot('Canal') + seg('canal', [['TOTAL', 'Total'], ['VD', 'VD'], ['VI', 'VI']], this.state.canal) + '</div>' : '')
+      + this._dropdown('marcas', 'Marcas', this._marcasEscopo(), this.state.marcas)
+      + this._dropdown('clientes', 'Clientes', this._redes(), this.state.clientes)
+      + '<div>' + rot('Exibir') + seg('ver', [['ambos', 'Gráficos e tabela'], ['graficos', 'Só gráficos'], ['tabela', 'Só tabela']], this.state.ver) + '</div>';
+
+    const filtroAtivo = !this._selVazia(this.state.marcas) || !this._selVazia(this.state.clientes);
+    this.$('uAviso').innerHTML = (this.rateado ? '<div style="border:1px solid #F0D9A0; background:#FDF6E6; border-radius:8px; padding:11px 15px; font-size:13px; color:#7A5A12; margin-bottom:12px;">'
+      + 'A aba <b>Curva</b> da base não traz a quebra por BU e canal deste ciclo — as séries por recorte estão <b>rateadas pelo mix projetado</b>.</div>' : '')
+      + (filtroAtivo ? '<div style="border:1px solid #CFE4F5; background:#EDF6FC; border-radius:8px; padding:11px 15px; font-size:13px; color:' + NAVY + '; margin-bottom:12px;">'
+        + 'Os filtros de marca e cliente se aplicam à tabela. Os gráficos seguem o recorte, porque a base guarda a curva diária por BU e canal, não por marca ou cliente.</div>' : '');
+
+    const c = this._curvasDoCorte();
+    const sufixo = this._simAtiva() ? ' · cenário simulado' : '';
+    this._igSet = {}; this._ajustes().ignoradas.forEach(k => this._igSet[k] = 1);
+    this.$('uKpis').innerHTML = [['Total', c.Total], ['VD', c.VD], ['VI', c.VI]].map(k => {
+      const d = k[1], aaT = d ? this._soma1(d.aa) : null;
+      const fimT = d ? this._soma1(d.real) + this._soma1(d.proj) : null;
+      return '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; padding:14px 16px 15px; box-shadow:0 1px 2px rgba(7,72,120,.06);">'
+        + '<div style="font-size:11.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:' + MUTED + ';">' + c.rotulo + ' · ' + k[0] + '</div>'
+        + '<div style="font-size:24px; font-weight:700; color:' + INK + '; font-variant-numeric:tabular-nums; line-height:1.15; margin-top:3px;">' + (d ? this._nn(fimT) : '—') + '</div>'
+        + '<div style="font-size:12.5px; color:' + MUTED + ';">AA ' + (d ? this._nn(aaT) : '—') + ' · ' + this._p(d && aaT ? (fimT / aaT - 1) * 100 : null) + '</div></div>';
+    }).join('');
+
+    let teto = null;
+    if (this.props.escalaComum) {
+      const t = [c.Total, c.VD, c.VI].filter(Boolean).map(d => Math.max.apply(null, d.aa.concat(d.real, d.proj)));
+      if (t.length) teto = Math.max.apply(null, t);
+    }
+    const fim = d => d ? this._nn(this._soma1(d.real) + this._soma1(d.proj)) : '—';
+    this.$('uGraficos').innerHTML = this.state.ver === 'tabela' ? '' : this._secao('graficos',
+      'Gráficos diários · ' + c.rotulo, 'total ' + fim(c.Total) + ' · VD ' + fim(c.VD) + ' · VI ' + fim(c.VI) + (sufixo ? ' · cenário simulado' : ''),
+      this._grafico('Total — realizado vs projetado vs ano anterior' + sufixo, c.Total, teto)
+      + this._grafico('VD — realizado vs projetado vs ano anterior' + sufixo, c.VD, teto)
+      + this._grafico('VI — realizado vs projetado vs ano anterior' + sufixo, c.VI, teto));
+    this.$('uTabela').innerHTML = this.state.ver === 'graficos' ? '' :
+      this._secao('dias', 'Vendas por dia · ' + c.rotulo, 'simulação dos dias não realizados', this._tabelaDias())
+      + this._secao('tabela', 'Abertura por BU, marca e cliente', 'clique na linha para abrir o nível seguinte', this._tabela());
+
+    this._pintarCen();
+    this._cenRascunho();
+    this._ligar();
+  }
+
+  _ligar() {
+    const q = (pai, sel) => this.$(pai).querySelectorAll(sel);
+    q('uTabs', 'button').forEach(b => b.onclick = () => { this.state.corte = b.dataset.c; this.state.filtro = null; this._pintar(); });
+    q('uControles', 'button[data-canal]').forEach(b => b.onclick = () => { this.state.canal = b.dataset.canal; this.state.filtro = null; this._pintar(); });
+    q('uControles', 'button[data-ver]').forEach(b => b.onclick = () => { this.state.ver = b.dataset.ver; this.state.filtro = null; this._pintar(); });
+    q('uControles', 'button[data-abre]').forEach(b => b.onclick = () => { this.state.filtro = this.state.filtro === b.dataset.abre ? null : b.dataset.abre; this._pintar(); });
+    q('uControles', 'button[data-fecha]').forEach(b => b.onclick = () => { this.state.filtro = null; this._pintar(); });
+    q('uControles', 'button[data-limpa]').forEach(b => b.onclick = () => { this.state[b.dataset.limpa] = {}; this._pintar(); });
+    q('uControles', 'input[data-sel]').forEach(i => i.onchange = () => {
+      const alvo = this.state[i.dataset.sel];
+      alvo[i.value] = i.checked;
+      if (!i.checked) delete alvo[i.value];
+      this._repintar();
+    });
+    const tb = this.$('uTabela');
+    tb.querySelectorAll('tr[data-k]').forEach(tr => tr.onclick = () => {
+      const k = tr.dataset.k;
+      this.state.abertos[k] = !this.state.abertos[k];
+      this._repintar();
+    });
+    tb.querySelectorAll('button[data-visao]').forEach(b => b.onclick = () => { this.state.visao = b.dataset.visao; this._repintar(); });
+    tb.querySelectorAll('input[data-lin]').forEach(i => {
+      i.onclick = e => e.stopPropagation();
+      i.oninput = () => {
+        const v = String(i.value).trim(), k = i.dataset.lin, o = this.idx[k];
+        const n = v === '' ? null : Number(v.replace(',', '.'));
+        if (n == null || isNaN(n) || (o && o.proj != null && Math.abs(n - o.proj) < 0.05)) delete this.state.simLinha[k];
+        else this.state.simLinha[k] = n;
+        clearTimeout(this._tl);
+        this._tl = setTimeout(() => this._repintar(), 260);
+      };
+    });
+    [this.$('uGraficos'), this.$('uTabela')].forEach(el => el.querySelectorAll('div[data-dobra]').forEach(d => d.onclick = () => {
+      this.state.dobra[d.dataset.dobra] = !this.state.dobra[d.dataset.dobra];
+      this._repintar();
+    }));
+    const chave = this._corte()[0];
+    const pega = () => {
+      const s = this.state.sim[chave] || { ajuste: 0, dias: {} };
+      this.state.sim[chave] = s; return s;
+    };
+    const sl = this.$('uSlider');
+    if (sl) sl.oninput = () => {
+      pega().ajuste = Number(sl.value);
+      clearTimeout(this._ts);
+      this._ts = setTimeout(() => this._repintar(), 140);
+    };
+    const sz = this.$('uSimZero');
+    if (sz) sz.onclick = () => {
+      delete this.state.sim[chave];
+      this._corte()[2].forEach(b => delete this.state.sim[b]);
+      this._linhasAjustadas().forEach(k => delete this.state.simLinha[k]);
+      this._repintar();
+    };
+    tb.querySelectorAll('input[data-dia]').forEach(i => i.oninput = () => {
+      const dia = Number(i.dataset.dia), v = String(i.value).trim(), s = pega();
+      if (v === '') delete s.dias[dia]; else s.dias[dia] = Number(v.replace(',', '.'));
+      clearTimeout(this._td);
+      this._td = setTimeout(() => this._repintar(), 220);
+    });
+    const ab = this.$('uAbrir'), fe = this.$('uFechar');
+    if (ab) ab.onclick = () => this._todos();
+    if (fe) fe.onclick = () => { this.state.abertos = {}; this._pintar(); };
+  }
+
+  /** Repinta preservando rolagem da página, rolagem das tabelas e o campo em foco. */
+  _repintar() {
+    const y = window.scrollY, ativo = document.activeElement;
+    const foco = ativo && ativo.dataset && ativo.dataset.dia ? 'dia:' + ativo.dataset.dia
+      : (ativo && ativo.dataset && ativo.dataset.lin ? 'lin:' + ativo.dataset.lin : (ativo && ativo.id) || null);
+    const pos = ativo && ativo.selectionStart;
+    const roladas = [].slice.call(document.querySelectorAll('#uTabela div[style*="overflow"]')).map(e => e.scrollTop);
+    this._pintar();
+    [].slice.call(document.querySelectorAll('#uTabela div[style*="overflow"]')).forEach((e, i) => { if (roladas[i] != null) e.scrollTop = roladas[i]; });
+    if (foco) {
+      const el = foco.indexOf('dia:') === 0
+        ? document.querySelector('#uTabela input[data-dia="' + foco.slice(4) + '"]')
+        : (foco.indexOf('lin:') === 0
+          ? document.querySelector('#uTabela input[data-lin="' + foco.slice(4) + '"]')
+          : this.$(foco));
+      if (el) {
+        el.focus({ preventScroll: true });
+        if (pos != null && el.setSelectionRange && el.type !== 'number') el.setSelectionRange(pos, pos);
+      }
+    }
+    // a altura do documento muda entre repaints: restaura a rolagem depois do foco e no frame seguinte
+    window.scrollTo(0, y);
+    requestAnimationFrame(() => window.scrollTo(0, y));
+  }
+
+  _todos() {
+    const a = {};
+    this._busEscopo().forEach(bu => {
+      a['bu:' + bu] = true;
+      this._marcas(bu).forEach(m => a['m:' + bu + '|' + m] = true);
+    });
+    this._redes().forEach(r => { a['c:' + r] = true; this._busEscopo().forEach(bu => a['c:' + r + '|' + bu] = true); });
+    CANAIS.forEach(c => { a['n:' + c] = true; this._busEscopo().forEach(bu => a['n:' + c + '|' + bu] = true); });
+    this.state.abertos = a;
+    this._pintar();
+  }
+
+
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

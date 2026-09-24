@@ -1,0 +1,55 @@
+/* ============================================================
+   Hypera Pharma — Color tokens
+   Brand palette: institutional blue + cyan accent.
+   Clean, trustworthy, pharmaceutical.
+   ============================================================ */
+:root {
+  /* ---- Brand / primary ---- */
+  --hy-blue: #0062AA;            /* Primary — buttons, links, headings, icons */
+  --hy-blue-dark: #074878;       /* Dark blue — dark surfaces, headers, pressed */
+  --hy-cyan: #00BFDF;            /* Secondary — accents, charts, hovers */
+  --hy-blue-light: #A9D0EE;      /* Light blue — support fills, badges, illos */
+  --hy-blue-bg: #EDF6FC;         /* Very light blue — alt sections, soft cards */
+
+  /* Primary interaction states (derived from dark blue) */
+  --hy-blue-hover: #074878;
+  --hy-blue-active: #053a61;
+  --hy-blue-disabled: #A9D0EE;
+
+  /* ---- Neutrals ---- */
+  --hy-ink: #292A2B;             /* Headings / principal text */
+  --hy-body: #434445;            /* Body copy */
+  --hy-muted: #5D5F61;           /* Secondary / muted text */
+  --hy-base: #212529;            /* Alt body base */
+  --hy-white: #FFFFFF;
+  --hy-border: #EFEFEF;          /* Borders, dividers */
+  --hy-surface-alt: #F7FAFD;     /* Subtle off-white surface */
+
+  /* ---- Semantic aliases ---- */
+  --color-primary: var(--hy-blue);
+  --color-primary-hover: var(--hy-blue-hover);
+  --color-primary-active: var(--hy-blue-active);
+  --color-secondary: var(--hy-cyan);
+  --color-accent: var(--hy-cyan);
+
+  --text-heading: var(--hy-ink);
+  --text-body: var(--hy-body);
+  --text-muted: var(--hy-muted);
+  --text-link: var(--hy-blue);
+  --text-on-dark: var(--hy-white);
+
+  --surface-page: var(--hy-white);
+  --surface-alt: var(--hy-blue-bg);
+  --surface-card: var(--hy-white);
+  --surface-dark: var(--hy-blue-dark);
+
+  --border-default: var(--hy-border);
+  --border-strong: #D9DDE0;
+  --border-focus: var(--hy-blue);
+
+  /* ---- Status (health/pharma context) ---- */
+  --color-success: #1E9E63;
+  --color-warning: #E8A33D;
+  --color-danger: #D64545;
+  --color-info: var(--hy-cyan);
+}

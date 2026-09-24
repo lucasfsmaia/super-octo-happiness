@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formato da Base — Boletim Sell Out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F4F7FA; }
+    a { color: #0062AA; }
+    a:hover { color: #08356E; }
+  </style>
+</helmet>
+
+<div style="font-family:Asap,Calibri,Arial,sans-serif; color:#292A2B; background:#F4F7FA; padding:0 0 80px;">
+
+  <div style="background:#0A3D80; background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%); border-bottom:3px solid #00BFDF; padding:38px 48px 34px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#9FD4F0; margin-bottom:10px;">Boletim Sell Out · Especificação de dados</div>
+      <h1 style="margin:0 0 10px; font-size:40px; line-height:1.1; font-weight:700; color:#fff;">Formato da base de vendas</h1>
+      <p style="margin:0; font-size:17px; line-height:1.5; color:#D6E9F7; max-width:820px; text-wrap:pretty;">Uma única extração diária alimenta o boletim inteiro. Variações, representatividades, top 5 de marcas e destaques passam a ser calculados — não digitados.</p>
+    </div>
+  </div>
+
+  <div style="max-width:1180px; margin:0 auto; padding:36px 48px 0;">
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:40px;">
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">Grão</div>
+        <div style="font-size:16px; line-height:1.45; color:#434445;">Dia × BU × marca × SKU × canal × cliente</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">Arquivos</div>
+        <div style="font-size:16px; line-height:1.45; color:#434445;">Um CSV por tabela: vendas · vendas-aa · projecao-inicial · projecao-atual · orcamento (+ FORECAST) · meta · curva</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">Unidade</div>
+        <div style="font-size:16px; line-height:1.45; color:#434445;">R$ inteiros na base; o script divide por 1.000.000</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">No e-mail</div>
+        <div style="font-size:16px; line-height:1.45; color:#434445;">Top 5 marcas por BU + linha “Demais marcas”</div>
+      </div>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">1. Convenção dos arquivos</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Pelo volume de linhas, a base não vem mais como um único Excel com abas: cada tabela é um <b>.csv</b> próprio e os arquivos são entregues juntos. O nome do arquivo é o que identifica a tabela.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Arquivo</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Conteúdo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ arquivos }}" as="a" hint-placeholder-count="7">
+            <tr>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:500; color:#08356E; white-space:nowrap;">{{ a.nome }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; line-height:1.45;">{{ a.conteudo }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:#EDF6FC; border-left:4px solid #00BFDF; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:44px; font-size:15.5px; line-height:1.6; color:#08356E; max-width:900px;">
+      <b>Regras de arquivo.</b> UTF-8 com BOM · separador <b>;</b> · primeira linha é o cabeçalho, com os mesmos nomes de coluna descritos abaixo · data em <b>dd/mm/aaaa</b> como texto · valor em R$ inteiros, vírgula decimal aceita · sem linhas em branco ou totais no meio.<br>
+      <b>Tabela grande pode ser quebrada</b> em partes numeradas — <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">vendas-01.csv</span>, <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">vendas-02.csv</span> — repetindo o cabeçalho em cada parte. O Atualizador junta as partes do mesmo nome numa tabela só.
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">2. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">vendas.csv</span></h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Mês corrente, só o <b>realizado diário</b>. Uma linha por combinação com movimento no dia, até a data de corte; somando a coluna <b>VALOR REAL</b>, sai o acumulado do mês. Projeção inicial e projeção atual do mês cheio vêm de <b>projecao-inicial.csv</b> e <b>projecao-atual.csv</b>; o orçamento, de <b>orcamento.csv</b>.</p>
+
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Coluna</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Tipo</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Valores</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Regra</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ colunas }}" as="c" hint-placeholder-count="10">
+            <tr>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:500; color:#08356E; white-space:nowrap;">{{ c.nome }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; white-space:nowrap;">{{ c.tipo }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#434445;">{{ c.valores }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; line-height:1.45;">{{ c.regra }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:auto; margin-bottom:44px;">
+      <div style="padding:14px 18px 0; font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#0062AA;">Exemplo de linhas</div>
+      <table style="width:100%; min-width:980px; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:12.5px; margin-top:10px;">
+        <thead>
+          <tr>
+            <sc-for list="{{ exHead }}" as="h" hint-placeholder-count="10">
+              <th align="right" style="padding:8px 12px; font-size:11px; color:#5D5F61; border-bottom:1px solid #E3EBF2; white-space:nowrap; text-align:left;">{{ h }}</th>
+            </sc-for>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ exRows }}" as="r" hint-placeholder-count="4">
+            <tr>
+              <sc-for list="{{ r }}" as="v" hint-placeholder-count="10">
+                <td style="padding:7px 12px; border-bottom:1px solid #F6F9FC; color:#434445; white-space:nowrap;">{{ v }}</td>
+              </sc-for>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <div style="padding:12px 18px 16px; font-size:13px; color:#8A8C8E;">As duas últimas linhas são de dias futuros: REAL vazio, projeções preenchidas.</div>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">3. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">vendas-aa.csv</span></h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Mesmas seis colunas de dimensão e só <b>VALOR REAL</b>. Traz o <b>mês fechado do ano anterior</b> inteiro: o mês cheio serve de base para o % de projeção, e o recorte até <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">dataCorteAA</span> serve de base para o % do realizado acumulado.</p>
+    <div style="background:#EDF6FC; border-left:4px solid #00BFDF; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:44px; font-size:15.5px; line-height:1.55; color:#08356E; max-width:900px;">
+      A marca e a BU precisam ser escritas igual nos dois arquivos. Marca que só existe em um dos anos aparece com crescimento de 100% ou -100% — é o comportamento esperado, mas vale conferir grafia antes de enviar.
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">4. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">projecao-inicial.csv</span></h2>
+    <p style="margin:0 0 44px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Colunas <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">BU · MARCA · SKU · CANAL · CLIENTE · VALOR PROJETADO INICIAL</span>, em R$. <b>Sem data</b>: é o valor do mês cheio projetado no início do ciclo, uma linha por combinação. Daqui sai <b>% proj inicial</b> e a coluna de revisão, que mostra se a projeção subiu ou caiu ao longo do mês.</p>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">5. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">projecao-atual.csv</span></h2>
+    <p style="margin:0 0 44px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Mesmo grão, com <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">VALOR PROJETADO ATUAL</span> no lugar do inicial. É a projeção vigente do mês cheio — dela saem <b>% proj</b>, o atingimento da cota e o mix VD/VI do projetado. Os dois arquivos são separados porque a inicial é congelada no começo do ciclo e a atual é reescrita a cada atualização.</p>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">6. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">orcamento.csv</span></h2>
+    <p style="margin:0 0 44px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Mesmo grão dos arquivos de projeção — <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">BU · MARCA · SKU · CANAL · CLIENTE · ORCAMENTO · FORECAST</span>, em R$, sem data. Separada porque o orçamento é travado no início do ano e revisado em outro ciclo; daqui saem <b>% cres orç</b> e o <b>atingimento da cota</b>. <b>FORECAST</b> é o orçamento reprojetado no ciclo (rolling forecast) e alimenta o segundo grupo de envio — <b>Gestão Orçamentária</b> —, que repete o boletim comercial acrescentando as colunas <b>FORECAST</b> e <b>% FCST</b> (projeção atual ÷ forecast − 1).</p>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">7. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">meta.csv</span></h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Duas colunas, <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">campo</span> e <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">valor</span>. É o único lugar com digitação.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:44px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+        <tbody>
+          <sc-for list="{{ meta }}" as="m" hint-placeholder-count="12">
+            <tr>
+              <td style="padding:10px 16px; border-bottom:1px solid #F1F5F9; font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:500; color:#08356E; white-space:nowrap; width:210px;">{{ m.campo }}</td>
+              <td style="padding:10px 16px; border-bottom:1px solid #F1F5F9; color:#434445; font-family:'JetBrains Mono',monospace; font-size:13px; white-space:nowrap; width:170px;">{{ m.exemplo }}</td>
+              <td style="padding:10px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; line-height:1.45;">{{ m.uso }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">8. <span style="font-family:'JetBrains Mono',monospace; font-size:22px; color:#0062AA;">curva.csv</span></h2>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Colunas <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">dia · BU · CANAL · realAA · real · proj</span>, uma linha por <b>dia corrido × BU × canal</b> do mês, em R$ milhões — o modelo já sai com CH, PP, SC e SG em VD e VI, 31 dias cada. É dela que saem o gráfico de ritmo do sumário, as páginas de <b>Ritmo diário</b> por BU e o quadro de ritmo do resumo do Teams: <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">real</span> até a data de corte, <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">proj</span> nos dias seguintes e <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">realAA</span> em todos.</p>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;"><b>BU</b> e <b>CANAL</b> são opcionais e independentes. Sem CANAL, a quebra VD/VI das páginas diárias é rateada pelo mix da BU e o slide avisa. Sem BU, sobra só a curva total. Se o arquivo vier vazio, a apresentação mantém a curva anterior e o Atualizador avisa na validação.</p>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">9. BUs e as sublinhas de SG</h2>
+    <p style="margin:0 0 44px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">A coluna <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">BU</span> recebe <b>CH</b>, <b>PP</b>, <b>SC</b> e as três sublinhas de SG: <b>SG - GENÉRICOS</b>, <b>SG - SMART (EX-VIT)</b> e <b>VIT NEO QUÍMICA</b>. As linhas consolidadas são calculadas: <b>SG</b> = SG - GENÉRICOS + SG - SMART (EX-VIT) + VIT NEO QUÍMICA · <b>SG - SIMILARES</b> = SG - SMART (EX-VIT) + VIT NEO QUÍMICA. Não existe mais aba Sublinhas. <b>Cobertura sai da própria base</b> — basta gravar <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">COBERTURA</span> na coluna BU.</p>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">10. Como cada número do e-mail nasce</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Toda soma respeita os filtros da linha (BU, marca, canal ou cliente).</p>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:44px;">
+      <sc-for list="{{ calculos }}" as="k" hint-placeholder-count="8">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 20px;">
+          <div style="font-size:15px; font-weight:700; color:#0062AA; margin-bottom:6px;">{{ k.titulo }}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.6; color:#292A2B; background:#F7FBFE; border-radius:6px; padding:10px 12px; margin-bottom:8px;">{{ k.formula }}</div>
+          <div style="font-size:14.5px; line-height:1.5; color:#5D5F61;">{{ k.nota }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">11. Top 5 e “Demais”</h2>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:24px 26px; margin-bottom:44px; max-width:900px;">
+      <ol style="margin:0; padding-left:22px; font-size:16px; line-height:1.65; color:#434445;">
+        <li style="margin-bottom:8px;">Dentro de cada BU, as marcas são ordenadas pelo <b>projetado atual</b> do mês.</li>
+        <li style="margin-bottom:8px;">As 5 primeiras abrem abaixo do nome da BU, com sua representatividade (projetado da marca ÷ projetado da BU).</li>
+        <li style="margin-bottom:8px;">Todas as outras somam numa linha única <b>“Demais marcas”</b> — valores somados, percentuais recalculados sobre a soma.</li>
+        <li>A quantidade é regulável: <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">topMarcas</span> no meta.csv.</li>
+      </ol>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700; color:#292A2B;">12. Travas antes do envio</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Qualquer item reprovado devolve <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">enviar = false</span> com o motivo, e nenhum e-mail sai.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:8px 26px 14px; max-width:900px;">
+      <sc-for list="{{ travas }}" as="t" hint-placeholder-count="6">
+        <div style="display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-bottom:1px solid #F1F5F9;">
+          <div style="width:8px; height:8px; border-radius:50%; background:#00BFDF; margin-top:8px; flex:0 0 auto;"></div>
+          <div style="font-size:15.5px; line-height:1.5; color:#434445;">{{ t }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;topMarcas&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:3,&quot;max&quot;:10,&quot;section&quot;:&quot;Regras&quot;},&quot;destaqueMinimo&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:2,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;R$ mi&quot;,&quot;section&quot;:&quot;Regras&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      arquivos: [
+        { nome: 'vendas.csv', conteudo: 'Realizado diário do mês corrente, até a data de corte.' },
+        { nome: 'vendas-aa.csv', conteudo: 'Realizado diário do mês fechado do ano anterior, inteiro.' },
+        { nome: 'projecao-inicial.csv', conteudo: 'Projeção do mês cheio congelada no início do ciclo, sem data.' },
+        { nome: 'projecao-atual.csv', conteudo: 'Projeção vigente do mês cheio, sem data. Reescrita a cada atualização.' },
+        { nome: 'orcamento.csv', conteudo: 'Orçamento absoluto e FORECAST do mês, sem data.' },
+        { nome: 'curva.csv', conteudo: 'Venda por dia corrido × BU × canal, em R$ milhões.' },
+        { nome: 'meta.csv', conteudo: 'Opcional. Parâmetros, links e trava de envio — o único arquivo digitado.' }
+      ],
+      colunas: [
+        { nome: 'DATA', tipo: 'Data', valores: 'dd/mm/aaaa', regra: 'Um dia por linha, até a data de corte. Dias futuros não entram neste arquivo.' },
+        { nome: 'BU', tipo: 'Texto', valores: 'CH · PP · SC · SG - GENÉRICOS · SG - SMART (EX-VIT) · VIT NEO QUÍMICA · COBERTURA', regra: 'SG não é valor de entrada: SG e SG - SIMILARES são calculadas a partir das três sublinhas. A cobertura vira linha própria e entra apenas no "Total".' },
+        { nome: 'MARCA', tipo: 'Texto', valores: 'BUSCOPAN, ADDERA D3, EPISOL…', regra: 'Base do agrupamento por marca no e-mail. Grafia única por marca.' },
+        { nome: 'SKU', tipo: 'Texto', valores: 'código ou descrição do item', regra: 'Não aparece no e-mail; serve de rastro e de checagem.' },
+        { nome: 'CANAL', tipo: 'Texto', valores: 'VD · VI', regra: 'Define as colunas VD e VI, calculadas como share do projetado.' },
+        { nome: 'CLIENTE', tipo: 'Texto', valores: 'DROGASIL, PAGUE MENOS, DELIVERY…', regra: 'Alimenta o ranking de redes. Redes fora da lista oficial caem em OUTROS.' },
+        { nome: 'VALOR REAL', tipo: 'Número', valores: 'R$', regra: 'Sell out realizado no dia.' },
+        { nome: '(projeções)', tipo: '—', valores: 'arquivos de projeção e orcamento.csv', regra: 'VALOR PROJETADO INICIAL e VALOR PROJETADO ATUAL vivem em arquivos próprios; ORCAMENTO e FORECAST, em orcamento.csv — todos sem data.' }
+      ],
+      exHead: ['DATA', 'BU', 'MARCA', 'SKU', 'CANAL', 'CLIENTE', 'REAL'],
+      exRows: [
+        ['04/08/2026', 'CH', 'BUSCOPAN', '7891058-001', 'VD', 'DROGASIL', '412.880'],
+        ['04/08/2026', 'CH', 'BUSCOPAN', '7891058-004', 'VI', 'PAGUE MENOS', '286.150'],
+        ['04/08/2026', 'SC', 'EPISOL', '7896714-020', 'VD', 'DELIVERY', '132.700'],
+        ['04/08/2026', 'SG - GENÉRICOS', 'DIPIRONA SODICA MG', '7891058-410', 'VI', 'OUTROS', '288.100'],
+        ['04/08/2026', 'SG - SMART (EX-VIT)', 'TORSILAX', '7891058-512', 'VD', 'PAGUE MENOS', '196.700'],
+        ['04/08/2026', 'VIT NEO QUÍMICA', 'VITASAY', '7891058-908', 'VI', 'OUTROS', '41.300'],
+        ['04/08/2026', 'COBERTURA', 'COBERTURA', '—', 'VI', 'OUTROS', '61.400']
+      ],
+      meta: [
+        { campo: 'referencia', exemplo: 'Agosto/26', uso: 'Aparece no assunto e no texto de abertura.' },
+        { campo: 'dataCorte', exemplo: '15/08/26', uso: 'Último dia realizado. Limita a soma de REAL.' },
+        { campo: 'dataCorteAA', exemplo: '16/08/25', uso: 'Dia equivalente no ano anterior. Define a base do % do realizado acumulado.' },
+        { campo: 'diasUteis', exemplo: '10', uso: 'Só informativo, no rodapé da tabela.' },
+        { campo: 'diasUteisAA', exemplo: '11', uso: 'Só informativo, no rodapé da tabela.' },
+        { campo: 'topMarcas', exemplo: '5', uso: 'Quantas marcas abrem sob cada BU antes de virar "Demais".' },
+        { campo: 'destaqueMinimo', exemplo: '2', uso: 'Corte de projetado, em R$ milhões, para uma marca poder virar destaque.' },
+        { campo: 'destaqueQtd', exemplo: '8', uso: 'Quantos destaques o e-mail mostra.' },
+        { campo: 'divisor', exemplo: '1000000', uso: 'Converte a base em R$ para os milhões exibidos.' },
+        { campo: 'consideracoes', exemplo: 'texto livre', uso: 'Bloco de leitura do mês. Deixe vazio para omitir a seção.' },
+        { campo: 'hub / executivos', exemplo: 'URL', uso: 'Links dos botões e do texto de abertura.' },
+        { campo: 'deck / pdf', exemplo: 'URL', uso: 'Apresentação do dia: link no texto de abertura e no terceiro botão. Sem pdf, o botão usa deck.' },
+        { campo: 'destinatarios', exemplo: 'a@…; b@…', uso: 'Lista que o Power Automate usa no envio.' },
+        { campo: 'prontoParaEnvio', exemplo: 'SIM', uso: 'Trava final. Fora de "SIM", o fluxo não dispara.' }
+      ],
+      calculos: [
+        { titulo: 'Realizado do mês', formula: 'Σ REAL  onde DATA ≤ dataCorte', nota: 'Acumulado até o corte, em vendas.csv.' },
+        { titulo: 'Realizado AA', formula: 'Σ REAL (vendas-aa.csv)', nota: 'Mês fechado do ano anterior, inteiro.' },
+        { titulo: '% projeção vs AA', formula: 'Σ PROJ_ATUAL (projecao-atual.csv) ÷ Σ REAL_AA − 1', nota: 'Mesma conta em BU, marca, canal e cliente.' },
+        { titulo: '% realizado vs AA', formula: 'Σ REAL ÷ Σ REAL_AA(≤ dataCorteAA) − 1', nota: 'Compara períodos equivalentes, não meses cheios.' },
+        { titulo: '% projeção inicial', formula: 'Σ PROJ_INICIAL ÷ Σ REAL_AA − 1', nota: 'Mostra se a projeção subiu ou caiu no mês.' },
+        { titulo: '% crescimento orçamento', formula: 'Σ ORCAMENTO ÷ Σ REAL_AA − 1', nota: 'Orçamento vem de orcamento.csv; fica em "–" se não vier.' },
+        { titulo: 'Atingimento da cota', formula: 'Σ PROJ_ATUAL ÷ Σ ORCAMENTO', nota: 'Barra da apresentação e rodapé do cartão MTG do e-mail.' },
+        { titulo: 'VD e VI', formula: 'Σ PROJ_ATUAL (canal) ÷ Σ PROJ_ATUAL', nota: 'Share do projetado, por isso as duas somam 100%.' },
+        { titulo: 'Representatividade da marca', formula: 'Σ PROJ_ATUAL (marca) ÷ Σ PROJ_ATUAL (BU)', nota: 'Percentual cinza ao lado do nome da marca.' },
+        { titulo: 'Destaques', formula: 'marcas com PROJ_ATUAL ≥ destaqueMinimo, ordenadas por % vs AA', nota: 'O corte de valor evita marca pequena liderando o ranking.' },
+        { titulo: 'Total e Total s/ Cobertura', formula: 'Σ BUs (+ COBERTURA no Total)', nota: 'As duas linhas saem da mesma base, sem digitação.' }
+      ],
+      travas: [
+        'prontoParaEnvio no meta.csv precisa estar em "SIM".',
+        'referencia, dataCorte e dataCorteAA preenchidos.',
+        'As BUs comerciais com venda na base: CH, PP, SC e as três sublinhas de SG.',
+        'Nenhuma BU sem realizado do ano anterior.',
+        'Coluna CANAL com VD e VI presentes.',
+        'Somas de REAL (vendas.csv) e de PROJ_ATUAL (projecao-atual.csv) maiores que zero.'
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

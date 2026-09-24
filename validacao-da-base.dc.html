@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Validação da Base — Boletim Sell Out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <script src="./base-boletim.js"></script>
+  <style>
+    body { margin: 0; background: #F4F7FA; }
+    a { color: #0062AA; }
+    a:hover { color: #08356E; }
+  </style>
+</helmet>
+
+<div style="font-family:Asap,Calibri,Arial,sans-serif; color:#292A2B; background:#F4F7FA; padding:0 0 80px;">
+
+  <div style="background:#0A3D80; background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%); border-bottom:3px solid #00BFDF; padding:38px 48px 34px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#9FD4F0; margin-bottom:10px;">Boletim Sell Out · Controle de qualidade</div>
+      <h1 style="margin:0 0 10px; font-size:40px; line-height:1.1; font-weight:700; color:#fff;">Validação da base</h1>
+      <p style="margin:0 0 18px; font-size:17px; line-height:1.5; color:#D6E9F7; max-width:840px; text-wrap:pretty;">A base do dia é lida antes do envio, comparada com o ano anterior e com a projeção congelada no início do ciclo. Desta leitura saem as principais variações por produto e por cliente e os pontos de atenção que acompanham a apresentação.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <div style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:800px; padding:6px 16px; font-size:14px; color:#EAF4FC;">Referência {{ referencia }}</div>
+        <div style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:800px; padding:6px 16px; font-size:14px; color:#EAF4FC;">Corte {{ dataCorte }}</div>
+        <div style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:800px; padding:6px 16px; font-size:14px; color:#EAF4FC;">{{ totalLinhas }} linhas lidas</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1180px; margin:0 auto; padding:36px 48px 0;">
+
+    <div style="display:flex; align-items:center; gap:18px; background:#fff; border:1px solid #E3EBF2; border-left:6px solid #00BFDF; border-radius:12px; padding:22px 26px; margin-bottom:34px;">
+      <div style="flex:1 1 auto; min-width:0;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:6px;">Veredito</div>
+        <div style="font-size:24px; font-weight:700; line-height:1.2;">{{ veredito }}</div>
+        <div style="font-size:15.5px; line-height:1.5; color:#5D5F61; margin-top:6px;">{{ vereditoNota }}</div>
+      </div>
+      <div style="display:flex; gap:10px; flex:none;">
+        <div style="text-align:center; min-width:74px; background:#FEF3F2; border:1px solid #FBD5D1; border-radius:10px; padding:12px 10px;">
+          <div style="font-size:26px; font-weight:700; color:#B42318; line-height:1;">{{ nCriticos }}</div>
+          <div style="font-size:12px; color:#8A4A44; margin-top:5px;">críticos</div>
+        </div>
+        <div style="text-align:center; min-width:74px; background:#FFFAEB; border:1px solid #FEDF89; border-radius:10px; padding:12px 10px;">
+          <div style="font-size:26px; font-weight:700; color:#B54708; line-height:1;">{{ nAtencao }}</div>
+          <div style="font-size:12px; color:#8A5A32; margin-top:5px;">atenção</div>
+        </div>
+        <div style="text-align:center; min-width:74px; background:#EDF6FC; border:1px solid #BEDFF3; border-radius:10px; padding:12px 10px;">
+          <div style="font-size:26px; font-weight:700; color:#0062AA; line-height:1;">{{ nInfo }}</div>
+          <div style="font-size:12px; color:#41678A; margin-top:5px;">leitura</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">1. Checagens estruturais</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Rodam antes de qualquer análise. Um item reprovado devolve <span style="font-family:'JetBrains Mono',monospace; font-size:14px;">enviar = false</span> e interrompe a produção do boletim.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:44px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Checagem</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF; width:150px;">Resultado</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF; width:110px;">Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ checagens }}" as="c" hint-placeholder-count="7">
+            <tr>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#434445; line-height:1.45;">{{ c.nome }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; font-family:'JetBrains Mono',monospace; font-size:13px;">{{ c.valor }}</td>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9;">
+                <span style="display:inline-block; border-radius:800px; padding:3px 12px; font-size:12.5px; font-weight:600; background:{{ c.bg }}; color:{{ c.cor }};">{{ c.rotulo }}</span>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">2. Principais variações por produto</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Marcas ordenadas pelo impacto em reais na variação do mês — projetado do mês cheio contra o realizado do ano anterior. O percentual sozinho não ordena: uma marca pequena com +120% pesa menos que uma grande com +6%.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:18px; margin-bottom:20px;">
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden;">
+        <div style="padding:14px 18px; border-bottom:1px solid #EFEFEF; font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#0062AA;">Maiores contribuições positivas</div>
+        <sc-for list="{{ produtosAlta }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid #F6F9FC;">
+            <div style="flex:1 1 auto; min-width:0;">
+              <div style="font-size:15.5px; font-weight:600; color:#292A2B;">{{ p.marca }}</div>
+              <div style="font-size:13px; color:#8A8C8E; margin-top:2px;">{{ p.bu }} · projetado {{ p.projTxt }}</div>
+            </div>
+            <div style="text-align:right; flex:none;">
+              <div style="font-size:16px; font-weight:700; color:#0F7B4A;">{{ p.impactoTxt }}</div>
+              <div style="font-size:13px; color:#5D5F61; margin-top:2px;">{{ p.crescTxt }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden;">
+        <div style="padding:14px 18px; border-bottom:1px solid #EFEFEF; font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#B42318;">Maiores contribuições negativas</div>
+        <sc-for list="{{ produtosQueda }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid #F6F9FC;">
+            <div style="flex:1 1 auto; min-width:0;">
+              <div style="font-size:15.5px; font-weight:600; color:#292A2B;">{{ p.marca }}</div>
+              <div style="font-size:13px; color:#8A8C8E; margin-top:2px;">{{ p.bu }} · projetado {{ p.projTxt }}</div>
+            </div>
+            <div style="text-align:right; flex:none;">
+              <div style="font-size:16px; font-weight:700; color:#B42318;">{{ p.impactoTxt }}</div>
+              <div style="font-size:13px; color:#5D5F61; margin-top:2px;">{{ p.crescTxt }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:#EDF6FC; border-left:4px solid #00BFDF; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:44px; font-size:15.5px; line-height:1.6; color:#08356E; max-width:900px;">
+      <b>Revisão de projeção.</b> {{ revisaoTexto }}
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">3. Principais variações por cliente</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Mesma leitura no eixo das redes. A coluna MTD compara o acumulado até o corte com o período equivalente do ano anterior; a coluna projeção olha o mês cheio.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:auto; margin-bottom:44px;">
+      <table style="width:100%; min-width:720px; border-collapse:collapse; font-size:14.5px;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Cliente</th>
+            <th align="right" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Real AA</th>
+            <th align="right" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Projeção</th>
+            <th align="right" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Impacto</th>
+            <th align="right" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">MTD</th>
+            <th align="right" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Projeção vs AA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ clientes }}" as="c" hint-placeholder-count="11">
+            <tr>
+              <td style="padding:11px 16px; border-bottom:1px solid #F1F5F9; font-weight:600; color:#292A2B;">{{ c.rede }}</td>
+              <td align="right" style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; font-variant-numeric:tabular-nums;">{{ c.realAATxt }}</td>
+              <td align="right" style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#434445; font-variant-numeric:tabular-nums;">{{ c.projTxt }}</td>
+              <td align="right" style="padding:11px 16px; border-bottom:1px solid #F1F5F9; font-weight:600; font-variant-numeric:tabular-nums; color:{{ c.cor }};">{{ c.impactoTxt }}</td>
+              <td align="right" style="padding:11px 16px; border-bottom:1px solid #F1F5F9; color:#5D5F61; font-variant-numeric:tabular-nums;">{{ c.mtdTxt }}</td>
+              <td align="right" style="padding:11px 16px; border-bottom:1px solid #F1F5F9; font-weight:600; font-variant-numeric:tabular-nums; color:{{ c.cor }};">{{ c.projVsAATxt }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">4. Cruzamentos fora de faixa</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Combinações produto × cliente com variação acima do limite de plausibilidade. Não são erros por definição — entrada de marca nova ou ruptura no ano anterior produzem o mesmo efeito —, mas cada uma precisa de uma explicação antes do envio.</p>
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:44px;">
+      <sc-for list="{{ outliers }}" as="o" hint-placeholder-count="6">
+        <div style="display:flex; align-items:center; gap:14px; padding:13px 20px; border-bottom:1px solid #F6F9FC;">
+          <div style="width:8px; height:8px; border-radius:50%; background:{{ o.cor }}; flex:none;"></div>
+          <div style="flex:1 1 auto; min-width:0; font-size:15.5px; color:#434445;">{{ o.marca }} <span style="color:#8A8C8E;">em</span> {{ o.rede }}</div>
+          <div style="flex:none; font-size:13px; color:#8A8C8E;">{{ o.bu }}</div>
+          <div style="flex:none; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:{{ o.cor }}; min-width:110px; text-align:right;">{{ o.crescTxt }}</div>
+        </div>
+      </sc-for>
+      <div style="padding:14px 20px; font-size:14px; color:#8A8C8E;">{{ outliersNota }}</div>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">5. Pontos de atenção da apresentação</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Gerados a partir das seções acima, já no texto que acompanha o boletim. Copie o bloco para o corpo do e-mail ou para as notas da apresentação.</p>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px;">
+      <sc-for list="{{ alertas }}" as="a" hint-placeholder-count="6">
+        <div style="display:flex; gap:16px; background:#fff; border:1px solid #E3EBF2; border-left:5px solid {{ a.cor }}; border-radius:10px; padding:16px 20px;">
+          <div style="flex:none; width:96px;">
+            <span style="display:inline-block; border-radius:800px; padding:3px 12px; font-size:12px; font-weight:600; background:{{ a.bg }}; color:{{ a.cor }};">{{ a.nivel }}</span>
+          </div>
+          <div style="flex:1 1 auto; min-width:0;">
+            <div style="font-size:16px; font-weight:600; color:#292A2B; margin-bottom:4px;">{{ a.titulo }}</div>
+            <div style="font-size:15px; line-height:1.55; color:#5D5F61; text-wrap:pretty;">{{ a.texto }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <button onClick="{{ copiar }}" style="background:#0062AA; color:#fff; border:none; border-radius:8px; padding:10px 24px; font-family:Asap,sans-serif; font-size:15px; cursor:pointer; transition:background .15s ease;" style-hover="background:#074878">Copiar pontos de atenção</button>
+      <span style="font-size:14px; color:#5D5F61;">{{ copiaStatus }}</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;limiteOutlier&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:150,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:50,&quot;max&quot;:1000,&quot;step&quot;:25,&quot;unit&quot;:&quot;%&quot;,&quot;section&quot;:&quot;Regras de validação&quot;},&quot;impactoMinimo&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0,&quot;max&quot;:10,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;R$ mi&quot;,&quot;section&quot;:&quot;Regras de validação&quot;},&quot;topProdutos&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:3,&quot;max&quot;:10,&quot;section&quot;:&quot;Regras de validação&quot;}}">
+class Component extends DCLogic {
+  state = { pronto: typeof window !== 'undefined' && !!window.BASE_BOLETIM, copiaStatus: '', tentativas: 0 };
+
+  componentDidMount() {
+    if (this.state.pronto) return;
+    this._t = setInterval(() => {
+      if (window.BASE_BOLETIM) { clearInterval(this._t); this.setState({ pronto: true }); }
+      else this.setState(s => ({ tentativas: s.tentativas + 1 }));
+    }, 120);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  _mi(v) { return (v < 0 ? '−' : '') + 'R$ ' + Math.abs(v).toFixed(1).replace('.', ',') + ' mi'; }
+  _sgn(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1).replace('.', ',') + '%'; }
+
+  renderVals() {
+    const vazio = {
+      referencia: '—', dataCorte: '—', totalLinhas: 0, veredito: 'Lendo a base…',
+      vereditoNota: 'Os indicadores aparecem assim que a base do dia terminar de carregar.',
+      nCriticos: 0, nAtencao: 0, nInfo: 0, checagens: [], produtosAlta: [], produtosQueda: [],
+      clientes: [], outliers: [], alertas: [], revisaoTexto: '', outliersNota: '',
+      copiar: () => {}, copiaStatus: this.state.copiaStatus
+    };
+    if (!this.state.pronto) return vazio;
+
+    const B = window.BASE_BOLETIM, C = B.COLUNAS, F = B.FATOS, M = B.META || {};
+    const ix = {}; C.forEach((c, i) => ix[c] = i);
+    const g = (r, k) => r[ix[k]];
+    const linhas = F.map(r => ({
+      bu: g(r, 'bu'), marca: g(r, 'marca'), rede: g(r, 'rede'),
+      realAA: g(r, 'realAA'), real: g(r, 'real'), proj: g(r, 'proj'),
+      projIni: g(r, 'projIni'), cresc: g(r, 'cresc'), pProj: g(r, 'pProj'), pIni: g(r, 'pIni')
+    }));
+
+    const limite = this.props.limiteOutlier ?? 150;
+    const impMin = this.props.impactoMinimo ?? 1;
+    const topN = this.props.topProdutos ?? 5;
+    const AGREG = new Set(['TOTAL', 'DEMAIS', 'TOTAL PB', 'Total']);
+    const BUS = ['CH', 'PP', 'SC', 'SG'];
+
+    // --- produtos: marca × TOTAL, com valores
+    const prods = linhas
+      .filter(l => BUS.indexOf(l.bu) >= 0 && l.rede === 'TOTAL' && !AGREG.has(l.marca) && l.realAA != null && l.proj != null)
+      .map(l => ({ bu: l.bu, marca: l.marca, proj: l.proj, realAA: l.realAA, impacto: +(l.proj - l.realAA).toFixed(1), cresc: l.pProj != null ? l.pProj : l.cresc }));
+    const fmtProd = p => ({
+      bu: p.bu, marca: p.marca, projTxt: this._mi(p.proj),
+      impactoTxt: (p.impacto > 0 ? '+' : '') + this._mi(p.impacto), crescTxt: this._sgn(p.cresc) + ' vs AA'
+    });
+    const ord = prods.slice().sort((a, b) => b.impacto - a.impacto);
+    const produtosAlta = ord.filter(p => p.impacto > 0).slice(0, topN).map(fmtProd);
+    const produtosQueda = ord.filter(p => p.impacto < 0).slice(-topN).reverse().map(fmtProd);
+
+    // --- clientes: TOTAL × rede
+    const excl = new Set(['TOTAL', 'VD', 'VI']);
+    const clientesRaw = linhas
+      .filter(l => l.bu === 'TOTAL' && l.marca === 'TOTAL' && !excl.has(l.rede) && l.realAA != null && l.proj != null)
+      .map(l => ({ rede: l.rede, realAA: l.realAA, proj: l.proj, impacto: +(l.proj - l.realAA).toFixed(1), mtd: l.cresc, projVsAA: l.pProj }))
+      .sort((a, b) => b.proj - a.proj);
+    const clientes = clientesRaw.map(c => ({
+      rede: c.rede, realAATxt: this._mi(c.realAA), projTxt: this._mi(c.proj),
+      impactoTxt: (c.impacto > 0 ? '+' : '') + this._mi(c.impacto),
+      mtdTxt: c.mtd == null ? '—' : this._sgn(c.mtd),
+      projVsAATxt: c.projVsAA == null ? '—' : this._sgn(c.projVsAA),
+      cor: c.impacto < 0 ? '#B42318' : '#0F7B4A'
+    }));
+    const clientesQueda = clientesRaw.filter(c => c.impacto < 0).sort((a, b) => a.impacto - b.impacto);
+
+    // --- cruzamentos produto × cliente fora de faixa
+    const cruz = linhas.filter(l => BUS.indexOf(l.bu) >= 0 && !AGREG.has(l.marca) && !excl.has(l.rede) && l.cresc != null);
+    const foraFaixa = cruz.filter(l => Math.abs(l.cresc) >= limite).sort((a, b) => Math.abs(b.cresc) - Math.abs(a.cresc));
+    const outliers = foraFaixa.slice(0, 8).map(l => ({
+      bu: l.bu, marca: l.marca, rede: l.rede, crescTxt: this._sgn(l.cresc),
+      cor: Math.abs(l.cresc) >= 1000 ? '#B42318' : '#B54708'
+    }));
+    const outliersNota = foraFaixa.length === 0
+      ? 'Nenhum cruzamento acima de ' + limite + '% nesta base.'
+      : foraFaixa.length + ' de ' + cruz.length + ' cruzamentos acima de ' + limite + '%' + (foraFaixa.length > 8 ? ' — os 8 maiores acima.' : '.');
+
+    // --- revisão de projeção (inicial → atual)
+    const totIni = linhas.find(l => l.marca === 'TOTAL' && l.rede === 'TOTAL' && l.bu === 'Total s/ Cobertura');
+    let revisaoTexto = 'Projeção inicial não informada nesta base — a comparação com o congelado do ciclo fica indisponível.';
+    let revisaoDelta = null;
+    if (totIni && totIni.projIni != null && totIni.proj != null) {
+      revisaoDelta = +(totIni.proj - totIni.projIni).toFixed(1);
+      revisaoTexto = 'A projeção do mês foi de ' + this._mi(totIni.projIni) + ' para ' + this._mi(totIni.proj) +
+        ' desde o início do ciclo, uma revisão de ' + (revisaoDelta > 0 ? '+' : '') + this._mi(revisaoDelta) +
+        ' (' + this._sgn(totIni.proj / totIni.projIni * 100 - 100) + ').';
+    }
+
+    // --- checagens estruturais
+    const ok = { rotulo: 'aprovado', bg: '#ECFDF3', cor: '#0F7B4A' };
+    const at = { rotulo: 'atenção', bg: '#FFFAEB', cor: '#B54708' };
+    const cr = { rotulo: 'reprovado', bg: '#FEF3F2', cor: '#B42318' };
+    const mk = (nome, valor, st) => Object.assign({ nome: nome, valor: valor }, st);
+
+    const busComVenda = BUS.filter(b => linhas.some(l => l.bu === b && l.rede === 'TOTAL' && l.marca === 'TOTAL' && l.real));
+    const semAA = prods.filter(p => !p.realAA).length;
+    const canais = ['VD', 'VI'].filter(c => linhas.some(l => l.rede === c && l.real != null));
+    const somaReal = linhas.filter(l => BUS.indexOf(l.bu) >= 0 && l.marca === 'TOTAL' && l.rede === 'TOTAL').reduce((s, l) => s + (l.real || 0), 0);
+    const totLinha = linhas.find(l => l.bu === 'Total s/ Cobertura');
+    const difTotal = totLinha ? +(somaReal - totLinha.real).toFixed(1) : null;
+    const nulos = F.reduce((s, r) => s + r.filter(v => v === null).length, 0);
+    const checagens = [
+      mk('Referência e data de corte preenchidas', (M.referencia || '—') + ' · ' + (M.dataCorte || '—'), M.referencia && M.dataCorte ? ok : cr),
+      mk('BUs comerciais com realizado no mês', busComVenda.join(' · ') || 'nenhuma', busComVenda.length === 4 ? ok : cr),
+      mk('Soma das BUs reconcilia com o Total s/ Cobertura', difTotal == null ? 'sem linha total' : 'diferença de ' + this._mi(difTotal), difTotal != null && Math.abs(difTotal) <= 0.5 ? ok : at),
+      mk('Canais VD e VI presentes', canais.join(' · ') || 'ausentes', canais.length === 2 ? ok : cr),
+      mk('Marcas sem realizado do ano anterior', semAA + ' de ' + prods.length, semAA === 0 ? ok : at),
+      mk('Clientes com projeção e AA', clientesRaw.length + ' redes', clientesRaw.length >= 5 ? ok : at),
+      mk('Cruzamentos produto × cliente fora de faixa', foraFaixa.length + ' acima de ' + limite + '%', foraFaixa.length === 0 ? ok : at),
+      mk('Células não informadas na base', nulos + ' campos vazios', nulos === 0 ? ok : { rotulo: 'leitura', bg: '#EDF6FC', cor: '#0062AA' })
+    ];
+
+    // --- alertas
+    const alertas = [];
+    const push = (nivel, titulo, texto) => {
+      const cores = { 'Crítico': ['#B42318', '#FEF3F2'], 'Atenção': ['#B54708', '#FFFAEB'], 'Leitura': ['#0062AA', '#EDF6FC'] };
+      alertas.push({ nivel: nivel, titulo: titulo, texto: texto, cor: cores[nivel][0], bg: cores[nivel][1] });
+    };
+
+    checagens.filter(c => c.rotulo === 'reprovado').forEach(c =>
+      push('Crítico', c.nome, 'Checagem estrutural reprovada (' + c.valor + '). O envio fica bloqueado até a correção na origem.'));
+
+    if (foraFaixa.length) {
+      const pior = foraFaixa[0];
+      push(foraFaixa.some(l => Math.abs(l.cresc) >= 1000) ? 'Crítico' : 'Atenção',
+        'Variação implausível em ' + pior.marca + ' / ' + pior.rede,
+        pior.marca + ' aparece com ' + this._sgn(pior.cresc) + ' em ' + pior.rede + '. Ao todo ' + foraFaixa.length +
+        ' cruzamentos passam de ' + limite + '%. Confirmar se é entrada de item novo, correção de cadastro ou base incompleta do ano anterior antes de publicar.');
+    }
+
+    const grandesQuedas = ord.filter(p => p.impacto <= -impMin).slice(-3).reverse();
+    if (grandesQuedas.length) {
+      push('Atenção', 'Marcas puxando a projeção para baixo',
+        grandesQuedas.map(p => p.marca + ' (' + p.bu + ', ' + this._mi(p.impacto) + ', ' + this._sgn(p.cresc) + ')').join(' · ') +
+        '. Somadas, tiram ' + this._mi(grandesQuedas.reduce((s, p) => s + p.impacto, 0)) + ' da comparação com o ano anterior.');
+    }
+
+    if (clientesQueda.length) {
+      push('Atenção', 'Redes em queda na projeção',
+        clientesQueda.slice(0, 3).map(c => c.rede + ' (' + this._mi(c.impacto) + ', ' + this._sgn(c.projVsAA) + ')').join(' · ') +
+        '. Vale checar se a queda é de ritmo ou de cobertura de loja.');
+    }
+
+    const topAlta = ord.filter(p => p.impacto > 0).slice(0, 3);
+    if (topAlta.length) {
+      push('Leitura', 'Concentração do crescimento',
+        topAlta.map(p => p.marca + ' (' + this._mi(p.impacto) + ')').join(' · ') +
+        ' respondem por ' + this._mi(topAlta.reduce((s, p) => s + p.impacto, 0)) + ' do ganho projetado. Se uma delas não se confirmar, o mês muda de patamar.');
+    }
+
+    if (revisaoDelta != null && Math.abs(revisaoDelta) >= impMin) {
+      push(revisaoDelta < 0 ? 'Atenção' : 'Leitura', 'Projeção revisada no ciclo', revisaoTexto);
+    }
+
+    const semAAList = prods.filter(p => !p.realAA);
+    if (semAAList.length) {
+      push('Atenção', 'Marcas sem base de comparação',
+        semAAList.map(p => p.marca).join(' · ') + ' não têm realizado do ano anterior, então aparecem com crescimento de 100%. Conferir a grafia nos dois arquivos antes do envio.');
+    }
+
+    if (!alertas.length) push('Leitura', 'Base sem pontos de atenção', 'Nenhuma variação fora de faixa e nenhuma checagem reprovada nesta leitura.');
+
+    const nCriticos = alertas.filter(a => a.nivel === 'Crítico').length;
+    const nAtencao = alertas.filter(a => a.nivel === 'Atenção').length;
+    const nInfo = alertas.filter(a => a.nivel === 'Leitura').length;
+
+    const veredito = nCriticos ? 'Base reprovada — corrigir antes de publicar'
+      : nAtencao ? 'Base aprovada com ressalvas' : 'Base aprovada';
+    const vereditoNota = nCriticos
+      ? 'Há ' + nCriticos + (nCriticos === 1 ? ' item crítico' : ' itens críticos') + ' que bloqueiam o envio.'
+      : nAtencao ? 'Os pontos de atenção abaixo acompanham a apresentação e o e-mail do dia.'
+      : 'Estrutura, produtos e clientes dentro das faixas esperadas.';
+
+    const texto = 'Pontos de atenção — ' + (M.referencia || '') + ' (corte ' + (M.dataCorte || '') + ')\n\n' +
+      alertas.map(a => '[' + a.nivel + '] ' + a.titulo + '\n' + a.texto).join('\n\n');
+
+    return {
+      referencia: M.referencia || '—', dataCorte: M.dataCorte || '—', totalLinhas: F.length,
+      veredito: veredito, vereditoNota: vereditoNota,
+      nCriticos: nCriticos, nAtencao: nAtencao, nInfo: nInfo,
+      checagens: checagens, produtosAlta: produtosAlta, produtosQueda: produtosQueda,
+      clientes: clientes, outliers: outliers, outliersNota: outliersNota,
+      revisaoTexto: revisaoTexto, alertas: alertas,
+      copiaStatus: this.state.copiaStatus,
+      copiar: () => {
+        const done = () => {
+          this.setState({ copiaStatus: 'Copiado.' });
+          setTimeout(() => this.setState({ copiaStatus: '' }), 2500);
+        };
+        if (navigator.clipboard) navigator.clipboard.writeText(texto).then(done, () => this.setState({ copiaStatus: 'Não foi possível copiar.' }));
+        else done();
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

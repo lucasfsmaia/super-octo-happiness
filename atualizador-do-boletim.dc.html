@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+  <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="email-logo.js"></script>
+  <script src="base-boletim.js?v=20260902c"></script>
+</helmet>
+<div style="font-family:'Asap',sans-serif; background:#EDF6FC; min-height:100vh; color:#434445; overflow-x:hidden;">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0062AA"></rect><g transform="translate(34,28)" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M16 0v30"></path><path d="M4 18l12 12 12-12"></path><rect x="0" y="38" width="32" height="6" rx="3" fill="#00BFDF" stroke="none"></rect></g></svg></template><div style="max-width:940px; margin:0 auto; padding:clamp(20px,4vw,40px) clamp(12px,3.2vw,32px) 80px;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; border-bottom:3px solid #0062AA; padding-bottom:16px;">
+      <div>
+        <div style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#00BFDF; font-weight:700;">Boletim Sell Out · Hypera Pharma</div>
+        <h1 style="font-size:clamp(22px,5.4vw,30px); font-weight:700; color:#292A2B; margin:4px 0 0;">Produção do Boletim</h1>
+      </div>
+      <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:34px;">
+    </div>
+
+    <p style="font-size:16px; line-height:1.55; margin:18px 0 22px; max-width:760px;">Quatro etapas: carregar a base do dia, validar a base e revisar os pontos de atenção, montar o resumo do Teams e disparar os e-mails. Nenhum percentual é digitado — tudo sai da base. Colunas e regras de cálculo estão em <a href="formato-da-base.dc.html" style="font-weight:600;">Formato da Base</a>.</p>
+
+    <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:26px;"></div>
+
+    <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
+      <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
+      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Tabela grande pode vir quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) — elas são unidas na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito.</div>
+      <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
+        <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivos<input id="inpFile" type="file" accept=".csv,.txt,.xlsx,.xls" multiple="multiple" style="display:none;"></label>
+        <button id="btnModel" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Baixar modelo (CSV)</button>
+      </div>
+      <div id="impInfo" style="font-size:14px; margin-top:16px; color:#5D5F61;"></div>
+    </div>
+
+    <div id="secCab" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
+      <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:16px;">Cabeçalho do boletim</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px;">
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Mês de referência<input id="inpRef" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Data de corte<input id="inpCorte" placeholder="15/08/26" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis realizados<input id="inpDias" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis MTD ano anterior<input id="inpDiasAA" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+      </div>
+      <details style="margin-top:18px; border-top:1px solid #EFEFEF; padding-top:14px;">
+        <summary style="font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;">Links do e-mail</summary>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin-top:14px;">
+          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">HUB (Power BI)<input id="inpHub" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Relatórios executivos<input id="inpExec" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+          <label style="font-size:14px; font-weight:600; color:#5D5F61;">Apresentação<input id="inpDeck" placeholder="boletim-sell-out.dc.html" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+          <label style="font-size:14px; font-weight:600; color:#5D5F61;">PDF<input id="inpPdf" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        </div>
+      </details>
+    </div>
+
+    
+
+    
+
+    <div id="secResumo" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
+        <div style="font-size:18px; font-weight:700; color:#292A2B;">Resumo para o Teams</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button id="btnGerarResumo" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Gerar de novo</button>
+          <button id="btnCopiarResumo" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Copiar resumo completo</button>
+        </div>
+      </div>
+      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 14px;">Mesmo texto de validação que vai no grupo do Teams. Superávit e gap saem da base (projetado − orçamento); os faltantes e a prévia são digitados aqui.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;">
+        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Liberação<input id="inpLib" placeholder="04/09" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Prévia<select id="inpPrevia" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px; background:#fff;"><option value=""> </option><option>1ª Prévia</option><option>2ª Prévia</option><option>3ª Prévia</option><option>Fechamento</option></select></label>
+        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Faltantes (%)<input id="inpFaltPct" placeholder="0,8" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Faltantes (R$ mi)<input id="inpFaltVal" placeholder="4,7" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Projeção média (%)<input id="inpProjMedia" placeholder="7,3" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+      </div>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; margin:14px 0 4px;">
+        
+      </div>
+      <textarea id="inpResumo" rows="16" style="display:block; width:100%; box-sizing:border-box; margin-top:10px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:13px; line-height:1.6; padding:14px; border:1.5px solid #EFEFEF; border-radius:8px; resize:vertical; white-space:pre;"></textarea>
+      <div id="resumoInfo" style="font-size:13.5px; color:#5D5F61; margin-top:10px;"></div>
+
+      <div style="border-top:1px solid #EFEFEF; margin-top:22px; padding-top:18px;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+          <div style="font-size:16px; font-weight:700; color:#292A2B;">Resumo montado</div>
+          <a href="Exemplo Resumo Teams.dc.html" style="font-size:14px; font-weight:600; color:#0062AA;">Ver Exemplo Resumo Teams</a>
+        </div>
+        <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:6px 0 16px;">É isto que o botão <b>Copiar resumo completo</b> leva para o Teams: cada parágrafo seguido do seu quadro. Os marcadores <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[HIGHLIGHTS]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[BU]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[CANAIS]]</code> e <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[RITMO]]</code> no texto acima dizem onde cada quadro entra — mova ou apague à vontade. O comparativo aparece a partir da segunda planilha carregada.</p>
+        <div id="resumoDoc" style="overflow-x:auto; background:#F7FBFE; border:1px solid #EFEFEF; border-radius:8px; padding:18px;"></div>
+      </div>
+    </div>
+
+    
+
+    <div id="secAlertas" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
+        <div style="font-size:18px; font-weight:700; color:#292A2B;">Validação da base e pontos de atenção</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <a href="validacao-da-base.dc.html" style="font-size:14px; font-weight:600; color:#0062AA;">Ver validação completa</a>
+          <button id="btnCopiarAlertas" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Copiar pontos de atenção</button>
+        </div>
+      </div>
+      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 16px;">Checagens estruturais e, na sequência, as principais variações por produto e por cliente lidas da base carregada. Esta etapa é obrigatória: o envio e o arquivamento só liberam depois que os pontos forem revisados.</p>
+      <div id="valPanel" style="border:1px solid #E3EBF2; background:#F7FBFE; border-radius:10px; padding:16px 18px; margin-bottom:20px;"></div>
+      <div id="alertaPanel"></div>
+      <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer; margin-top:18px;"><input id="chkAlertas" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pontos de atenção revisados</label>
+    </div>
+
+    <div id="secEnvio" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
+        <div style="font-size:18px; font-weight:700; color:#292A2B;">Envio dos e-mails</div>
+        <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;"><input id="chkPronto" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pronto para envio</label>
+      </div>
+      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 18px;"><b>Pronto para envio</b> é a trava que o fluxo automático lê antes de disparar — só libera depois que as considerações do dia forem validadas. Saem dois e-mails do mesmo fechamento: o <b>comercial</b> (orçamento) e o de <b>Gestão Orçamentária</b> (orçamento + forecast do ciclo). Para enviar à mão, use os botões <b>Copiar</b> e cole no Outlook.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px;">
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Para<input id="inpPara" placeholder="lista@hypera.com.br" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Cc<input id="inpCc" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Para · Gestão Orçamentária <span style="font-weight:400;">(com Forecast)</span><input id="inpPara2" placeholder="controladoria@hypera.com.br" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Assunto<input id="inpAssunto" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:24px;">
+        <button id="btnPrev" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 22px; cursor:pointer;">Pré-visualizar</button>
+        <button id="btnArquivar" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:11px 22px; cursor:pointer;">Arquivar este envio</button>
+        <button id="btnCopiar2" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0a7d34; background:#fff; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Copiar Gestão Orçamentária</button>
+        <button id="btnCopiar" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Copiar e-mail comercial</button>
+        <span id="envInfo" style="font-size:14px; color:#5D5F61; align-self:center;"></span>
+      </div>
+    </div>
+
+    <div id="prevBox" style="display:none; background:#fff; border:1px solid #EFEFEF; border-radius:12px; overflow:hidden; margin-top:8px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 16px; border-bottom:1px solid #EFEFEF; flex-wrap:wrap;">
+        <div style="display:flex; align-items:baseline; gap:12px;">
+          <span style="font-size:15px; font-weight:700; color:#292A2B;">Pré-visualização do e-mail</span>
+          <span id="prevMeta" style="font-size:13px; color:#5D5F61;"></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button id="prevG1" type="button" style="font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:800px; padding:7px 16px; cursor:pointer;">Comercial</button>
+          <button id="prevG2" type="button" style="font-family:inherit; font-size:13px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #A9D0EE; border-radius:800px; padding:7px 16px; cursor:pointer; margin-right:10px;">Gest. Orçamentária</button>
+          <button id="prevDesk" type="button" data-w="1000" style="font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:800px; padding:7px 16px; cursor:pointer;">Desktop</button>
+          <button id="prevMob" type="button" data-w="400" style="font-family:inherit; font-size:13px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #A9D0EE; border-radius:800px; padding:7px 16px; cursor:pointer;">Celular</button>
+          <button id="prevFechar" type="button" style="font-family:inherit; font-size:13px; font-weight:600; color:#5D5F61; background:#fff; border:1.5px solid #EFEFEF; border-radius:800px; padding:7px 16px; cursor:pointer; margin-left:6px;">Fechar</button>
+        </div>
+      </div>
+      <div style="background:#E4EAEF; padding:20px; max-height:70vh; overflow:auto;">
+        <div id="prevWrap" style="width:100%; overflow:hidden; text-align:center;">
+          <iframe id="prevFrame" title="Pré-visualização do e-mail" scrolling="no" style="display:inline-block; width:1000px; height:600px; border:none; border-radius:6px; background:#fff; box-shadow:0 2px 14px rgba(7,72,120,.12); transform-origin:0 0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { this._wait(); }
+  _wait(n = 0) {
+    if (window.BASE_BOLETIM && document.getElementById('inpRef')) return this._init();
+    if (n > 120) return; setTimeout(() => this._wait(n + 1), 60);
+  }
+
+  /** Três etapas na mesma página: base · validação · envio. */
+  _pintarEtapas() {
+    const box = this.$('etapas');
+    if (!box) return;
+    const defs = [
+      [1, 'Base do dia', 'Arquivos e cabeçalho'],
+      [2, 'Validação da base', 'Checagens e alertas'],
+      [3, 'Resumo', 'Texto para o Teams'],
+      [4, 'Envio', 'E-mails e arquivamento']
+    ];
+    box.innerHTML = defs.map(d => {
+      const on = this._etapa === d[0];
+      return '<button type="button" data-etapa="' + d[0] + '" style="font-family:inherit; text-align:left; cursor:pointer; display:flex; align-items:center; gap:12px; '
+        + 'border:1.5px solid ' + (on ? '#0062AA' : '#DCE7F0') + '; background:' + (on ? '#0062AA' : '#fff') + '; border-radius:10px; padding:12px 16px;">'
+        + '<span style="flex:none; width:26px; height:26px; border-radius:800px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; '
+        + 'background:' + (on ? 'rgba(255,255,255,.22)' : '#EDF6FC') + '; color:' + (on ? '#fff' : '#0062AA') + ';">' + d[0] + '</span>'
+        + '<span><span style="display:block; font-size:15px; font-weight:700; color:' + (on ? '#fff' : '#292A2B') + ';">' + d[1] + '</span>'
+        + '<span style="display:block; font-size:12.5px; margin-top:1px; color:' + (on ? '#D6E9F7' : '#5D5F61') + ';">' + d[2] + '</span></span></button>';
+    }).join('');
+    box.querySelectorAll('button[data-etapa]').forEach(b => b.onclick = () => this._irEtapa(Number(b.dataset.etapa)));
+    const visiveis = { 1: ['dropZone', 'secCab'], 2: ['secAlertas'], 3: ['secResumo'], 4: ['secEnvio'] }[this._etapa] || [];
+    ['dropZone', 'secCab', 'secResumo', 'secAlertas', 'secEnvio'].forEach(id => {
+      const el = this.$(id);
+      if (el) el.style.display = visiveis.indexOf(id) >= 0 ? '' : 'none';
+    });
+    const pb = this.$('prevBox');
+    if (pb && this._etapa !== 4) pb.style.display = 'none';
+  }
+  _irEtapa(n) { this._etapa = n; this._pintarEtapas(); }
+
+  _init() {
+    const B = JSON.parse(JSON.stringify(window.BASE_BOLETIM));
+    this.base = B; this.cols = B.COLUNAS; this.fatos = B.FATOS.map(r => r.slice());
+    const $ = id => document.getElementById(id); this.$ = $;
+    const set = (id, v) => { const el = $(id); if (el) el.value = v; };
+    const chk = (id, v) => { const el = $(id); if (el) el.checked = v; };
+    const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+    this._etapa = 1; this._pintarEtapas();
+    set('inpRef', B.META.referencia || '');
+    set('inpCorte', B.META.dataCorte || '');
+    set('inpDias', B.META.diasUteis || '');
+    set('inpDiasAA', B.META.diasUteisAA || '');
+    set('inpHub', (B.META.links || {}).hub || '');
+    set('inpExec', (B.META.links || {}).executivos || '');
+    set('inpDeck', (B.META.links || {}).deck || '');
+    set('inpPdf', (B.META.links || {}).pdf || '');
+    const E = B.META.envio || {};
+    set('inpPara', E.para || '');
+    set('inpPara2', E.para2 || '');
+    set('inpCc', E.cc || '');
+    chk('chkPronto', !!E.pronto);
+    set('inpAssunto', E.assunto || this._assunto());
+    ['inpRef', 'inpCorte'].forEach(id => on(id, 'input', () => {
+      const a = $('inpAssunto');
+      if (a && !a.dataset.editado) a.value = this._assunto();
+    }));
+    on('inpAssunto', 'input', e => { e.target.dataset.editado = '1'; });
+    on('btnGerarCons', 'click', () => this._gerarCons(true));
+    on('chkCons', 'change', () => this._consEstado());
+    on('inpCons', 'input', () => { chk('chkCons', false); this._consEstado(); });
+    set('inpLib', new Date().toLocaleDateString('pt-BR').slice(0, 5));
+    // faltantes e projeção média: vêm da base quando existem, senão do último preenchimento
+    const FA = Object.assign({}, this._faltSalvo(), B.META.faltantes || {});
+    const nf = v => v == null || v === '' ? '' : String(v).replace('.', ',');
+    if (FA.pct != null) set('inpFaltPct', nf(FA.pct));
+    if (FA.val != null) set('inpFaltVal', nf(FA.val));
+    if (FA.media != null) set('inpProjMedia', nf(FA.media));
+    if (FA.aloc != null) chk('chkFaltAloc', !!FA.aloc);
+    on('btnGerarResumo', 'click', () => this._gerarResumo(true));
+    on('btnCopiarResumo', 'click', () => this._copiarResumo());
+    on('inpResumo', 'input', () => this._montarDoc());
+    ['inpLib', 'inpPrevia', 'inpFaltPct', 'inpFaltVal', 'inpProjMedia', 'chkFaltAloc']
+      .forEach(id => ['input', 'change'].forEach(ev => on(id, ev, () => { this._faltSalvar(); this._gerarResumo(); })));
+    on('btnCopiar', 'click', () => this._copiar(false));
+    on('btnCopiar2', 'click', () => this._copiar(true));
+    on('btnModel', 'click', () => this._modelo());
+    on('btnBase', 'click', () => this._dl('base-boletim.js', this._baseFile(), 'text/javascript'));
+    on('btnPrev', 'click', () => this._preview());
+    on('btnArquivar', 'click', () => this._arquivar());
+    on('prevG1', 'click', () => this._prevGrupo(false));
+    on('prevG2', 'click', () => this._prevGrupo(true));
+    on('prevDesk', 'click', () => this._prevLargura(1000));
+    on('prevMob', 'click', () => this._prevLargura(400));
+    on('prevFechar', 'click', () => { const b = $('prevBox'); if (b) b.style.display = 'none'; });
+    on('inpFile', 'change', e => { const fs = Array.from(e.target.files); if (fs.length) this._import(fs); });
+    const dz = $('dropZone');
+    if (dz) {
+      ['dragover', 'dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.background = '#EDF6FC'; }));
+      ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.background = '#fff'; }));
+      dz.addEventListener('drop', e => { e.preventDefault(); const fs = Array.from(e.dataTransfer.files); if (fs.length) this._import(fs); });
+    }
+    // cada etapa é independente: um bloco removido da tela não pode derrubar os demais
+    on('chkAlertas', 'change', () => this._consEstado());
+    on('btnCopiarAlertas', 'click', () => {
+      const txt = this._alertasTexto || '';
+      if (navigator.clipboard && txt) navigator.clipboard.writeText(txt);
+      const b = this.$('btnCopiarAlertas');
+      if (b) { const o = b.textContent; b.textContent = 'Copiado'; setTimeout(() => { b.textContent = o; }, 2000); }
+    });
+    [() => this._validar(), () => this._gerarAlertas(), () => this._gerarCons(), () => this._gerarResumo(), () => this._consEstado()]
+      .forEach(fn => { try { fn(); } catch (e) { console.warn('etapa do init falhou', e); } });
+  }
+
+  _v(id) { const el = this.$(id); return el ? el.value : ''; }
+  _ck(id) { const el = this.$(id); return !!(el && el.checked); }
+  _num(v) { if (v == null || v === '' || v === '-') return null; if (typeof v === 'number') return v; const n = parseFloat(String(v).replace(/\./g, '').replace(',', '.').replace('%', '')); return isFinite(n) ? n : null; }
+  _fmt(v, d) { return v == null ? '-' : v.toFixed(d == null ? 1 : d).replace('.', ','); }
+  _pct(v) { return v == null ? '-' : v.toFixed(1).replace('.', ',') + '%'; }
+  _cor(v) { return v == null ? '#8A8C8E' : (v < 0 ? '#B32B23' : '#17734A'); }
+  _row(bu, marca, rede) { const o = this._idx || this._reindex(); return o[bu + '|' + marca + '|' + rede] || null; }
+  _reindex() { const o = {}; this.fatos.forEach(f => { const r = {}; this.cols.forEach((c, i) => r[c] = f[i]); o[r.bu + '|' + r.marca + '|' + r.rede] = r; }); this._idx = o; return o; }
+  /** Projeção atual vs. forecast do ciclo. */
+  _vsFcst(r) { return (r && r.forecast) ? Math.round((r.proj / r.forecast - 1) * 1000) / 10 : null; }
+  _cres(r, campo) { if (!r) return null; const pub = { proj: 'pProj', projIni: 'pIni', orcAbs: 'pOrc' }[campo]; if (pub && r[pub] != null) return r[pub]; return (r.realAA && r[campo] != null) ? (r[campo] / r.realAA - 1) * 100 : null; }
+
+  /** dd/mm/aa|aaaa -> serial do Excel */
+  _serial(txt) {
+    const p = String(txt || '').split('/'); if (p.length < 3) return 0;
+    let y = Number(p[2]); if (y < 100) y += 2000;
+    return Math.round((Date.UTC(y, Number(p[1]) - 1, Number(p[0])) - Date.UTC(1899, 11, 30)) / 86400000);
+  }
+
+  /** serial do Excel -> Date (UTC) */
+  _dataDe(s) { return new Date(Date.UTC(1899, 11, 30) + s * 86400000); }
+
+  /**
+   * Preenche da própria base o que a aba Meta traria: data de corte, mês de referência e
+   * dias úteis (realizados e MTD do ano anterior). Só preenche o que veio vazio — valor
+   * digitado na Meta sempre ganha. Assim a aba Meta vira opcional.
+   */
+  _derivarMeta(M, vendas, vendasAA) {
+    const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const derivado = [];
+    const dias = vendas.map(v => v.data).filter(d => d > 0);
+    if (!dias.length) return derivado;
+    const corteSerial = this._serial(M.dataCorte) || Math.max.apply(null, dias);
+    const dc = this._dataDe(corteSerial);
+    const dd = n => String(n).padStart(2, '0');
+    if (!M.dataCorte) {
+      M.dataCorte = dd(dc.getUTCDate()) + '/' + dd(dc.getUTCMonth() + 1) + '/' + String(dc.getUTCFullYear()).slice(-2);
+      derivado.push('data de corte ' + M.dataCorte);
+    }
+    if (!M.referencia) {
+      M.referencia = MESES[dc.getUTCMonth()] + '/' + String(dc.getUTCFullYear()).slice(-2);
+      derivado.push('referência ' + M.referencia);
+    }
+    // dia útil = dia com movimento na base que não cai em sábado ou domingo
+    const uteis = lista => {
+      const vistos = {};
+      lista.forEach(v => {
+        if (!v.data) return;
+        const w = this._dataDe(v.data).getUTCDay();
+        if (w !== 0 && w !== 6) vistos[v.data] = 1;
+      });
+      return Object.keys(vistos).length;
+    };
+    if (!this._num(M.diasUteis)) {
+      const n = uteis(vendas.filter(v => v.data <= corteSerial));
+      if (n) { M.diasUteis = n; derivado.push(n + ' dias úteis'); }
+    }
+    if (!this._num(M.diasUteisAA) && vendasAA.length) {
+      const diaCorte = dc.getUTCDate();
+      const n = uteis(vendasAA.filter(v => v.data && this._dataDe(v.data).getUTCDate() <= diaCorte));
+      if (n) { M.diasUteisAA = n; derivado.push(n + ' dias úteis no ano anterior'); }
+    }
+    this._metaDerivada = derivado;
+    return derivado;
+  }
+
+  /** Lê uma aba transacional (DIA | BU | MARCA | SKU | CANAL | CLIENTE | valores). */
+  _lerTrans(X, ws, divisor) {
+    const g = X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+    if (!g.length) return [];
+    const head = g[0].map(c => String(c == null ? '' : c).trim().toUpperCase().replace(/\s+/g, '_'));
+    const col = (...alt) => { for (const a of alt) { const i = head.indexOf(a); if (i >= 0) return i; } return -1; };
+    const iData = col('DATA', 'DIA'), iBU = col('BU'), iMar = col('MARCA'), iSku = col('SKU'),
+      iCan = col('CANAL'), iCli = col('CLIENTE', 'REDE'), iReal = col('VALOR_REAL', 'REAL'),
+      iIni = col('VALOR_PROJETADO_INICIAL', 'PROJ_INICIAL', 'PROJETADO_INICIAL'),
+      iPro = col('VALOR_PROJETADO_ATUAL', 'PROJ_ATUAL', 'PROJETADO_ATUAL'),
+      iOrc = col('ORCAMENTO', 'ORÇAMENTO', 'ORC'),
+      iFcst = col('FORECAST', 'FCST', 'ORCAMENTO_REPROJETADO');
+    const v = (r, i) => { const x = i < 0 ? null : this._num(r[i]); return x == null ? 0 : x / divisor; };
+    const out = [];
+    g.slice(1).forEach(r => {
+      const bu = iBU < 0 ? '' : String(r[iBU] || '').trim().toUpperCase(); if (!bu) return;
+      out.push({
+        data: iData < 0 ? 0 : (typeof r[iData] === 'number' ? r[iData] : this._serial(r[iData])), bu,
+        marca: iMar < 0 ? 'NÃO INFORMADA' : String(r[iMar] || '').trim().toUpperCase(),
+        sku: iSku < 0 ? '' : String(r[iSku] || '').trim(),
+        canal: iCan < 0 ? 'VD' : String(r[iCan] || '').trim().toUpperCase(),
+        cliente: iCli < 0 ? 'OUTROS' : String(r[iCli] || '').trim().toUpperCase(),
+        real: v(r, iReal), projIni: v(r, iIni), proj: v(r, iPro), orc: v(r, iOrc), forecast: v(r, iFcst)
+      });
+    });
+    return out;
+  }
+
+  /**
+   * Projeção inicial e projeção atual em abas separadas (formato atual) ou numa aba
+   * "Projeções" única com as duas colunas (formato antigo). Devolve um plano só, casando
+   * as linhas por bu|marca|sku|canal|cliente.
+   */
+  _abasProjecao(X, wb, divisor) {
+    const cand = wb.SheetNames.filter(n => /proje/i.test(n) && !/resumo|m[ée]todo/i.test(n));
+    const nIni = cand.find(n => /inicial/i.test(n));
+    const nAtu = cand.find(n => /atual|vigente/i.test(n));
+    if (!nIni && !nAtu) {
+      const unica = cand[0];
+      return { nomes: unica ? [unica] : [], linhas: unica ? this._lerTrans(X, wb.Sheets[unica], divisor) : [] };
+    }
+    const chave = o => [o.bu, o.marca, o.sku, o.canal, o.cliente].join('|');
+    const mapa = {}, ordem = [];
+    const juntar = (nome, campo) => {
+      if (!nome) return;
+      this._lerTrans(X, wb.Sheets[nome], divisor).forEach(o => {
+        const k = chave(o);
+        if (!mapa[k]) { mapa[k] = Object.assign({}, o, { projIni: 0, proj: 0 }); ordem.push(k); }
+        // numa aba dedicada o valor pode vir na coluna específica ou na genérica
+        const v = o[campo] || o.proj || o.projIni || 0;
+        mapa[k][campo] = v;
+      });
+    };
+    juntar(nIni, 'projIni');
+    juntar(nAtu, 'proj');
+    return { nomes: [nIni, nAtu].filter(Boolean), linhas: ordem.map(k => mapa[k]) };
+  }
+
+  /** Aba Curva (venda por dia corrido) -> acumulados do gráfico de ritmo do mês. */
+  _lerCurva(X, wb) {
+    const nomeCurva = wb.SheetNames.find(n => /curva|ritmo/i.test(n));
+    if (nomeCurva) {
+      const bruto = X.utils.sheet_to_json(wb.Sheets[nomeCurva], { header: 1, raw: true, defval: '' });
+      const cab = (bruto[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
+      const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
+      const iD = Math.max(0, ci('DIA', 'DATA')), iBU = ci('BU'), iCanal = ci('CANAL'),
+        iAA = ci('REALAA', 'REAL AA', 'AA'), iR = ci('REAL', 'REALIZADO'), iP = ci('PROJ', 'PROJEÇÃO', 'PROJECAO');
+      const cAA = iAA < 0 ? 1 : iAA, cR = iR < 0 ? 2 : iR, cP = iP < 0 ? 3 : iP;
+      const cr = bruto.slice(1);
+      const linhas = cr.map(r => ({
+        d: this._num(r[iD]), bu: iBU < 0 ? null : String(r[iBU] || '').trim().toUpperCase(),
+        canal: iCanal < 0 ? null : String(r[iCanal] || '').trim().toUpperCase(),
+        aa: this._num(r[cAA]), real: this._num(r[cR]), proj: this._num(r[cP])
+      })).filter(x => x.d);
+      // com coluna CANAL, guarda também a curva de cada BU por canal
+      this._curvaBUCanal = null;
+      if (iBU >= 0 && iCanal >= 0 && linhas.some(x => x.bu && x.canal)) {
+        const dd0 = [...new Set(linhas.map(x => x.d))].sort((a, b) => a - b);
+        const acum0 = arr => { let t = 0; return arr.map(v => Math.round((t += v) * 10) / 10); };
+        const porBC = {};
+        [...new Set(linhas.filter(x => x.bu && x.canal).map(x => x.bu + '|' + x.canal))].forEach(k => {
+          const [bu, canal] = k.split('|');
+          const m = {}; linhas.filter(x => x.bu === bu && x.canal === canal).forEach(x => m[x.d] = x);
+          const serie = dd0.map(d => m[d] || {});
+          const comR = serie.filter(x => x.real != null);
+          const iAt = comR.length ? serie.lastIndexOf(comR[comR.length - 1]) : -1;
+          porBC[bu] = porBC[bu] || {};
+          porBC[bu][canal] = {
+            diasMes: dd0.length, diaAtual: iAt + 1,
+            aa: acum0(serie.map(x => x.aa || 0)),
+            real: acum0(serie.slice(0, iAt + 1).map(x => x.real || 0)),
+            proj: (() => { let t = 0; serie.slice(0, iAt + 1).forEach(x => t += x.real || 0);
+              return serie.slice(iAt + 1).map(x => Math.round((t += (x.proj || 0)) * 10) / 10); })()
+          };
+        });
+        this._curvaBUCanal = porBC;
+        // consolida os canais numa linha por BU e dia
+        const chave = {}, ordem = [];
+        linhas.forEach(x => {
+          const k = x.bu + '|' + x.d;
+          if (!chave[k]) { chave[k] = { d: x.d, bu: x.bu, canal: null, aa: null, real: null, proj: null }; ordem.push(chave[k]); }
+          ['aa', 'real', 'proj'].forEach(campo => {
+            if (x[campo] != null) chave[k][campo] = Math.round(((chave[k][campo] || 0) + x[campo]) * 100) / 100;
+          });
+        });
+        linhas.length = 0; ordem.forEach(o => linhas.push(o));
+      }
+      const acum = arr => { let t = 0; return arr.map(v => Math.round((t += v) * 10) / 10); };
+      // aba com coluna BU: guarda uma curva por BU e consolida o total
+      if (iBU >= 0 && linhas.some(x => x.bu)) {
+        const bus = [...new Set(linhas.filter(x => x.bu).map(x => x.bu))];
+        const dd = [...new Set(linhas.map(x => x.d))].sort((a, b) => a - b);
+        const porBU = {};
+        bus.forEach(b => {
+          const m = {}; linhas.filter(x => x.bu === b).forEach(x => m[x.d] = x);
+          const serie = dd.map(d => m[d] || {});
+          const comReal = serie.filter(x => x.real != null);
+          const diaAtual = comReal.length ? dd[serie.indexOf(comReal[comReal.length - 1])] : 0;
+          const idxAtual = dd.indexOf(diaAtual);
+          porBU[b] = {
+            diasMes: dd.length, diaAtual,
+            aa: acum(serie.map(x => x.aa || 0)),
+            real: acum(serie.slice(0, idxAtual + 1).map(x => x.real || 0)),
+            proj: (() => { let t = 0; serie.slice(0, idxAtual + 1).forEach(x => t += x.real || 0);
+              return serie.slice(idxAtual + 1).map(x => Math.round((t += (x.proj || 0)) * 10) / 10); })()
+          };
+        });
+        this._curvaBU = porBU;
+        const tem = campo => dd.map(d => linhas.some(x => x.d === d && x[campo] != null));
+        const soma = campo => dd.map(d => linhas.filter(x => x.d === d).reduce((a, x) => a + (x[campo] || 0), 0));
+        const sAA = soma('aa'), sR = soma('real'), sP = soma('proj'), tR = tem('real'), tP = tem('proj');
+        linhas.length = 0;
+        dd.forEach((d, i) => linhas.push({ d, bu: null, aa: sAA[i], real: tR[i] ? sR[i] : null, proj: tP[i] ? sP[i] : null }));
+      } else this._curvaBU = null;
+      const dias = linhas.sort((a, b) => a.d - b.d);
+      const comReal = dias.filter(x => x.real != null);
+      if (dias.length && comReal.length) {
+        const diaAtual = comReal[comReal.length - 1].d;
+        const p = (this._v('inpCorte') || '').split('/');
+        this._curva = {
+          ano: p[2] ? (String(p[2]).length === 2 ? 2000 + Number(p[2]) : Number(p[2])) : new Date().getFullYear(),
+          mes: p[1] ? Number(p[1]) : new Date().getMonth() + 1,
+          diasMes: dias.length,
+          diaAtual,
+          real: acum(dias.filter(x => x.d <= diaAtual).map(x => x.real || 0)),
+          proj: (() => { let t = 0; dias.filter(x => x.d <= diaAtual).forEach(x => t += x.real || 0);
+            return dias.filter(x => x.d > diaAtual).map(x => Math.round((t += (x.proj || 0)) * 10) / 10); })(),
+          aa: acum(dias.map(x => x.aa || 0))
+        };
+      }
+    }
+  }
+
+  /** Abas de apoio: histórico mensal, método da projeção e de/para de cliente. */
+  _lerExtras(X, wb) {
+    const ler = (re, mapear) => {
+      const nome = wb.SheetNames.find(n => re.test(n));
+      if (!nome) return null;
+      const br = X.utils.sheet_to_json(wb.Sheets[nome], { header: 1, raw: true, defval: '' });
+      const cab = (br[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
+      const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
+      const out = br.slice(1).map(r => mapear(r, ci)).filter(Boolean);
+      return out.length ? out : null;
+    };
+    this._historicoMensal = ler(/hist[oó]rico\s*mensal|mensal/i, (r, ci) => {
+      const ano = this._num(r[ci('ANO')]), mes = this._num(r[ci('MES', 'MÊS')]), v = this._num(r[ci('VALOR', 'PX')]);
+      if (!ano || !mes || v == null) return null;
+      return [ano, mes, String(r[ci('BU')] || '').trim().toUpperCase() || 'TOTAL',
+        String(r[ci('CANAL')] || '').trim().toUpperCase() || 'TOTAL', Math.round(v / (this._divisor || 1e6) * 10) / 10];
+    });
+    this._resumoProj = ler(/resumo\s*proje/i, (r, ci) => {
+      const bu = String(r[ci('BU')] || '').trim().toUpperCase();
+      if (!bu) return null;
+      return { bu, metodo: String(r[ci('METODO', 'MÉTODO')] || '').trim(), dados: String(r[ci('DADOS')] || '').trim(),
+        ajuste: String(r[ci('AJUSTE')] || '').trim(), reuniao: String(r[ci('REUNIAO', 'REUNIÃO')] || '').trim() };
+    });
+    this._clientes = ler(/^clientes?$/i, (r, ci) => {
+      const cli = String(r[ci('CLIENTE')] || '').trim().toUpperCase();
+      if (!cli) return null;
+      return { cliente: cli, rede: String(r[ci('REDE')] || '').trim().toUpperCase(),
+        grupo: String(r[ci('GRUPO')] || '').trim(), uf: String(r[ci('UF')] || '').trim().toUpperCase() };
+    });
+  }
+
+  /** Base transacional -> grade bu × marca × rede que o e-mail e a apresentação consomem. */
+  _agregar(vendas, vendasAA, plano, M, topN, cota) {
+    const corteAA = this._serial(M.dataCorteAA);
+    // SG chega na planilha quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas
+    const SUB_SG = ['SG - GENÉRICOS', 'SG - GENERICOS', 'SG - SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'VIT NEO QUIMICA'];
+    const canonSub = b => b === 'SG - GENERICOS' ? 'SG - GENÉRICOS' : (b === 'VIT NEO QUIMICA' ? 'VIT NEO QUÍMICA' : b);
+    const norm = arr => arr.map(v => Object.assign({}, v, { sub: canonSub(v.bu), bu: SUB_SG.indexOf(v.bu) >= 0 ? 'SG' : v.bu }));
+    vendas = norm(vendas); vendasAA = norm(vendasAA); plano = norm(plano || []); cota = norm(cota || []);
+    const z = () => ({ realAA: 0, realAAmtd: 0, real: 0, proj: 0, projIni: 0, orc: 0, forecast: 0, projVD: 0, projVI: 0 });
+    const mapa = {}, pega = k => (mapa[k] = mapa[k] || z());
+    const chaves = v => ['T', 'BU|' + v.bu, 'SUB|' + v.sub, 'MARCA|' + v.bu + '|' + v.marca, 'CANAL|' + v.canal,
+      'CANAL|' + v.bu + '|' + v.canal, 'CLI|' + v.cliente, 'CLI|' + v.bu + '|' + v.cliente,
+      // grãos de abertura das tabelas: marca × cliente e marca × canal
+      'MC|' + v.bu + '|' + v.marca + '|' + v.cliente, 'MC|' + v.bu + '|' + v.marca + '|' + v.canal];
+    vendas.forEach(v => chaves(v).forEach(k => { pega(k).real += v.real; }));
+    plano.forEach(v => chaves(v).forEach(k => {
+      const a = pega(k); a.proj += v.proj; a.projIni += v.projIni; if (!cota.length) a.orc += v.orc;
+      if (v.canal.indexOf('VD') === 0) a.projVD += v.proj; else a.projVI += v.proj;
+    }));
+    cota.forEach(v => chaves(v).forEach(k => { const a = pega(k); a.orc += v.orc; a.forecast += v.forecast || 0; }));
+    vendasAA.forEach(v => chaves(v).forEach(k => {
+      const a = pega(k); a.realAA += v.real; if (!corteAA || v.data <= corteAA) a.realAAmtd += v.real;
+    }));
+    const linhas = vendas.concat(plano);
+    const BUS = ['CH', 'PP', 'SC', 'SG'].filter(b => linhas.some(v => v.bu === b));
+    const temCob = linhas.some(v => v.bu === 'COBERTURA');
+    const soma = (alvo, f) => { if (f) Object.keys(alvo).forEach(k => alvo[k] += f[k]); return alvo; };
+    const totSC = z(); BUS.forEach(b => soma(totSC, mapa['BU|' + b]));
+    const totG = soma(z(), totSC); if (temCob) soma(totG, mapa['BU|COBERTURA']);
+    const r1 = 10, arred = v => v == null ? null : Math.round(v * 10) / 10;
+    const varia = (v, b) => b > 0 ? Math.round((v / b - 1) * 1000) / 10 : null;
+    const shr = (p, t) => t > 0 ? Math.round((p / t) * 1000) / 10 : null;
+    const linha = (bu, marca, rede, a) => {
+      const r = new Array(this.cols.length).fill(null);
+      const set = (c, v) => r[this.cols.indexOf(c)] = v;
+      set('bu', bu); set('marca', marca); set('rede', rede);
+      set('realAA', arred(a.realAA)); set('real', arred(a.real)); set('proj', arred(a.proj));
+      set('projIni', a.projIni ? arred(a.projIni) : null); set('orcAbs', a.orc ? arred(a.orc) : null);
+      set('forecast', a.forecast ? arred(a.forecast) : null);
+      set('pProj', varia(a.proj, a.realAA)); set('pIni', a.projIni ? varia(a.projIni, a.realAA) : null);
+      set('pOrc', a.orc ? varia(a.orc, a.realAA) : null);
+      set('cresc', varia(a.real, a.realAAmtd));
+      set('vd', shr(a.projVD, a.proj)); set('vi', shr(a.projVI, a.proj));
+      return r;
+    };
+    const fatos = [];
+    BUS.forEach(b => fatos.push(linha(b, 'TOTAL', 'TOTAL', mapa['BU|' + b])));
+    if (temCob) fatos.push(linha('COBERTURA', 'TOTAL', 'TOTAL', mapa['BU|COBERTURA']));
+    const somaSub = rots => { const s = z(); rots.forEach(r => soma(s, mapa['SUB|' + r])); return s; };
+    [['SG - GENÉRICOS', ['SG - GENÉRICOS']],
+      ['SG - SIMILARES', ['SG - SMART (EX-VIT)', 'VIT NEO QUÍMICA']],
+      ['SMART (EX-VIT)', ['SG - SMART (EX-VIT)']],
+      ['VIT NEO QUÍMICA', ['VIT NEO QUÍMICA']]].forEach(([rot, rots]) => {
+      const s = somaSub(rots);
+      if (s.realAA || s.proj || s.real) fatos.push(linha(rot, 'TOTAL', 'TOTAL', s));
+    });
+    fatos.push(linha('Total', 'TOTAL', 'TOTAL', totG));
+    fatos.push(linha('Total s/ Cobertura', 'TOTAL', 'TOTAL', totSC));
+    fatos.push(linha('TOTAL', 'TOTAL', 'TOTAL', totSC));
+    ['VD', 'VI'].forEach(c => {
+      if (mapa['CANAL|' + c]) fatos.push(linha('TOTAL', 'TOTAL', c, mapa['CANAL|' + c]));
+      BUS.forEach(b => { if (mapa['CANAL|' + b + '|' + c]) fatos.push(linha(b, 'TOTAL', c, mapa['CANAL|' + b + '|' + c])); });
+    });
+    const clientes = [...new Set(linhas.map(v => v.cliente))]
+      .sort((a, b) => (mapa['CLI|' + b].proj) - (mapa['CLI|' + a].proj));
+    clientes.forEach(c => {
+      fatos.push(linha('TOTAL', 'TOTAL', c, mapa['CLI|' + c]));
+      BUS.forEach(b => { if (mapa['CLI|' + b + '|' + c]) fatos.push(linha(b, 'TOTAL', c, mapa['CLI|' + b + '|' + c])); });
+    });
+    const destaques = [];
+    BUS.forEach(bu => {
+      const nomes = [...new Set(linhas.filter(v => v.bu === bu).map(v => v.marca))];
+      const lista = nomes.map(n => ({ n, a: mapa['MARCA|' + bu + '|' + n] })).sort((x, y) => y.a.proj - x.a.proj);
+      // marca no total e aberta por cliente e por canal — grão das tabelas do painel
+      const abre = (rotulo, nome) => {
+        clientes.forEach(c => { const a = mapa['MC|' + bu + '|' + nome + '|' + c]; if (a) fatos.push(linha(bu, rotulo, c, a)); });
+        ['VD', 'VI'].forEach(c => { const a = mapa['MC|' + bu + '|' + nome + '|' + c]; if (a) fatos.push(linha(bu, rotulo, c, a)); });
+      };
+      lista.slice(0, topN).forEach(m => { fatos.push(linha(bu, m.n, 'TOTAL', m.a)); abre(m.n, m.n); });
+      const cauda = lista.slice(topN);
+      if (cauda.length) {
+        const d = z(); cauda.forEach(c => soma(d, c.a));
+        fatos.push(linha(bu, 'DEMAIS', 'TOTAL', d));
+        clientes.concat(['VD', 'VI']).forEach(c => {
+          const s = z(); let tem = false;
+          cauda.forEach(m => { const a = mapa['MC|' + bu + '|' + m.n + '|' + c]; if (a) { soma(s, a); tem = true; } });
+          if (tem) fatos.push(linha(bu, 'DEMAIS', c, s));
+        });
+      }
+      const min = this._num(M.destaqueMinimo) == null ? 2 : this._num(M.destaqueMinimo);
+      lista.forEach(m => { if (m.a.proj >= min && m.a.realAA > 0) destaques.push([m.n, varia(m.a.proj, m.a.realAA)]); });
+    });
+    destaques.sort((a, b) => b[1] - a[1]);
+    return {
+      fatos, destaques: destaques.slice(0, this._num(M.destaqueQtd) || 8),
+      mtdAA: { vd: null, vi: null, total: arred(totSC.realAAmtd) },
+      resumo: { marcas: [...new Set(linhas.map(v => v.bu + '|' + v.marca))].length, skus: [...new Set(linhas.map(v => v.sku))].length }
+    };
+  }
+
+  /**
+   * CSV -> matriz de texto. Leitura própria (e não pelo leitor de Excel) para que nada seja
+   * reinterpretado: data fica "04/08/2026" e não vira 8 de abril, e número com vírgula
+   * decimal chega inteiro em _num. Aceita ; ou , como separador e campos entre aspas.
+   */
+  _parseCSV(txt) {
+    const t = String(txt || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+    const prim = t.split('\n')[0] || '';
+    const sep = (prim.split(';').length > prim.split(',').length) ? ';' : ',';
+    const linhas = []; let campo = '', linha = [], aspas = false;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (aspas) {
+        if (c === '"') { if (t[i + 1] === '"') { campo += '"'; i++; } else aspas = false; }
+        else campo += c;
+      } else if (c === '"') aspas = true;
+      else if (c === sep) { linha.push(campo); campo = ''; }
+      else if (c === '\n') { linha.push(campo); linhas.push(linha); linha = []; campo = ''; }
+      else campo += c;
+    }
+    if (campo !== '' || linha.length) { linha.push(campo); linhas.push(linha); }
+    return linhas.filter(r => r.some(v => String(v).trim() !== '')).map(r => r.map(v => v.trim()));
+  }
+
+  /**
+   * Um CSV por tabela (vendas.csv, vendas-aa.csv, projecao-atual.csv…), vários de uma vez.
+   * Partes numeradas do mesmo nome (vendas-01, vendas-02) são emendadas numa tabela só.
+   * Monta a mesma estrutura de pasta de abas que o .xlsx produzia, então o resto do fluxo
+   * não muda.
+   */
+  _wbDeCSVs(X, arqs) {
+    const nomeTabela = n => n.replace(/\.[^.]+$/, '')
+      .replace(/[ _-]*(parte|part|p)?[ _-]*\d+$/i, '')
+      .replace(/[_-]+/g, ' ').trim() || 'vendas';
+    const ordenados = arqs.slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { numeric: true }));
+    return Promise.all(ordenados.map(a => a.text().then(t => ({ nome: nomeTabela(a.name), texto: t }))))
+      .then(lidos => {
+        const grupos = {}, ordem = [];
+        lidos.forEach(l => { if (!grupos[l.nome]) { grupos[l.nome] = []; ordem.push(l.nome); } grupos[l.nome].push(l.texto); });
+        const wb = { SheetNames: [], Sheets: {} };
+        ordem.forEach(nome => {
+          const linhas = [];
+          let cab = null;
+          grupos[nome].forEach(txt => {
+            const aoa = this._parseCSV(txt);
+            if (!aoa.length) return;
+            const assina = r => r.map(c => String(c == null ? '' : c).trim().toUpperCase()).join('|');
+            if (cab == null) { cab = assina(aoa[0]); linhas.push.apply(linhas, aoa); }
+            else linhas.push.apply(linhas, assina(aoa[0]) === cab ? aoa.slice(1) : aoa);
+          });
+          if (!linhas.length) return;
+          wb.SheetNames.push(nome);
+          wb.Sheets[nome] = X.utils.aoa_to_sheet(linhas);
+        });
+        return wb;
+      });
+  }
+
+  _import(entrada) {
+    const info = this.$('impInfo');
+    if (!window.XLSX) { info.style.color = '#B32B23'; info.textContent = 'Leitor da base não carregou.'; return; }
+    const X = window.XLSX;
+    const arqs = Array.isArray(entrada) ? entrada : [entrada];
+    const csvs = arqs.filter(a => /\.(csv|txt)$/i.test(a.name));
+    const rotulo = arqs.length === 1 ? arqs[0].name : arqs.length + ' arquivos';
+    const fonte = csvs.length
+      ? this._wbDeCSVs(X, csvs)
+      : arqs[0].arrayBuffer().then(ab => X.read(ab, { type: 'array' }));
+    fonte.then(wb => {
+      const f = { name: rotulo };
+      const nomeVendas = wb.SheetNames.find(n => /^vendas$|venda/i.test(n) && !/aa/i.test(n));
+      const cabTrans = nomeVendas
+        ? (X.utils.sheet_to_json(wb.Sheets[nomeVendas], { header: 1, raw: true, defval: '' })[0] || [])
+          .map(c => String(c).trim().toUpperCase()).join('|')
+        : '';
+      if (nomeVendas && /CANAL/.test(cabTrans) && /(DATA|DIA)/.test(cabTrans)) {
+        const nomeMetaT = wb.SheetNames.find(n => /meta|cabe/i.test(n));
+        const M = {};
+        if (nomeMetaT) X.utils.sheet_to_json(wb.Sheets[nomeMetaT], { header: 1, raw: true, defval: '' })
+          .forEach(r => { const k = String(r[0] || '').trim(); if (k && k !== 'campo') M[k] = r[1]; });
+        const divisor = this._num(M.divisor) || 1000000;
+        const topN = this._num(M.topMarcas) || 5;
+        const vendas = this._lerTrans(X, wb.Sheets[nomeVendas], divisor);
+        const nomeAA = wb.SheetNames.find(n => /vendas.*aa|aa.*vendas|anterior/i.test(n));
+        const vendasAA = nomeAA ? this._lerTrans(X, wb.Sheets[nomeAA], divisor) : [];
+        const pj = this._abasProjecao(X, wb, divisor);
+        const nomeProj = pj.nomes.length ? pj.nomes.join(' + ') : null;
+        const nomeOrc = wb.SheetNames.find(n => /or(ç|c)amento/i.test(n));
+        const plano = pj.linhas.length ? pj.linhas
+          : (nomeOrc ? this._lerTrans(X, wb.Sheets[nomeOrc], divisor) : vendas);
+        const cota = nomeProj && nomeOrc ? this._lerTrans(X, wb.Sheets[nomeOrc], divisor) : [];
+        if (!vendas.length) throw new Error('vendas sem linhas');
+        if (!vendasAA.length) throw new Error('"vendas-aa" ausente ou vazio — sem ano anterior não há variação');
+        this._derivarMeta(M, vendas, vendasAA);
+        if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
+        if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % da cota');
+        const corte = this._serial(M.dataCorte);
+        const ag = this._agregar(vendas.filter(v => !corte || v.data <= corte), vendasAA, plano, M, topN, cota);
+        this.fatos = ag.fatos; this._idx = null;
+        this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
+        this._lerCurva(X, wb);
+      this._lerExtras(X, wb);
+        const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
+        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
+        put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
+        info.style.color = '#0a7d34';
+        info.innerHTML = '✓ <b>' + f.name + '</b>: ' + vendas.length.toLocaleString('pt-BR') + ' linhas de venda + '
+          + vendasAA.length.toLocaleString('pt-BR') + ' do ano anterior · ' + ag.resumo.marcas + ' marcas · '
+          + ag.resumo.skus + ' SKUs · agregado em ' + this.fatos.length + ' linhas (top ' + topN + ' marcas por BU + Demais).'
+          + ((this._metaDerivada && this._metaDerivada.length)
+            ? '<br><span style="color:#5D5F61;">Sem meta.csv para estes campos — deduzidos da base: <b>' + this._metaDerivada.join('</b>, <b>') + '</b>. Confira no cabeçalho abaixo.</span>' : '');
+        this._validar();
+        this._gerarAlertas();
+        this._gerarCons();
+        this._guardarFoto();
+        this._gerarResumo();
+        return;
+      }
+      const nomeFatos = wb.SheetNames.find(n => /fato|dados|base/i.test(n)) || wb.SheetNames[0];
+      const rows = X.utils.sheet_to_json(wb.Sheets[nomeFatos], { header: 1, raw: true, defval: '' });
+      if (!rows.length) throw new Error('aba de fatos vazia');
+      const head = rows[0].map(c => String(c == null ? '' : c).trim());
+      const map = this.cols.map(c => head.findIndex(h => h.toLowerCase() === c.toLowerCase()));
+      if (map[0] < 0 || map[1] < 0 || map[2] < 0) throw new Error('faltam as colunas bu, marca e rede');
+      const out = [];
+      rows.slice(1).forEach(r => {
+        const bu = String(r[map[0]] == null ? '' : r[map[0]]).trim(); if (!bu) return;
+        out.push(this.cols.map((c, i) => {
+          const v = map[i] < 0 ? null : r[map[i]];
+          return i < 3 ? String(v == null ? '' : v).trim() : this._num(v);
+        }));
+      });
+      if (!out.length) throw new Error('nenhuma linha de fato lida');
+      this.fatos = out; this._idx = null;
+      const nomeMeta = wb.SheetNames.find(n => /meta|cabe/i.test(n));
+      if (nomeMeta) {
+        const mr = X.utils.sheet_to_json(wb.Sheets[nomeMeta], { header: 1, raw: true, defval: '' });
+        const M = {}; mr.forEach(r => { const k = String(r[0] || '').trim(); if (k) M[k] = r[1]; });
+        const put = (id, k) => { if (M[k] != null && M[k] !== '') this.$(id).value = M[k]; };
+        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
+        put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
+        const n = k => this._num(M[k]);
+        if (n('mtdAaTotal') != null) this._mtdAA = { vd: n('mtdAaVD'), vi: n('mtdAaVI'), total: n('mtdAaTotal') };
+      }
+      this._lerCurva(X, wb);
+      this._lerExtras(X, wb);
+      const nomeDest = wb.SheetNames.find(n => /destaque/i.test(n));
+      if (nomeDest) {
+        const dr = X.utils.sheet_to_json(wb.Sheets[nomeDest], { header: 1, raw: true, defval: '' }).slice(1);
+        const d = dr.map(r => [String(r[0] || '').trim(), this._num(r[1])]).filter(x => x[0]);
+        if (d.length) this._destaques = d;
+      }
+      info.style.color = '#0a7d34';
+      info.innerHTML = '✓ <b>' + f.name + '</b>: ' + out.length + ' linhas de fato lidas da aba <b>' + nomeFatos + '</b>' + (nomeMeta ? ' · cabeçalho da aba <b>' + nomeMeta + '</b>' : '') + '.';
+      this._validar();
+      this._gerarAlertas();
+      this._gerarCons();
+      this._guardarFoto();
+      this._gerarResumo();
+    }).catch(e => { info.style.color = '#B32B23'; info.textContent = 'Falha ao ler a base: ' + e.message; });
+  }
+
+  _validar() {
+    const el = this.$('valPanel'); if (!el) return; this._reindex();
+    const bus = ['CH', 'PP', 'SC', 'SG'], falhas = [], avisos = [];
+    const tot = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    if (!tot) falhas.push('linha <b>Total s/ Cobertura</b> ausente — é dela que sai o número do topo do e-mail.');
+    bus.forEach(b => { if (!this._row(b, 'TOTAL', 'TOTAL')) falhas.push('BU <b>' + b + '</b> sem linha agregada (marca e rede = TOTAL).'); });
+    ['VD', 'VI', 'TOTAL'].forEach(r => { if (!this._row('TOTAL', 'TOTAL', r)) falhas.push('canal <b>' + r + '</b> ausente em TOTAL.'); });
+    if (tot) {
+      const soma = bus.reduce((a, b) => { const r = this._row(b, 'TOTAL', 'TOTAL'); return a + ((r && r.proj) || 0); }, 0);
+      const dif = Math.abs(soma - (tot.proj || 0));
+      if (dif > 1.5) avisos.push('a soma das projeções das BUs (' + this._fmt(soma) + ') difere do total (' + this._fmt(tot.proj) + ') em ' + this._fmt(dif) + '.');
+    }
+    const marcas = this.fatos.filter(f => f[1] !== 'TOTAL' && f[2] === 'TOTAL').length;
+    const nulos = this.fatos.filter(f => f[3] == null && f[8] == null).length;
+    if (nulos) avisos.push(nulos + ' linhas sem valor e sem crescimento — serão exibidas como "-".');
+    if (!this._curva) avisos.push('<b>curva</b> não preenchida — o gráfico de ritmo do mês da apresentação segue com a curva anterior.');
+    const li = (t, c) => '<li style="margin-bottom:6px; color:' + c + ';">' + t + '</li>';
+    el.innerHTML = '<div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:12px;">Validação</div>' +
+      '<div style="display:flex; gap:26px; flex-wrap:wrap; font-size:15px; margin-bottom:' + (falhas.length || avisos.length ? '14px' : '0') + ';">' +
+      ['<b>' + this.fatos.length + '</b> linhas de fato', '<b>' + marcas + '</b> linhas de marca', '<b>' + [...new Set(this.fatos.map(f => f[0]))].length + '</b> BUs', '<b>' + [...new Set(this.fatos.map(f => f[2]))].length + '</b> redes']
+        .map(t => '<span style="background:#EDF6FC; border-radius:800px; padding:6px 16px;">' + t + '</span>').join('') + '</div>' +
+      (falhas.length ? '<ul style="margin:0 0 10px; padding-left:20px; font-size:15px;">' + falhas.map(t => li(t, '#B32B23')).join('') + '</ul>' : '') +
+      (avisos.length ? '<ul style="margin:0; padding-left:20px; font-size:15px;">' + avisos.map(t => li(t, '#8A6A12')).join('') + '</ul>' : '') +
+      (!falhas.length && !avisos.length ? '<div style="font-size:15px; color:#0a7d34;">✓ Base consistente — pode gerar os arquivos.</div>' : '');
+  }
+
+  /** Principais variações por produto e por cliente + alertas do dia. Etapa obrigatória antes do envio. */
+  _gerarAlertas() {
+    const el = this.$('alertaPanel'); if (!el) return; this._reindex();
+    const c = this.cols, gi = k => c.indexOf(k);
+    const L = this.fatos.map(r => ({ bu: r[gi('bu')], marca: r[gi('marca')], rede: r[gi('rede')], realAA: r[gi('realAA')], proj: r[gi('proj')], cresc: r[gi('cresc')], pProj: r[gi('pProj')] }));
+    const BUS = ['CH', 'PP', 'SC', 'SG'], AGREG = ['TOTAL', 'DEMAIS', 'TOTAL PB', 'Total'], EXCL = ['TOTAL', 'VD', 'VI'];
+    const mi = v => (v < 0 ? '−' : '') + 'R$ ' + this._fmt(Math.abs(v)) + ' mi';
+    const sg = v => v == null ? '-' : (v > 0 ? '+' : v < 0 ? '−' : '') + this._fmt(Math.abs(v)) + '%';
+    const LIM = 150, IMP = 1;
+
+    const prods = L.filter(l => BUS.indexOf(l.bu) >= 0 && l.rede === 'TOTAL' && AGREG.indexOf(l.marca) < 0 && l.realAA != null && l.proj != null)
+      .map(l => ({ bu: l.bu, marca: l.marca, impacto: Math.round((l.proj - l.realAA) * 10) / 10, cresc: l.pProj != null ? l.pProj : l.cresc }))
+      .sort((a, b) => b.impacto - a.impacto);
+    const alta = prods.filter(p => p.impacto > 0).slice(0, 5);
+    const queda = prods.filter(p => p.impacto < 0).slice(-5).reverse();
+
+    const redes = L.filter(l => l.bu === 'TOTAL' && l.marca === 'TOTAL' && EXCL.indexOf(l.rede) < 0 && l.realAA != null && l.proj != null)
+      .map(l => ({ rede: l.rede, impacto: Math.round((l.proj - l.realAA) * 10) / 10, pProj: l.pProj, mtd: l.cresc }))
+      .sort((a, b) => a.impacto - b.impacto);
+    const redesQueda = redes.filter(r => r.impacto < 0);
+    const redesAlta = redes.filter(r => r.impacto > 0).slice().reverse();
+
+    const cruz = L.filter(l => BUS.indexOf(l.bu) >= 0 && AGREG.indexOf(l.marca) < 0 && EXCL.indexOf(l.rede) < 0 && l.cresc != null);
+    const fora = cruz.filter(l => Math.abs(l.cresc) >= LIM).sort((a, b) => Math.abs(b.cresc) - Math.abs(a.cresc));
+    const semAA = L.filter(l => BUS.indexOf(l.bu) >= 0 && l.rede === 'TOTAL' && AGREG.indexOf(l.marca) < 0 && l.proj != null && !l.realAA);
+
+    const A = [];
+    const add = (nivel, titulo, texto) => A.push({ nivel: nivel, titulo: titulo, texto: texto });
+    if (fora.length) {
+      const p = fora[0];
+      add(fora.some(l => Math.abs(l.cresc) >= 1000) ? 'Crítico' : 'Atenção',
+        'Variação implausível em ' + p.marca + ' / ' + p.rede,
+        p.marca + ' aparece com ' + sg(p.cresc) + ' em ' + p.rede + '. São ' + fora.length + ' cruzamentos produto × cliente acima de ' + LIM + '%. Confirmar item novo, cadastro ou base incompleta do ano anterior antes de publicar.');
+    }
+    if (queda.length) {
+      const g = queda.filter(p => p.impacto <= -IMP).slice(0, 3);
+      if (g.length) add('Atenção', 'Marcas puxando a projeção para baixo',
+        g.map(p => p.marca + ' (' + p.bu + ', ' + mi(p.impacto) + ', ' + sg(p.cresc) + ')').join(' · ') + '. Somadas, tiram ' + mi(g.reduce((s, p) => s + p.impacto, 0)) + ' da comparação com o ano anterior.');
+    }
+    if (redesQueda.length) add('Atenção', 'Redes em queda na projeção',
+      redesQueda.slice(0, 3).map(r => r.rede + ' (' + mi(r.impacto) + ', ' + sg(r.pProj) + ')').join(' · ') + '. Checar se a queda é de ritmo ou de cobertura de loja.');
+    if (alta.length) add('Leitura', 'Concentração do crescimento',
+      alta.slice(0, 3).map(p => p.marca + ' (' + mi(p.impacto) + ')').join(' · ') + ' respondem por ' + mi(alta.slice(0, 3).reduce((s, p) => s + p.impacto, 0)) + ' do ganho projetado.');
+    if (semAA.length) add('Atenção', 'Marcas sem base de comparação',
+      semAA.map(p => p.marca).join(' · ') + ' não têm realizado do ano anterior e aparecem com crescimento de 100%. Conferir a grafia nos dois arquivos.');
+    if (!A.length) add('Leitura', 'Base sem pontos de atenção', 'Nenhuma variação fora de faixa nesta leitura.');
+
+    const C = { 'Crítico': ['#B42318', '#FEF3F2'], 'Atenção': ['#B54708', '#FFFAEB'], 'Leitura': ['#0062AA', '#EDF6FC'] };
+    const lista = (tit, arr, cor, fmt) => '<div style="background:#F7FBFE; border:1px solid #E3EBF2; border-radius:10px; overflow:hidden;">'
+      + '<div style="padding:11px 16px; border-bottom:1px solid #EFEFEF; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:' + cor + ';">' + tit + '</div>'
+      + (arr.length ? arr.map(fmt).join('') : '<div style="padding:12px 16px; font-size:14px; color:#8A8C8E;">sem itens</div>') + '</div>';
+    const linha = (nome, sub, val, cor) => '<div style="display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid #EFF5FA;">'
+      + '<div style="flex:1 1 auto; min-width:0;"><div style="font-size:14.5px; font-weight:600; color:#292A2B;">' + nome + '</div>'
+      + '<div style="font-size:12.5px; color:#8A8C8E; margin-top:1px;">' + sub + '</div></div>'
+      + '<div style="flex:none; font-size:15px; font-weight:700; color:' + cor + ';">' + val + '</div></div>';
+
+    el.innerHTML = '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:18px;">'
+      + lista('Produtos — maiores altas', alta, '#17734A', p => linha(p.marca, p.bu + ' · ' + sg(p.cresc) + ' vs AA', '+' + mi(p.impacto), '#17734A'))
+      + lista('Produtos — maiores quedas', queda, '#B42318', p => linha(p.marca, p.bu + ' · ' + sg(p.cresc) + ' vs AA', mi(p.impacto), '#B42318'))
+      + lista('Clientes — maiores altas', redesAlta.slice(0, 5), '#17734A', r => linha(r.rede, 'MTD ' + sg(r.mtd) + ' · proj ' + sg(r.pProj), '+' + mi(r.impacto), '#17734A'))
+      + lista('Clientes — maiores quedas', redesQueda.slice(0, 5), '#B42318', r => linha(r.rede, 'MTD ' + sg(r.mtd) + ' · proj ' + sg(r.pProj), mi(r.impacto), '#B42318'))
+      + '</div>'
+      + A.map(a => '<div style="display:flex; gap:14px; border:1px solid #E3EBF2; border-left:5px solid ' + C[a.nivel][0] + '; border-radius:10px; padding:14px 18px; margin-bottom:10px;">'
+        + '<div style="flex:none;"><span style="display:inline-block; border-radius:800px; padding:3px 12px; font-size:12px; font-weight:600; background:' + C[a.nivel][1] + '; color:' + C[a.nivel][0] + ';">' + a.nivel + '</span></div>'
+        + '<div style="flex:1 1 auto; min-width:0;"><div style="font-size:15px; font-weight:600; color:#292A2B; margin-bottom:3px;">' + a.titulo + '</div>'
+        + '<div style="font-size:14px; line-height:1.55; color:#5D5F61;">' + a.texto + '</div></div></div>').join('');
+
+    this._alertasTexto = 'Pontos de atenção — ' + (this._v('inpRef') || '') + ' (corte ' + (this._v('inpCorte') || '') + ')\n\n'
+      + A.map(a => '[' + a.nivel + '] ' + a.titulo + '\n' + a.texto).join('\n\n');
+  }
+
+  /** Escreve as considerações a partir da base agregada. */
+  _gerarCons(manual) {
+    const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    const tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
+    if (!t) { this.$('consInfo').textContent = 'Sem a linha Total s/ Cobertura não há como escrever as considerações.'; return; }
+    const f = v => this._fmt(v), p = v => this._pct(v);
+    const frases = [];
+    const cMes = this._cres(t, 'proj');
+    frases.push('A projeção do mês é de R$ ' + f(t.proj) + ' mi, ' + p(cMes) + ' vs. o mesmo mês do ano anterior'
+      + (tt ? ', com realizado acumulado de R$ ' + f(tt.real) + ' mi (' + p(tt.cresc) + ' vs. MTD anterior)' : '') + '.');
+
+    if (t.orcAbs != null && t.orcAbs > 0) {
+      const at = (t.proj / t.orcAbs) * 100, gap = t.proj - t.orcAbs;
+      frases.push('O atingimento da cota está em ' + f(at) + '%, ' + (gap >= 0 ? 'R$ ' + f(gap) + ' mi acima' : 'R$ ' + f(-gap) + ' mi abaixo') + ' do orçamento.');
+    }
+    if (t.forecast != null && t.forecast > 0) {
+      const vf = this._vsFcst(t), gf = t.proj - t.forecast;
+      frases.push('Contra o forecast do ciclo (R$ ' + f(t.forecast) + ' mi), a projeção está ' + p(vf)
+        + ' (' + (gf >= 0 ? '+' : '-') + 'R$ ' + f(Math.abs(gf)) + ' mi).');
+    }
+    if (t.projIni != null) {
+      const rev = t.proj - t.projIni;
+      if (Math.abs(rev) >= 0.5) frases.push('A projeção foi revisada em R$ ' + (rev > 0 ? '+' : '-') + f(Math.abs(rev)) + ' mi vs. a inicial.');
+    }
+    const bus = ['CH', 'PP', 'SC', 'SG'].map(b => ({ b, r: this._row(b, 'TOTAL', 'TOTAL') }))
+      .filter(o => o.r).map(o => ({ b: o.b, c: this._cres(o.r, 'proj'), v: o.r.proj }))
+      .filter(o => o.c != null).sort((a, b) => b.c - a.c);
+    if (bus.length > 1) {
+      const alta = bus[0], baixa = bus[bus.length - 1];
+      frases.push(alta.b + ' puxa o crescimento (' + p(alta.c) + ')'
+        + (baixa.c < 0 ? ' e ' + baixa.b + ' segue negativa (' + p(baixa.c) + ')' : ', com ' + baixa.b + ' na ponta mais baixa (' + p(baixa.c) + ')') + '.');
+    }
+    const vd = this._row('TOTAL', 'TOTAL', 'VD'), vi = this._row('TOTAL', 'TOTAL', 'VI');
+    if (vd && vi && vd.proj != null && vi.proj != null) {
+      const tp = vd.proj + vi.proj;
+      if (tp > 0) frases.push('No mix de canais, VD responde por ' + f((vd.proj / tp) * 100) + '% do projetado e VI por ' + f((vi.proj / tp) * 100) + '%.');
+    }
+    const d = this._destaques || [];
+    if (d.length) {
+      const pos = d.filter(x => x[1] != null && x[1] > 0).slice(0, 3).map(x => x[0] + ' (' + p(x[1]) + ')');
+      if (pos.length) frases.push('Entre as marcas, destaque para ' + pos.join(', ') + '.');
+    }
+    const elC = this.$('inpCons'); if (elC) elC.value = frases.join(' ');
+    const elK = this.$('chkCons'); if (elK) elK.checked = false;
+    const elI = this.$('consInfo'); if (elI) elI.textContent = manual ? 'Texto reescrito a partir da base — revise e valide.' : '';
+    this._consEstado();
+  }
+
+  /** Gap/superávit vs. orçamento, em R$ mi, e o canal que mais explica o desvio. */
+  _desvio(bu) {
+    const r = this._row(bu, 'TOTAL', 'TOTAL');
+    if (!r || r.orcAbs == null || r.proj == null) return null;
+    const gap = Math.round((r.proj - r.orcAbs) * 10) / 10;
+    let canal = null, melhor = 0;
+    ['VD', 'VI'].forEach(c => {
+      const x = this._row(bu, 'TOTAL', c);
+      if (!x || x.proj == null) return;
+      // desvio do canal vs. orçamento quando existe; senão, o canal mais distante do ano anterior
+      const d = x.orcAbs != null ? x.proj - x.orcAbs
+        : (x.realAA ? (x.proj / x.realAA - 1) * 100 : null);
+      if (d == null) return;
+      if (canal == null || Math.abs(d) > Math.abs(melhor)) { canal = c; melhor = d; }
+    });
+    return { bu, gap, canal };
+  }
+
+  /** Desvio do canal no total: vs. orçamento se houver, senão o gap distribuído pelo mix projetado. */
+  _desvioCanal(c) {
+    const x = this._row('TOTAL', 'TOTAL', c);
+    if (!x || x.proj == null) return null;
+    if (x.orcAbs != null) return Math.round((x.proj - x.orcAbs) * 10) / 10;
+    const vd = this._row('TOTAL', 'TOTAL', 'VD'), vi = this._row('TOTAL', 'TOTAL', 'VI');
+    const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    if (!vd || !vi || !t || t.orcAbs == null || t.proj == null) return null;
+    const soma = (vd.proj || 0) + (vi.proj || 0);
+    if (!soma) return null;
+    return Math.round((t.proj - t.orcAbs) * ((x.proj || 0) / soma) * 10) / 10;
+  }
+
+  /** Resumo de validação do Teams: texto com marcadores de quadro na ordem de leitura. */
+  _gerarResumo(manual) {
+    const $ = this.$, f = v => this._fmt(v), inf = $('resumoInfo');
+    const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    if (!t) { inf.textContent = 'Sem a linha Total s/ Cobertura não há como escrever o resumo.'; return; }
+    const corte = String($('inpCorte').value || '').split('/').slice(0, 2).join('/');
+    const L = [];
+    L.push('Liberação ' + ($('inpLib').value || '').trim());
+    const prev = ($('inpPrevia').value || '').trim();
+    L.push('Base Ref.: ' + corte + (prev ? ' – ' + prev : ''));
+    L.push('[[HIGHLIGHTS]]');
+    L.push('[[BU]]');
+    L.push('[[CANAIS]]');
+    L.push('[[RITMO]]');
+    const ant = (this._snaps() || {}).anterior;
+    if (ant && ant.bus && ant.bus['Total s/ Cobertura'] && ant.bus['Total s/ Cobertura'].proj != null && t.proj != null) {
+      L.push('');
+      const cvA = this._curva || (this.base.META && this.base.META.curva);
+      const rA = (ant.curva && ant.curva.real) || [], rN = (cvA && cvA.real) || [];
+      if (rA.length && rN.length) {
+        const i = Math.min(rA.length, rN.length) - 1;
+        const dr = Math.round((rN[i] - rA[i]) * 10) / 10;
+        if (Math.abs(dr) >= 0.1) L.push('Atenção: o realizado acumulado até o dia ' + String(i + 1).padStart(2, '0')
+          + ' voltou ' + (dr > 0 ? 'R$ ' + f(dr) + ' milhões acima' : 'R$ ' + f(-dr) + ' milhões abaixo')
+          + ' da base anterior — reprocessamento no envio dos dados.');
+      }
+    }
+    $('inpResumo').value = L.join('\n');
+    this._montarDoc();
+    inf.style.color = '#5D5F61';
+    inf.textContent = manual ? 'Resumo reescrito a partir da base — confira antes de colar no Teams.' : '';
+  }
+
+  _SNAP() { return 'boletim.base.snapshots.v1'; }
+
+  /** Foto da base atual, por BU, para comparar com a carga seguinte. */
+  _foto() {
+    const chaves = ['CH', 'PP', 'SC', 'SG', 'Total s/ Cobertura'];
+    const bus = {};
+    chaves.forEach(b => {
+      const r = this._row(b, 'TOTAL', 'TOTAL'); if (!r) return;
+      bus[b] = { realAA: r.realAA, real: r.real, proj: r.proj, projIni: r.projIni, orcAbs: r.orcAbs, pProj: this._cres(r, 'proj') };
+    });
+    const cv = this._curva || (this.base.META && this.base.META.curva);
+    const curva = cv ? { diasMes: cv.diasMes, diaAtual: cv.diaAtual, aa: cv.aa, real: cv.real, proj: cv.proj } : null;
+    const curvaBU = this._curvaBUAtual() || null;
+    return { corte: (this._v('inpCorte') || '').trim(), ref: (this._v('inpRef') || '').trim(), em: new Date().toLocaleString('pt-BR'), bus, curva, curvaBU };
+  }
+
+  _snaps() { try { const s = JSON.parse(localStorage.getItem(this._SNAP()) || '{}'); return s && typeof s === 'object' ? s : {}; } catch (e) { return {}; } }
+
+  /** Guarda a base recém-lida e empurra a anterior para o comparativo. */
+  _guardarFoto() {
+    const s = this._snaps(), nova = this._foto();
+    if (!Object.keys(nova.bus).length) return;
+    const anterior = (s.atual && s.atual.corte !== nova.corte) ? s.atual : (s.anterior || null);
+    try { localStorage.setItem(this._SNAP(), JSON.stringify({ atual: nova, anterior })); } catch (e) { /* modo privado */ }
+  }
+
+  /** Curva por BU: da base quando a aba Curva traz a coluna BU; senão rateada pelo mix projetado. */
+  _curvaBUAtual() {
+    if (this._curvaBU) { this._buRateado = false; return this._curvaBU; }
+    const cv = this._curva || (this.base.META && this.base.META.curva);
+    if (!cv || !cv.real || !cv.real.length) return null;
+    const share = {}; let somaProj = 0;
+    ['CH', 'PP', 'SC', 'SG'].forEach(b => {
+      const r = this._row(b, 'TOTAL', 'TOTAL');
+      if (r && r.proj) { share[b] = r.proj; somaProj += r.proj; }
+    });
+    if (!somaProj) return null;
+    const out = {};
+    Object.keys(share).forEach(b => {
+      const k = share[b] / somaProj;
+      out[b] = {
+        diasMes: cv.diasMes, diaAtual: cv.diaAtual,
+        aa: (cv.aa || []).map(v => v == null ? null : Math.round(v * k * 10) / 10),
+        real: (cv.real || []).map(v => v == null ? null : Math.round(v * k * 10) / 10),
+        proj: (cv.proj || []).map(v => v == null ? null : Math.round(v * k * 10) / 10)
+      };
+    });
+    this._buRateado = true;
+    return out;
+  }
+
+  _corteTxt() { return (this._v('inpCorte') || '').trim(); }
+
+  _faltSalvo() { try { const o = JSON.parse(localStorage.getItem('boletim.faltantes.v1') || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
+
+  _faltSalvar() { try { localStorage.setItem('boletim.faltantes.v1', JSON.stringify(this._faltantes())); } catch (e) { /* modo privado */ } }
+
+  _faltantes() {
+    const v = id => { const el = this.$(id); return el ? el.value : ''; };
+    const ck = this.$('chkFaltAloc');
+    return { pct: this._num(v('inpFaltPct')), val: this._num(v('inpFaltVal')),
+      aloc: !!(ck && ck.checked), media: this._num(v('inpProjMedia')) };
+  }
+
+  _qh() {
+    const f = v => this._fmt(v), p = v => this._pct(v), cor = v => this._cor(v);
+    const T = 'border-collapse:collapse;font-family:Asap,Calibri,Arial,sans-serif;margin:4px 0 14px;';
+    const th = t => '<th align="center" style="font-size:11px;line-height:16px;font-weight:700;color:#0062AA;padding:5px 8px;border-bottom:1.5px solid #00BFDF;white-space:nowrap;">' + t + '</th>';
+    const td = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'right') + '" style="font-size:13px;line-height:19px;color:' + (o.c || '#292A2B') + ';font-weight:' + (o.b ? '700' : '400') + ';padding:5px 8px;border-bottom:1px solid #EFEFEF;white-space:nowrap;">' + t + '</td>'; };
+    const cap = t => '<div style="font-size:14px;line-height:21px;font-weight:700;color:#0062AA;padding:10px 0 2px;">' + t + '</div>';
+    return { f, p, cor, T, th, td, cap };
+  }
+
+  /** Um quadro do resumo, pelo nome do marcador. */
+  _quadro(nome) {
+    const H = this._qh(), f = H.f, p = H.p, cor = H.cor, T = H.T, th = H.th, td = H.td, cap = H.cap;
+    const BUS = ['CH', 'PP', 'SC', 'SG'].filter(b => this._row(b, 'TOTAL', 'TOTAL'));
+    const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    const temFcst = this.fatos.some(r => r[this.cols.indexOf('forecast')] != null);
+    const ant = (this._snaps() || {}).anterior;
+    const cv = this._curva || (this.base.META && this.base.META.curva);
+
+    if (nome === 'HIGHLIGHTS') {
+      const tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
+      const dv = ['CH', 'PP', 'SC', 'SG'].map(b => this._desvio(b)).filter(Boolean).sort((a, b) => b.gap - a.gap);
+      const cn = ['VD', 'VI'].map(c => ({ c, d: this._desvioCanal(c) })).filter(o => o.d != null)
+        .sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+      const gapOrc = (t && t.orcAbs != null && t.proj != null) ? Math.round((t.proj - t.orcAbs) * 10) / 10 : null;
+      const card = (rot, valor, sub, c) =>
+        '<td width="25%" valign="top" bgcolor="#EDF6FC" style="width:25%;background-color:#EDF6FC;border-radius:8px;padding:11px 12px;border:5px solid #FFFFFF;font-family:Asap,Calibri,Arial,sans-serif;">' +
+        '<div style="font-size:10px;line-height:14px;letter-spacing:.07em;text-transform:uppercase;color:#5D5F61;font-weight:700;">' + rot + '</div>' +
+        '<div style="font-size:20px;line-height:26px;font-weight:700;color:' + (c || '#074878') + ';padding-top:2px;">' + valor + '</div>' +
+        '<div style="font-size:11.5px;line-height:16px;color:#5D5F61;">' + sub + '</div></td>';
+      const F = this._faltantes();
+      const extras = [];
+      if (F.pct != null || F.val != null) {
+        extras.push(card('Faltantes',
+          (F.pct == null ? '' : f(F.pct) + '%') + (F.pct != null && F.val != null ? ' · ' : '') + (F.val == null ? '' : 'R$ ' + f(F.val) + ' mi'),
+          '', '#8A6A12'));
+      }
+      if (F.media != null) extras.push(card('Projeção média', p(F.media), 'percentual consolidado do ciclo', '#074878'));
+      const cards = [
+        card('Projeção do mês', 'R$ ' + f(t.proj) + ' mi', p(this._cres(t, 'proj')) + ' vs. AA', '#074878'),
+        card('Realizado até o corte', 'R$ ' + f(tt ? tt.real : t.real) + ' mi', tt && tt.cresc != null ? p(tt.cresc) + ' vs. MTD anterior' : 'acumulado do mês', '#074878'),
+        card('Gap vs. orçamento', gapOrc == null ? '-' : (gapOrc > 0 ? '+' : '') + 'R$ ' + f(gapOrc) + ' mi',
+          t.orcAbs != null ? 'orçamento R$ ' + f(t.orcAbs) + ' mi' : 'sem orçamento na base', cor(gapOrc)),
+        dv.length ? card('Maior superávit', dv[0].bu + ' +R$ ' + f(Math.abs(dv[0].gap)) + ' mi',
+          dv[0].canal ? 'puxado pelo canal ' + dv[0].canal : 'vs. orçamento', '#17734A') : '',
+        dv.length > 1 ? card('Maior gap', dv[dv.length - 1].bu + ' ' + (dv[dv.length - 1].gap < 0 ? '-' : '+') + 'R$ ' + f(Math.abs(dv[dv.length - 1].gap)) + ' mi',
+          dv[dv.length - 1].canal ? 'puxado pelo canal ' + dv[dv.length - 1].canal : 'vs. orçamento', cor(dv[dv.length - 1].gap)) : '',
+        cn.length ? card('Canal em destaque', cn[0].c + ' ' + (cn[0].d > 0 ? '+' : '') + f(cn[0].d),
+          (cn[0].d < 0 ? 'gap' : 'superávit') + ' vs. orçamento' + (cn.length > 1 ? ' · ' + cn[1].c + ' ' + (cn[1].d > 0 ? '+' : '') + f(cn[1].d) : ''), cor(cn[0].d)) : ''
+      ].filter(Boolean).concat(extras);
+      // no máximo duas linhas de quatro cartões
+      cards.length = Math.min(cards.length, 8);
+      const linhas3 = [];
+      for (let i = 0; i < cards.length; i += 4) linhas3.push('<tr>' + cards.slice(i, i + 4).join('') + '</tr>');
+      return '<table cellpadding="0" cellspacing="0" border="0" width="640" style="width:640px;max-width:100%;border-collapse:collapse;margin:6px 0 16px;">' + linhas3.join('') + '</table>';
+    }
+
+    if (nome === 'BU') {
+      const grupo = (t2, n) => '<th colspan="' + n + '" align="center" style="font-size:10.5px;line-height:15px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#5D5F61;padding:2px 8px 4px;border-bottom:1px solid #EFEFEF;white-space:nowrap;">' + t2 + '</th>';
+      const linha = (rot, r, tot) => {
+        const gap = (r.proj != null && r.orcAbs != null) ? Math.round((r.proj - r.orcAbs) * 10) / 10 : null;
+        const gapP = r.orcAbs ? (r.proj / r.orcAbs - 1) * 100 : null;
+        const rev = (r.proj != null && r.projIni != null) ? Math.round((r.proj - r.projIni) * 10) / 10 : null;
+        return '<tr>' + td(rot, { a: 'left', b: true, c: tot ? '#292A2B' : '#0062AA' }) +
+          td(f(r.realAA), { b: tot }) + td(f(r.real), { b: tot }) +
+          td(f(r.projIni), { c: '#5D5F61' }) + td(f(r.proj), { b: true }) +
+          td(f(rev), { c: cor(rev) }) + td(p(this._cres(r, 'proj')), { c: cor(this._cres(r, 'proj')), b: true }) +
+          td(f(r.orcAbs), { b: tot }) + td(f(gap), { c: cor(gap), b: true }) + td(p(gapP), { c: cor(gapP) }) +
+          (temFcst ? td(f(r.forecast), { b: tot }) + td(p(this._vsFcst(r)), { c: cor(this._vsFcst(r)), b: true }) : '') + '</tr>';
+      };
+      return cap('Crescimento e projeção por BU (R$ mi)') +
+        '<table cellpadding="0" cellspacing="0" border="0" style="' + T + '">' +
+        '<tr>' + grupo('', 1) + grupo('Realizado', 2) + grupo('Projeção', 4) + grupo('Orçamento', 3) +
+        (temFcst ? grupo('Forecast', 2) : '') + '</tr>' +
+        '<tr>' + ['BU', 'REAL AA', 'REALIZADO', 'PROJ. INICIAL', 'PROJETADO', 'REVISÃO', '% vs AA', 'ORÇAMENTO', 'GAP', '% vs ORÇ']
+          .concat(temFcst ? ['FORECAST', '% FCST'] : []).map(th).join('') + '</tr>' +
+        BUS.map(b => linha(b, this._row(b, 'TOTAL', 'TOTAL'))).join('') +
+        (t ? linha('TOTAL', t, true) : '') + '</table>';
+    }
+
+    if (nome === 'CANAIS') {
+      const canais = ['VD', 'VI'].map(c => ({ c, r: this._row('TOTAL', 'TOTAL', c) })).filter(o => o.r);
+      if (!canais.length) return '';
+      // projetado por BU dentro de cada canal, a partir do mix VD/VI de cada BU
+      const mix = {}; let temMix = false;
+      BUS.forEach(b => {
+        const r = this._row(b, 'TOTAL', 'TOTAL');
+        if (!r || r.proj == null || (r.vd == null && r.vi == null)) return;
+        temMix = true;
+        mix[b] = { VD: r.vd == null ? null : r.proj * r.vd / 100, VI: r.vi == null ? null : r.proj * r.vi / 100 };
+      });
+      const cols = temMix ? Object.keys(mix) : [];
+      const alvo = {}; canais.forEach(o => { if (o.r.proj != null) alvo[o.c] = o.r.proj; });
+      const val = {};
+      ['VD', 'VI'].forEach(c => {
+        const soma = cols.reduce((a, b) => a + (mix[b][c] || 0), 0);
+        const k = (alvo[c] != null && soma > 0) ? alvo[c] / soma : 1;
+        val[c] = {}; cols.forEach(b => { val[c][b] = mix[b][c] == null ? null : Math.round(mix[b][c] * k * 10) / 10; });
+      });
+      return cap('Canais (R$ mi)' + (temMix ? ' <span style="font-weight:400;font-size:13px;color:#5D5F61;">as colunas de BU rateiam o projetado do canal pelo mix VD/VI de cada BU</span>' : '')) +
+        '<table cellpadding="0" cellspacing="0" border="0" style="' + T + '"><tr>' +
+        ['CANAL', 'REAL AA', 'REALIZADO', 'PROJETADO', '% PROJ', 'DESVIO']
+          .concat(cols.map(b => b + ' PROJ')).map(th).join('') + '</tr>' +
+        canais.map(o => {
+          const d = this._desvioCanal(o.c);
+          return '<tr>' + td(o.c, { a: 'left', b: true, c: '#0062AA' }) + td(f(o.r.realAA)) + td(f(o.r.real)) +
+            td(f(o.r.proj), { b: true }) + td(p(this._cres(o.r, 'proj')), { c: cor(this._cres(o.r, 'proj')), b: true }) +
+            td(f(d), { c: cor(d), b: true }) +
+            cols.map(b => td(val[o.c][b] == null ? '-' : f(val[o.c][b]), { c: '#434445' })).join('') + '</tr>';
+        }).join('') + '</table>';
+      return out;
+    }
+
+    if (nome === 'RITMO' || nome === 'RITMOBU') {
+      if (nome === 'RITMOBU') return '';
+      const serie = c => (c && c.real) ? c.real.concat(c.proj || []) : null;
+      const fimMes = c => { const s = serie(c) || []; return s.length ? s[s.length - 1] : null; };
+      const aaMes = c => { const a = (c && c.aa) || []; return a.length ? a[a.length - 1] : null; };
+      const cb = this._curvaBUAtual();
+      const cbAnt = (ant && ant.curvaBU) || {};
+      const nomes = cb ? ['CH', 'PP', 'SC', 'SG'].filter(b => cb[b])
+        .concat(Object.keys(cb).filter(b => ['CH', 'PP', 'SC', 'SG'].indexOf(b) < 0)) : [];
+      const temBU = !!nomes.length;
+      if (!cv || !cv.real || !cv.real.length) {
+        if (!temBU) return '';
+      }
+      const aa = (cv && cv.aa) || [], real = (cv && cv.real) || [], proj = (cv && cv.proj) || [];
+      const antS = ant && ant.curva ? serie(ant.curva) : null, atS = serie(cv) || [];
+      const S = {}, corteBU = {};
+      nomes.forEach(b => { S[b] = serie(cb[b]) || []; corteBU[b] = (cb[b].real || []).length; });
+      const dias = Math.max.apply(null, [(cv && cv.diasMes) || atS.length].concat(nomes.map(b => cb[b].diasMes || S[b].length)));
+      const DS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+      const pc = this._corteTxt().split('/');
+      const anoC = cv && cv.ano ? cv.ano : (pc[2] ? (String(pc[2]).length === 2 ? 2000 + Number(pc[2]) : Number(pc[2])) : null);
+      const mesC = cv && cv.mes ? cv.mes : (pc[1] ? Number(pc[1]) : null);
+      const wd = d => (anoC && mesC) ? new Date(anoC, mesC - 1, d).getDay() : -1;
+      const ehFds = d => { const w = wd(d); return w === 0 || w === 6; };
+      const rotDia = d => {
+        const n = String(d).padStart(2, '0');
+        if (wd(d) < 0) return n;
+        const fds = ehFds(d);
+        return n + ' <span style="font-weight:' + (fds ? '700' : '400') + ';color:' + (fds ? '#0062AA' : '#8A8C8E') + ';">' + DS[wd(d)] + '</span>';
+      };
+      const tf = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'right') + '" style="font-size:13px;line-height:19px;font-weight:700;color:' + (o.c || '#292A2B') + ';padding:6px 8px;border-top:1.5px solid #00BFDF;white-space:nowrap;">' + t + '</td>'; };
+      const cabec = ['DIA'].concat(temBU ? nomes.concat(['TOTAL']) : ['REALIZADO', 'PROJEÇÃO'])
+        .concat(['AA', 'VAR vs AA']).concat(antS ? ['BASE ANT.', 'VAR vs BASE ANT.'] : [])
+        .concat(temBU ? ['BU MAIOR VAR', 'VAR DA BU'] : []);
+      let diario = cap('Ritmo do mês — acumulado (R$ mi)'
+        + (temBU ? ' <span style="font-weight:400;font-size:13px;color:#5D5F61;">por BU; números em cinza são projeção; BU MAIOR VAR é a maior distância do AA no dia' + (this._buRateado ? ' · quebra rateada pelo mix projetado de cada BU' : '') + '</span>' : '')
+        + (antS ? ' <span style="font-weight:400;font-size:13px;color:#5D5F61;">· base anterior ' + ((ant && ant.corte) || '-') + '</span>' : '')) +
+        '<table cellpadding="0" cellspacing="0" border="0" style="' + T + '"><tr>' + cabec.map(th).join('') + '</tr>' +
+        Array.from({ length: dias }, (_, i) => {
+          const a = aa[i] == null ? null : aa[i];
+          const r = i < real.length ? real[i] : null;
+          const pr = i < real.length ? null : proj[i - real.length];
+          let cels = '', total = null;
+          if (temBU) {
+            let soma = 0, tem = false;
+            cels = nomes.map(b => {
+              const v = S[b][i];
+              if (v != null) { soma += v; tem = true; }
+              return td(v == null ? '-' : f(v), { c: i < corteBU[b] ? '#292A2B' : '#5D5F61' });
+            }).join('');
+            total = atS[i] != null ? atS[i] : (tem ? Math.round(soma * 10) / 10 : null);
+            cels += td(total == null ? '-' : f(total), { b: true });
+          } else {
+            total = r != null ? r : pr;
+            cels = td(r == null ? '-' : f(r), { b: true }) + td(pr == null ? '-' : f(pr), { c: '#5D5F61' });
+          }
+          const v = (a != null && total != null) ? Math.round((total - a) * 10) / 10 : null;
+          const b0 = antS ? antS[i] : null;
+          const vb = (b0 != null && total != null) ? Math.round((total - b0) * 10) / 10 : null;
+          let lider = null;
+          if (temBU) {
+            nomes.forEach(b => {
+              const x = S[b][i], aB = (cb[b].aa || [])[i];
+              if (x == null || aB == null) return;
+              const dB = Math.round((x - aB) * 10) / 10;
+              if (!lider || Math.abs(dB) > Math.abs(lider.v)) lider = { b, v: dB };
+            });
+          }
+          const fds = ehFds(i + 1);
+          const sep = (i === real.length && real.length && proj.length)
+            ? '<tr><td colspan="' + cabec.length + '" style="font-size:10.5px;line-height:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#5D5F61;background-color:#F2F7FB;border-top:1.5px solid #A9D0EE;padding:6px 8px;">Projeção a partir daqui</td></tr>'
+            : '';
+          return sep + '<tr' + (fds ? ' bgcolor="#EFF5FA"' : '') + '>' + td(rotDia(i + 1), { a: 'left', c: '#5D5F61' }) + cels +
+            td(f(a)) + td(f(v), { c: cor(v), b: true }) +
+            (antS ? td(b0 == null ? '-' : f(b0), { c: '#5D5F61' }) + td(f(vb), { c: cor(vb), b: true }) : '') +
+            (temBU ? td(lider ? lider.b : '-', { a: 'center', b: true, c: '#0062AA' }) +
+              td(lider ? f(lider.v) : '-', { c: lider ? cor(lider.v) : '#8A8C8E', b: true }) : '') + '</tr>';
+        }).join('') +
+        '</table>' +
+        '<div style="font-family:Asap,Calibri,Arial,sans-serif;font-size:11.5px;line-height:17px;color:#5D5F61;padding:0 0 10px;">Sábado e domingo aparecem com fundo azul e o dia da semana em destaque. Acima da faixa <b>Projeção a partir daqui</b> os números são realizados; abaixo, projeção.</div>';
+      if (!temBU) diario += '<div style="font-size:12.5px;line-height:19px;color:#8A6A12;padding:2px 0 12px;">Sem quebra por BU: a aba <b>Curva</b> desta planilha não traz a coluna <b>BU</b>. Baixe o modelo novo, preencha o dia a dia por BU e recarregue.</div>';
+      let out = '';
+      // fechamento do mês: sempre acumulado, coluna por BU + total
+      const somaCurvas = cs => {
+        const n = Math.max.apply(null, cs.map(c => ((c.real || []).length + (c.proj || []).length)));
+        const sAt = new Array(n).fill(null), sAA = new Array(n).fill(null);
+        let corte = 0;
+        cs.forEach(c => {
+          corte = Math.max(corte, (c.real || []).length);
+          const s = (c.real || []).concat(c.proj || []), a = c.aa || [];
+          for (let i = 0; i < n; i++) {
+            if (s[i] != null) sAt[i] = Math.round(((sAt[i] || 0) + s[i]) * 10) / 10;
+            if (a[i] != null) sAA[i] = Math.round(((sAA[i] || 0) + a[i]) * 10) / 10;
+          }
+        });
+        return { real: sAt.slice(0, corte), proj: sAt.slice(corte), aa: sAA, diasMes: n };
+      };
+      const curvas = {}, curvasAnt = {};
+      nomes.forEach(b => { curvas[b] = cb[b]; curvasAnt[b] = cbAnt[b] || null; });
+      curvas.TOTAL = (cv && cv.real && cv.real.length) ? cv : somaCurvas(nomes.map(b => cb[b]));
+      curvasAnt.TOTAL = (ant && ant.curva && ant.curva.real && ant.curva.real.length) ? ant.curva
+        : (nomes.some(b => cbAnt[b]) ? somaCurvas(nomes.filter(b => cbAnt[b]).map(b => cbAnt[b])) : null);
+      const colunas = nomes.concat(['TOTAL']);
+      // realizado só é comparável até o corte da base anterior
+      const mesmoDia = b => {
+        const rA = (curvasAnt[b] && curvasAnt[b].real) || [], rN = (curvas[b] && curvas[b].real) || [];
+        if (!rA.length || !rN.length) return { ant: null, atual: null, dia: null };
+        const i = Math.min(rA.length, rN.length) - 1;
+        return { ant: rA[i], atual: rN[i], dia: i + 1 };
+      };
+      const cmp = {}; colunas.forEach(b => cmp[b] = mesmoDia(b));
+      const diaCmp = colunas.map(b => cmp[b].dia).filter(Boolean)[0] || null;
+      const val = {
+        aa: b => aaMes(curvas[b]),
+        real: b => { const r = (curvas[b] && curvas[b].real) || []; return r.length ? r[r.length - 1] : null; },
+        fim: b => fimMes(curvas[b]),
+        ant: b => fimMes(curvasAnt[b]),
+        realAnt: b => cmp[b].ant,
+        realMesmoDia: b => cmp[b].atual
+      };
+      const temAnt = colunas.some(b => val.ant(b) != null);
+      let zi = 0;
+      const cel = (t2, o) => '<td align="' + (o.a || 'right') + '" style="font-size:13px;line-height:19px;color:' + o.c +
+        ';font-weight:' + (o.b ? '700' : '400') + ';padding:' + (o.p || '5px 10px') + ';background-color:' + o.bg +
+        ';border-bottom:1px solid #F2F7FB;white-space:nowrap;">' + t2 + '</td>';
+      const linhaF = (rot, fn, o) => {
+        o = o || {}; zi++;
+        const bg = zi % 2 ? '#FFFFFF' : '#F9FCFE';
+        return '<tr>' + cel(rot, { a: 'left', c: o.forte ? '#292A2B' : '#434445', b: !!o.forte, p: '5px 10px 5px 18px', bg: bg }) +
+          colunas.map(b => {
+            const v = fn(b), tot = b === 'TOTAL';
+            return cel(v == null ? '-' : (o.pct ? p(v) : f(v)),
+              { c: o.cor ? cor(v) : '#292A2B', b: tot || !!o.forte, bg: tot ? '#EDF6FC' : bg });
+          }).join('') + '</tr>';
+      };
+      // um só denominador: tudo sai da curva, para não conflitar com os quadros de FATOS
+      const pctVsAA = b => { const a = val.aa(b), x = val.fim(b); return (a && x != null) ? Math.round((x / a - 1) * 1000) / 10 : null; };
+      const pAnt = b => { const c = curvasAnt[b]; const a = aaMes(c), x = fimMes(c); return (a && x != null) ? Math.round((x / a - 1) * 1000) / 10 : null; };
+      const dia = diaCmp == null ? '-' : String(diaCmp).padStart(2, '0');
+      // ritmo médio por dia: realizado (até o corte) vs. previsto (dias restantes)
+      const ritmo = b => {
+        const c = curvas[b] || {}, rAc = c.real || [], pAc = c.proj || [];
+        const zer = () => ({ r: [0, 0], p: [0, 0] });
+        const acc = { tot: zer(), ut: zer(), fds: zer() };
+        const bucket = d => {
+          if (!anoC || !mesC) return ['tot'];
+          const w = new Date(anoC, mesC - 1, d).getDay();
+          return ['tot', (w === 0 || w === 6) ? 'fds' : 'ut'];
+        };
+        rAc.forEach((v, i) => {
+          const dv = Math.round((v - (i ? rAc[i - 1] : 0)) * 100) / 100;
+          bucket(i + 1).forEach(k => { acc[k].r[0] += dv; acc[k].r[1]++; });
+        });
+        const base = rAc.length ? rAc[rAc.length - 1] : 0;
+        pAc.forEach((v, k) => {
+          const dv = Math.round((v - (k ? pAc[k - 1] : base)) * 100) / 100;
+          bucket(rAc.length + k + 1).forEach(g => { acc[g].p[0] += dv; acc[g].p[1]++; });
+        });
+        const md = x => x[1] ? Math.round((x[0] / x[1]) * 10) / 10 : null;
+        return { totR: md(acc.tot.r), totP: md(acc.tot.p), utR: md(acc.ut.r), utP: md(acc.ut.p), fdsR: md(acc.fds.r), fdsP: md(acc.fds.p) };
+      };
+      const rit = {}; colunas.forEach(b => rit[b] = ritmo(b));
+      const temFds = colunas.some(b => rit[b].fdsR != null || rit[b].fdsP != null);
+      const varR = (a, x) => (a && x != null) ? Math.round((x / a - 1) * 1000) / 10 : null;
+      const grupoL = t2 => { zi = 0; return '<tr><td colspan="' + (colunas.length + 1) +
+        '" style="font-size:10.5px;line-height:15px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#0062AA;background-color:#E7F2FA;border-left:3px solid #00BFDF;border-top:1px solid #D6E8F5;padding:9px 10px 8px;">' + t2 + '</td></tr>'; };
+      out += cap('Fechamento e evolução por BU (R$ mi) <span style="font-weight:400;font-size:13px;color:#5D5F61;">todos os valores acumulados</span>') +
+        '<table cellpadding="0" cellspacing="0" border="0" style="' + T + '"><tr>' +
+        [''].concat(colunas).map(th).join('') + '</tr>' +
+        grupoL('Mês') +
+        linhaF('AA do mês', val.aa) +
+        linhaF('Projeção fim de mês', val.fim) +
+        linhaF('Var vs AA', b => { const a = val.aa(b), x = val.fim(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) +
+        linhaF('% vs AA', pctVsAA, { cor: true, pct: true, forte: true }) +
+        grupoL('Realizado') +
+        linhaF('Realizado até o corte', val.real) +
+        (temAnt ? linhaF('Realizado dia ' + dia + ' · base atual', val.realMesmoDia) +
+          linhaF('Realizado dia ' + dia + ' · base ant.', val.realAnt) +
+          linhaF('Var do realizado', b => { const a = val.realAnt(b), x = val.realMesmoDia(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) : '') +
+        (temAnt ? grupoL('vs. última base' + ((ant && ant.corte) ? ' (' + ant.corte + ')' : '')) +
+          linhaF('Projeção base ant.', val.ant) +
+          linhaF('Var da projeção', b => { const a = val.ant(b), x = val.fim(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) +
+          linhaF('% var', b => { const a = val.ant(b), x = val.fim(b); return (a && x != null) ? Math.round((x / a - 1) * 1000) / 10 : null; }, { cor: true, pct: true, forte: true }) +
+          linhaF('% vs AA na base ant.', pAnt, { pct: true, cor: true }) +
+          linhaF('Evolução (p.p.)', b => { const a = pAnt(b), x = pctVsAA(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) : '') +
+        grupoL('Ritmo médio por dia (R$ mi)') +
+        linhaF('Total · real', b => rit[b].totR) +
+        linhaF('Total · previsto', b => rit[b].totP) +
+        linhaF('Total · var', b => varR(rit[b].totR, rit[b].totP), { cor: true, pct: true, forte: true }) +
+        linhaF('Dias úteis · real', b => rit[b].utR) +
+        linhaF('Dias úteis · previsto', b => rit[b].utP) +
+        linhaF('Dias úteis · var', b => varR(rit[b].utR, rit[b].utP), { cor: true, pct: true, forte: true }) +
+        (temFds ? linhaF('Fim de semana · real', b => rit[b].fdsR) +
+          linhaF('Fim de semana · previsto', b => rit[b].fdsP) +
+          linhaF('Fim de semana · var', b => varR(rit[b].fdsR, rit[b].fdsP), { cor: true, pct: true, forte: true }) : '') +
+        '</table>';
+      return out + diario;
+    }
+    return '';
+  }
+
+  /** Texto + quadros na ordem dos marcadores. */
+  _montarDoc() {
+    const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const linhas = (this._v('inpResumo') || '').split('\n');
+    let html = '', buffer = [];
+    const flush = () => {
+      if (!buffer.length) return;
+      html += '<div style="font-family:Asap,Calibri,Arial,sans-serif;font-size:14px;line-height:22px;color:#292A2B;white-space:pre-wrap;margin:0 0 4px;">'
+        + esc(buffer.join('\n')) + '</div>';
+      buffer = [];
+    };
+    let primeiro = true;
+    const cabec = () => {
+      const ls = buffer.map(x => x.trim()).filter(Boolean);
+      if (!ls.length) return false;
+      html += '<div style="font-family:Asap,Calibri,Arial,sans-serif;border-bottom:3px solid #0062AA;padding-bottom:12px;margin:0 0 18px;">'
+        + '<div style="font-size:11px;line-height:16px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#00BFDF;">' + esc(ls[0]) + '</div>'
+        + '<div style="font-size:20px;line-height:28px;font-weight:700;color:#292A2B;padding-top:2px;">' + esc(ls[1] || '') + '</div>'
+        + (ls.length > 2 ? '<div style="font-size:14px;line-height:21px;color:#5D5F61;white-space:pre-wrap;padding-top:6px;">' + esc(ls.slice(2).join('\n')) + '</div>' : '')
+        + '</div>';
+      buffer = [];
+      return true;
+    };
+    linhas.forEach(l => {
+      const m = l.trim().match(/^\[\[([A-Z]+)\]\]$/);
+      if (m) {
+        if (primeiro) { primeiro = false; if (!cabec()) flush(); } else flush();
+        html += this._quadro(m[1]);
+      } else buffer.push(l);
+    });
+    flush();
+    this.$('resumoDoc').innerHTML = html;
+    return html;
+  }
+
+  /** Copia texto e quadros juntos, na ordem montada. */
+  _copiarResumo() {
+    const inf = this.$('resumoInfo'), html = this._montarDoc();
+    const texto = (this._v('inpResumo') || '').replace(/^\s*\[\[[A-Z]+\]\]\s*$/gm, '').replace(/\n{3,}/g, '\n\n');
+    const ok = () => { inf.style.color = '#0a7d34'; inf.textContent = '✓ Resumo copiado com os quadros — cole no grupo do Teams com Ctrl+V.'; };
+    const falha = () => { inf.style.color = '#B32B23'; inf.textContent = 'Não foi possível copiar. Selecione o resumo montado na tela e use Ctrl+C.'; };
+    if (navigator.clipboard && window.ClipboardItem) {
+      navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([texto], { type: 'text/plain' })
+      })]).then(ok).catch(falha);
+    } else falha();
+  }
+
+  /** Trava cópia e arquivamento enquanto a equipe não validar o texto. */
+  _consEstado() {
+    // sem o bloco de considerações na tela não há o que validar — a trava sai do caminho
+    const ok = (!this.$('inpCons') || (this._ck('chkCons') && !!this._v('inpCons').trim()))
+      && (!this.$('chkAlertas') || this._ck('chkAlertas'));
+    ['btnCopiar', 'btnCopiar2', 'btnArquivar'].forEach(id => {
+      const b = this.$(id); if (!b) return;
+      b.disabled = !ok;
+      b.style.opacity = ok ? '1' : '.45';
+      b.style.cursor = ok ? 'pointer' : 'not-allowed';
+      b.title = ok ? '' : 'Valide as considerações do dia antes de enviar ou arquivar.';
+    });
+    const cp = this.$('chkPronto');
+    if (cp) { if (!ok && cp.checked) cp.checked = false; cp.disabled = !ok; }
+    return ok;
+  }
+
+  _meta() {
+    // leitura tolerante: campos podem não estar na tela (etapa oculta ou bloco removido)
+    const v = id => String(this._v(id) || '').trim(), M = JSON.parse(JSON.stringify(this.base.META));
+    M.referencia = v('inpRef') || M.referencia;
+    M.dataCorte = v('inpCorte') || M.dataCorte;
+    M.diasUteis = parseInt(v('inpDias'), 10) || M.diasUteis;
+    M.diasUteisAA = parseInt(v('inpDiasAA'), 10) || M.diasUteisAA;
+    M.consideracoes = this.$('inpCons') ? v('inpCons') : (M.consideracoes || '');
+    const L = M.links || {};
+    M.links = { hub: v('inpHub') || L.hub || '', executivos: v('inpExec') || L.executivos || '', deck: v('inpDeck') || L.deck || '', pdf: v('inpPdf') || L.pdf || '' };
+    const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
+    const vd = this._row('TOTAL', 'TOTAL', 'VD'), vi = this._row('TOTAL', 'TOTAL', 'VI'), tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
+    if (t) {
+      M.mes = { aa: { vd: vd && vd.realAA, vi: vi && vi.realAA, total: t.realAA }, proj: { vd: vd && vd.proj, vi: vi && vi.proj, total: t.proj }, cresc: this._cres(t, 'proj') };
+      const cvd = vd ? this._cres(vd, 'proj') : null, cvi = vi ? this._cres(vi, 'proj') : null;
+      const mBase = this.base.META.mes || {};
+      M.mes.cresVD = cvd == null ? mBase.cresVD : cvd;
+      M.mes.cresVI = cvi == null ? mBase.cresVI : cvi;
+    }
+    if (tt) { M.mtd = Object.assign({}, M.mtd, { atual: { vd: vd && vd.real, vi: vi && vi.real, total: tt.real }, cresc: tt.cresc }); }
+    if (this._mtdAA) M.mtd = Object.assign({}, M.mtd, { aa: this._mtdAA });
+    if (this._destaques) M.destaques = this._destaques;
+    if (this._curva) M.curva = Object.assign({}, M.curva, this._curva);
+    if (this._curvaBU) M.curvaBU = this._curvaBU;
+    if (this._curvaBUCanal) M.curvaBUCanal = this._curvaBUCanal;
+    if (this._historicoMensal) M.historicoMensal = this._historicoMensal;
+    if (this._resumoProj) M.resumoProjecao = this._resumoProj;
+    if (this._clientes) M.clientes = this._clientes;
+    M.faltantes = this._faltantes();
+    if (M.curva && t && t.orcAbs != null) M.curva.orcTotal = t.orcAbs;
+    M.envio = this._envio();
+    M.atualizadoEm = new Date().toLocaleDateString('pt-BR');
+    return M;
+  }
+
+  _baseFile() {
+    const M = this._meta();
+    return '/* BASE ÚNICA — Boletim Sell Out | Hypera Pharma\n' +
+      ' * Grão: bu × marca × rede. Medidas: realAA, real, proj, projIni, orcAbs, forecast, cresc, vd, vi (+ % publicados pProj, pIni, pOrc).\n' +
+      ' * marca = "TOTAL" -> linha agregada da BU · rede = "TOTAL" -> soma dos canais.\n' +
+      ' * Gerado pelo Atualizador em ' + new Date().toLocaleString('pt-BR') + ' · ' + this.fatos.length + ' linhas de fato.\n */\n' +
+      'window.BASE_BOLETIM = {\n  META: ' + JSON.stringify(M) + ',\n  COLUNAS: ' + JSON.stringify(this.cols) + ',\n  FATOS: [\n' +
+      this.fatos.map(r => '    ' + JSON.stringify(r)).join(',\n') + '\n  ]\n};\n';
+  }
+
+  // grade completa: toda BU × toda marca × todo canal, já preenchida onde a base tem número
+  _gradeAberta() {
+    const ORD_REDE = ['TOTAL', 'VD', 'VI', 'DROGASIL', 'DELIVERY', 'PAGUE MENOS', 'DROGARIA SAO PAULO',
+      'RAIA', 'SAO JOAO', 'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO', 'OUTROS'];
+    const naBase = [...new Set(this.fatos.map(r => r[2]))];
+    const REDES = ORD_REDE.filter(r => naBase.indexOf(r) >= 0)
+      .concat(naBase.filter(r => ORD_REDE.indexOf(r) < 0));
+    const ORD_BU = ['CH', 'PP', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES',
+      'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura', 'VITNQ'];
+    const idx = {};
+    this.fatos.forEach(r => { idx[r[0] + '|' + r[1] + '|' + r[2]] = r; });
+    const bus = ORD_BU.filter(b => this.fatos.some(r => r[0] === b))
+      .concat([...new Set(this.fatos.map(r => r[0]))].filter(b => ORD_BU.indexOf(b) < 0));
+    const linhas = [];
+    bus.forEach(bu => {
+      const marcas = [...new Set(this.fatos.filter(r => r[0] === bu).map(r => r[1]))]
+        .sort((a, b) => {
+          const peso = m => m === 'TOTAL' ? 0 : m === 'TOTAL PB' ? 3 : m === 'OUTROS' ? 2 : 1;
+          return peso(a) - peso(b);
+        });
+      marcas.forEach(marca => {
+        REDES.forEach(rede => {
+          const r = idx[bu + '|' + marca + '|' + rede];
+          linhas.push(r ? r.slice() : [bu, marca, rede].concat(new Array(this.cols.length - 3).fill(null)));
+        });
+      });
+    });
+    return linhas;
+  }
+
+  /** Registra o envio do dia no histórico do portal: e-mail em arquivo + índice JSON. */
+  _arquivar() {
+    const CHAVE = 'boletim.historico.v1';
+    const st = this.$('status');
+    const M = this._meta();
+    const p = String(M.dataCorte || '').split(/[\/\-.]/);
+    if (p.length !== 3 || !Number(p[0]) || !Number(p[1])) {
+      st.style.color = '#B32B23';
+      st.textContent = 'Preencha a data de corte no formato dd/mm/aa antes de arquivar.';
+      return;
+    }
+    let ano = Number(p[2]); if (ano < 100) ano += 2000;
+    const mes = Number(p[1]), dia = Number(p[0]);
+    const mm = String(mes).padStart(2, '0'), dd = String(dia).padStart(2, '0');
+    const id = ano + '-' + mm + '-' + dd;
+    const pasta = 'edicoes/' + ano + '/' + mm + '/' + dd + '/';
+    const edicao = {
+      id, ano, mes, dia,
+      data: dd + '/' + mm + '/' + String(ano).slice(2),
+      referencia: String(M.referencia || '').trim(),
+      enviadoEm: new Date().toLocaleDateString('pt-BR'),
+      email: pasta + 'email.html',
+      pdf: pasta + 'apresentacao.pdf',
+      base: pasta + 'base.xlsx',
+      email2: pasta + 'email-gestao-orcamentaria.html',
+      pdf2: pasta + 'apresentacao-gestao-orcamentaria.pdf',
+      destinatarios: (M.envio && M.envio.para) || ''
+    };
+    let hist = [];
+    try { hist = JSON.parse(localStorage.getItem(CHAVE) || '[]'); } catch (e) { hist = []; }
+    if (!Array.isArray(hist)) hist = [];
+    hist = hist.filter(e => e && e.id !== id).concat([edicao]).sort((a, b) => a.id < b.id ? 1 : -1);
+    try { localStorage.setItem(CHAVE, JSON.stringify(hist)); } catch (e) { /* modo privado */ }
+    this._dl('email.html', this._emailFile(false), 'text/html');
+    this._dl('email-gestao-orcamentaria.html', this._emailFile(true), 'text/html');
+    this._dl('historico-boletim.json', JSON.stringify({ atualizadoEm: edicao.enviadoEm, edicoes: hist }, null, 2), 'application/json');
+    st.style.color = '#0a7d34';
+    st.innerHTML = '✓ envio de <b>' + edicao.data + '</b> arquivado. Coloque na pasta <b>' + pasta + '</b> do portal: '
+      + '<b>email.html</b> e <b>email-gestao-orcamentaria.html</b> (baixados), '
+      + '<b>apresentacao.pdf</b>, <b>apresentacao-gestao-orcamentaria.pdf</b> e <b>base.xlsx</b>. '
+      + 'O <b>historico-boletim.json</b> vai na raiz do portal. No dia a dia o fluxo do Power Automate grava isso sozinho.';
+  }
+
+  _modelo() {
+    const info = this.$('impInfo');
+    if (!window.XLSX) { info.style.color = '#B32B23'; info.textContent = 'Gerador de arquivos não carregou.'; return; }
+    const X = window.XLSX, wb = X.utils.book_new(), M = this._meta();
+    const COLS_T = ['DATA', 'BU', 'MARCA', 'SKU', 'CANAL', 'CLIENTE', 'VALOR REAL'];
+    const COLS_PI = ['BU', 'MARCA', 'SKU', 'CANAL', 'CLIENTE', 'VALOR PROJETADO INICIAL'];
+    const COLS_PA = ['BU', 'MARCA', 'SKU', 'CANAL', 'CLIENTE', 'VALOR PROJETADO ATUAL'];
+    const COLS_O = ['BU', 'MARCA', 'SKU', 'CANAL', 'CLIENTE', 'ORCAMENTO', 'FORECAST'];
+    const larguras = [{ wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 8 }, { wch: 22 }, { wch: 16 }];
+    // duas linhas de exemplo apenas para fixar o formato — apague antes de colar a extração
+    const exemplo = [
+      ['04/08/2026', 'CH', 'BUSCOPAN', '7891058-001', 'VD', 'DROGASIL', 412880],
+      ['04/08/2026', 'SG - GENÉRICOS', 'DIPIRONA SODICA MG', '7891058-410', 'VI', 'OUTROS', 288100],
+      ['04/08/2026', 'SG - SMART (EX-VIT)', 'TORSILAX', '7891058-512', 'VD', 'PAGUE MENOS', 196700],
+      ['04/08/2026', 'VIT NEO QUÍMICA', 'VITASAY', '7891058-908', 'VI', 'OUTROS', 41300]
+    ];
+    const wsV = X.utils.aoa_to_sheet([COLS_T].concat(exemplo));
+    wsV['!cols'] = larguras; X.utils.book_append_sheet(wb, wsV, 'Vendas');
+    const dimsProj = [
+      ['CH', 'BUSCOPAN', '7891058-001', 'VD', 'DROGASIL'],
+      ['PP', 'ADDERA D3', '7891058-733', 'VD', 'RAIA'],
+      ['SG - GENÉRICOS', 'DIPIRONA SODICA MG', '7891058-410', 'VI', 'OUTROS']
+    ];
+    const colsProj = [{ wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 8 }, { wch: 22 }, { wch: 26 }];
+    const wsPI = X.utils.aoa_to_sheet([COLS_PI].concat(
+      dimsProj.map((d, i) => d.concat([[12398500, 15512000, 8275000][i]]))));
+    wsPI['!cols'] = colsProj; X.utils.book_append_sheet(wb, wsPI, 'Projeção inicial');
+    const wsPA = X.utils.aoa_to_sheet([COLS_PA].concat(
+      dimsProj.map((d, i) => d.concat([[12405100, 15531700, 8281400][i]]))));
+    wsPA['!cols'] = colsProj; X.utils.book_append_sheet(wb, wsPA, 'Projeção atual');
+    const wsO = X.utils.aoa_to_sheet([COLS_O].concat([
+      ['CH', 'BUSCOPAN', '7891058-001', 'VD', 'DROGASIL', 12410000, 12402000],
+      ['PP', 'ADDERA D3', '7891058-733', 'VD', 'RAIA', 15520000, 15528000],
+      ['SG - GENÉRICOS', 'DIPIRONA SODICA MG', '7891058-410', 'VI', 'OUTROS', 8279000, 8283000]
+    ]));
+    wsO['!cols'] = [{ wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 8 }, { wch: 22 }, { wch: 16 }, { wch: 16 }];
+    X.utils.book_append_sheet(wb, wsO, 'Orçamento');
+    const wsAA = X.utils.aoa_to_sheet([COLS_T].concat(
+      [['04/08/2025', 'CH', 'BUSCOPAN', '7891058-001', 'VD', 'DROGASIL', 390400]]));
+    wsAA['!cols'] = larguras.slice(0, 7); X.utils.book_append_sheet(wb, wsAA, 'Vendas AA');
+    X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([
+      ['campo', 'valor'], ['referencia', M.referencia], ['dataCorte', M.dataCorte], ['dataCorteAA', ''],
+      ['diasUteis', M.diasUteis], ['diasUteisAA', M.diasUteisAA],
+      ['topMarcas', 5], ['destaqueMinimo', 2], ['destaqueQtd', 8], ['divisor', 1000000],
+      ['consideracoes', M.consideracoes], ['hub', M.links.hub], ['executivos', M.links.executivos],
+      ['deck', M.links.deck], ['pdf', M.links.pdf],
+      ['destinatarios', M.envio.para], ['destinatariosGO', M.envio.para2], ['copia', M.envio.cc], ['assunto', M.envio.assunto],
+      ['prontoParaEnvio', M.envio.pronto ? 'SIM' : 'NÃO']
+    ]), 'Meta');
+    const BUS_C = ['CH', 'PP', 'SC', 'SG'];
+    const wsC = X.utils.aoa_to_sheet([['dia', 'BU', 'CANAL', 'MARCA', 'realAA', 'real', 'proj', 'projOriginal']].concat(
+      BUS_C.reduce((acc, b) => acc.concat(['VD', 'VI'].reduce((a2, cn) =>
+        a2.concat(Array.from({ length: 31 }, (_, i) => [i + 1, b, cn, '', null, null, null, null])), [])), [])));
+    wsC['!cols'] = [{ wch: 6 }, { wch: 10 }, { wch: 8 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }];
+    X.utils.book_append_sheet(wb, wsC, 'Curva');
+    // histórico mensal: alimenta o comparativo de anos (2022...) das páginas de gráficos
+    const anoAtual = new Date().getFullYear();
+    const wsH = X.utils.aoa_to_sheet([['ano', 'mes', 'BU', 'CANAL', 'valor']].concat(
+      [[anoAtual - 1, 1, 'CH', 'VD', null], [anoAtual - 1, 1, 'CH', 'VI', null]]));
+    wsH['!cols'] = [{ wch: 7 }, { wch: 6 }, { wch: 10 }, { wch: 8 }, { wch: 14 }];
+    X.utils.book_append_sheet(wb, wsH, 'Histórico Mensal');
+    // como a projeção de cada BU foi construída — reproduz a aba Resumo dos gráficos por BU
+    const wsR = X.utils.aoa_to_sheet([['BU', 'metodo', 'dados', 'ajuste', 'reuniao']].concat(
+      BUS_C.map(b => [b, 'Estatístico', 'Proj + Real', '', ''])));
+    wsR['!cols'] = [{ wch: 10 }, { wch: 16 }, { wch: 16 }, { wch: 28 }, { wch: 10 }];
+    X.utils.book_append_sheet(wb, wsR, 'Resumo Projeção');
+    // de/para de cliente: agrupa a abertura por cliente das tabelas
+    const wsCl = X.utils.aoa_to_sheet([['CLIENTE', 'REDE', 'GRUPO', 'UF']].concat(
+      [['DROGASIL', 'RAIA DROGASIL', 'Grandes redes', 'SP'], ['OUTROS', 'OUTROS', 'Demais', '']]));
+    wsCl['!cols'] = [{ wch: 24 }, { wch: 20 }, { wch: 18 }, { wch: 6 }];
+    X.utils.book_append_sheet(wb, wsCl, 'Clientes');
+    const slug = n => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '.csv';
+    wb.SheetNames.forEach((n, i) => setTimeout(
+      () => this._dl(slug(n), '\uFEFF' + X.utils.sheet_to_csv(wb.Sheets[n], { FS: ';' }), 'text/csv;charset=utf-8'), i * 250));
+    info.style.color = '#0a7d34';
+    info.innerHTML = '✓ Modelo gerado: um CSV por tabela — <b>' + wb.SheetNames.map(slug).join('</b>, <b>') + '</b>. '
+      + 'Separador <b>;</b>, UTF-8. <b>vendas</b> (mês corrente), '
+      + '<b>vendas-aa</b> (mês fechado do ano anterior), <b>projecao-inicial</b> e <b>projecao-atual</b> (mês cheio, sem data), '
+      + '<b>orcamento</b> (orçamento absoluto do mês, sem data), '
+      + '<b>meta</b> (parâmetros, links e trava de envio), <b>historico-mensal</b> (venda mensal por ano, BU e canal), '
+      + '<b>resumo-projecao</b> (método, dados e ajustes por BU), <b>clientes</b> (de/para cliente → rede), <b>curva</b> '
+      + '(venda por dia corrido, por BU e canal, em R$ mi — alimenta o ritmo do mês da apresentação e do resumo do Teams). Na coluna BU use CH, PP, SC '
+      + 'e as três sublinhas de SG (SG - GENÉRICOS, SG - SMART (EX-VIT), VIT NEO QUÍMICA): SG e SG - SIMILARES são calculadas. '
+      + 'Cole a extração diária nos arquivos de venda, em R$, e devolva todos aqui de uma vez. Arquivo grande pode ser quebrado em vendas-01.csv, vendas-02.csv…';
+  }
+
+  _dl(nome, txt, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], { type: mime + ';charset=utf-8' }));
+    a.download = nome; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    this.$('status').textContent = nome + ' baixado.';
+  }
+
+  _preview() {
+    const box = this.$('prevBox'), fr = this.$('prevFrame');
+    box.style.display = 'block';
+    this.$('prevMeta').textContent = (this._v('inpRef') || '') + ' · dados até ' + (this._v('inpCorte') || '');
+    const wrap = this.$('prevWrap');
+    if (wrap) wrap.style.height = 'auto';
+    fr.style.height = '400px';
+    fr.onload = () => {
+      this._prevLargura(this._prevW || 1000);
+      [80, 300, 800].forEach(t => setTimeout(() => this._prevAltura(), t));
+    };
+    fr.srcdoc = this._emailFile(this._prevG2);
+  }
+
+  /** Mantém a largura real do e-mail e reduz por escala, sem cortar nada. */
+  _prevAltura() {
+    const fr = this.$('prevFrame'), wrap = this.$('prevWrap'), d = fr && fr.contentDocument;
+    if (!fr || !d || !d.body) return;
+    const w = this._prevW || 1000;
+    const alt = Math.max(400, Math.max(d.body.scrollHeight, d.documentElement.scrollHeight) + 24);
+    fr.style.width = w + 'px';
+    fr.style.height = alt + 'px';
+    const disp = wrap ? wrap.clientWidth : w;
+    const k = Math.min(1, disp / w);
+    fr.style.transform = k < 1 ? 'scale(' + k.toFixed(4) + ')' : 'none';
+    if (wrap) wrap.style.height = Math.ceil(alt * k) + 'px';
+  }
+
+  _prevLargura(w) {
+    const fr = this.$('prevFrame');
+    this._prevW = w;
+    fr.style.width = w + 'px';
+    [['prevDesk', 1000], ['prevMob', 400]].forEach(([id, v]) => {
+      const b = this.$(id), on = v === w;
+      b.style.background = on ? '#0062AA' : '#fff';
+      b.style.color = on ? '#fff' : '#0062AA';
+      b.style.borderColor = on ? '#0062AA' : '#A9D0EE';
+    });
+    setTimeout(() => this._prevAltura(), 60);
+  }
+
+  // ---------- envio ----------
+  _assunto() {
+    const ref = (this._v('inpRef') || '').trim();
+    const p = (this._v('inpCorte') || '').trim().split('/');
+    return 'Boletim Sell Out | ' + ref + (p[0] ? ' — dados até ' + p[0] + '/' + (p[1] || '') : '');
+  }
+
+  /** Alterna a pré-visualização entre os dois grupos. */
+  _prevGrupo(g2) {
+    this._prevG2 = g2;
+    const on = { bg: '#0062AA', bd: '#0062AA', c: '#fff' }, off = { bg: '#fff', bd: '#A9D0EE', c: '#0062AA' };
+    [['prevG1', !g2], ['prevG2', g2]].forEach(([id, ativo]) => {
+      const st = ativo ? on : off, b = this.$(id);
+      b.style.background = st.bg; b.style.borderColor = st.bd; b.style.color = st.c;
+    });
+    this._preview();
+  }
+
+  _envio() {
+    return {
+      para: this._v('inpPara').trim(),
+      para2: this._v('inpPara2').trim(),
+      cc: this._v('inpCc').trim(),
+      assunto: this._v('inpAssunto').trim() || this._assunto(),
+      pronto: this._ck('chkPronto')
+    };
+  }
+
+  _copiar(g2) {
+    const info = this.$('envInfo'), html = this._emailFile(g2);
+    const corpo = html.replace(/^[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\s\S]*$/i, '');
+    const ok = () => { info.style.color = '#0a7d34'; info.textContent = '✓ E-mail ' + (g2 ? 'de Gestão Orçamentária' : 'comercial') + ' copiado — cole no Outlook com Ctrl+V.'; };
+    const falha = () => { info.style.color = '#B32B23'; info.textContent = 'Não foi possível copiar. Use "Pré-visualizar e-mail", selecione tudo e copie manualmente.'; };
+    if (navigator.clipboard && window.ClipboardItem) {
+      navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([corpo], { type: 'text/html' }),
+        'text/plain': new Blob([this._v('inpAssunto') || this._assunto()], { type: 'text/plain' })
+      })]).then(ok).catch(falha);
+    } else falha();
+  }
+
+  // ---------- e-mail do dia (mesmo layout de "boletim-sell-out-email.html") ----------
+  _emailFile(g2) {
+    const M = this._meta(), esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const F = this.fatos.map(f => { const o = {}; this.cols.forEach((c, i) => o[c] = f[i]); return o; });
+    const g = (bu, marca, rede) => F.find(o => o.bu === bu && o.marca === marca && o.rede === rede) || null;
+    const tot = g('Total s/ Cobertura', 'TOTAL', 'TOTAL') || {};
+    const cVD = g('TOTAL', 'TOTAL', 'VD') || {}, cVI = g('TOTAL', 'TOTAL', 'VI') || {};
+    const mtdAA = (M.mtd && M.mtd.aa) || {}, mtdAt = (M.mtd && M.mtd.atual) || {};
+    const num = v => (typeof v === 'number' ? v : null);
+    const menos = (a, b) => (typeof a === 'number' && typeof b === 'number') ? a - b : null;
+
+    // ----- barras empilhadas VD (claro) + VI (escuro) -----
+    const barra = (rotulo, vd, vi, escala) => {
+      const t = (vd || 0) + (vi || 0);
+      const h = v => Math.max(14, Math.round((v || 0) * escala));
+      const seg = (v, bg, cor) => '<tr><td height="' + h(v) + '" align="center" bgcolor="' + bg + '" style="height:' + h(v) +
+        'px;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:' + h(v) + 'px;mso-line-height-rule:exactly;font-weight:bold;color:' + cor + ';">' + this._fmt(v) + '</td></tr>';
+      return '<td width="56" valign="bottom" style="width:56px;padding:0 7px 0 7px;">' +
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="56" style="width:56px;">' +
+        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:19px;font-weight:bold;color:#074878;padding-bottom:4px;">' + this._fmt(t) + '</td></tr>' +
+        seg(vi, '#074878', '#FFFFFF') + seg(vd, '#A9D0EE', '#074878') +
+        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:17px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
+        '</table></td>';
+    };
+
+    const cartao = (eyebrow, valor, sub, delta, barras, nota) =>
+      '<td class="kpi" width="33%" valign="top" bgcolor="#EDF6FC" style="width:33%;background-color:#EDF6FC;border-radius:8px;padding:16px 16px 14px;border-left:6px solid #FFFFFF;border-right:6px solid #FFFFFF;font-family:Calibri,Arial,sans-serif;">' +
+      '<div style="font-size:13px;line-height:18px;letter-spacing:1px;text-transform:uppercase;color:#5D5F61;font-weight:bold;">' + esc(eyebrow) + '</div>' +
+      '<div style="font-size:36px;line-height:42px;mso-line-height-rule:exactly;font-weight:bold;color:#074878;padding-top:4px;">' + this._fmt(valor) + '</div>' +
+      '<div style="font-size:14px;line-height:19px;color:#5D5F61;">' + esc(sub) + '</div>' +
+      '<div style="font-size:16px;line-height:22px;font-weight:bold;color:' + this._cor(delta) + ';padding:6px 0 12px;">' + this._pct(delta) + ' vs AA</div>' +
+      '<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>' + barras + '</tr></table>' +
+      '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:8px;">' + nota + '</div></td>';
+
+    const esc114 = t => t ? 114 / t : 0;
+    const e1 = esc114(Math.max((M.mes.aa.total || 0), (M.mes.proj.total || 0)));
+    const c1 = cartao('Projeção do mês', tot.proj, M.moeda + ', s/ cobertura', this._cres(tot, 'proj'),
+      barra('AA', M.mes.aa.vd, M.mes.aa.vi, e1) + barra('Projetado', M.mes.proj.vd, M.mes.proj.vi, e1),
+      'VD ' + this._pct(num(M.mes.cresVD)) + ' &#183; VI ' + this._pct(num(M.mes.cresVI)));
+
+    const mtdAAt = (mtdAA.vd || 0) + (mtdAA.vi || 0), mtdAtt = (mtdAt.vd || 0) + (mtdAt.vi || 0);
+    const e2 = esc114(Math.max(mtdAAt, mtdAtt));
+    const c2 = cartao('Realizado', tot.real, M.moeda + ', ' + M.diasUteis + ' dias úteis', num(M.mtd.cresc),
+      barra('MTD ' + (String(M.referencia).match(/\d{2}$/) ? String(Number(String(M.referencia).slice(-2)) - 1) : 'AA'), mtdAA.vd, mtdAA.vi, e2) +
+      barra('Realizado', mtdAt.vd, mtdAt.vi, e2),
+      'VD ' + this._pct(num(cVD.cresc)) + ' &#183; VI ' + this._pct(num(cVI.cresc)) + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis');
+
+    const mtgVD = menos(M.mes.proj.vd, mtdAt.vd), mtgVI = menos(M.mes.proj.vi, mtdAt.vi);
+    const mtgAAvd = menos(M.mes.aa.vd, mtdAA.vd), mtgAAvi = menos(M.mes.aa.vi, mtdAA.vi);
+    const mtg = (mtgVD || 0) + (mtgVI || 0), mtgAA = (mtgAAvd || 0) + (mtgAAvi || 0);
+    const e3 = esc114(Math.max(mtg, mtgAA));
+    const c3 = cartao('MTG', mtg, M.moeda + ', Projetado − Realizado', mtgAA ? (mtg / mtgAA - 1) * 100 : null,
+      barra('MTG AA', mtgAAvd, mtgAAvi, e3) + barra('MTG', mtgVD, mtgVI, e3),
+      (() => {
+        const at = tot.orcAbs ? tot.proj / tot.orcAbs * 100 : null;
+        const gap = tot.orcAbs != null ? tot.proj - tot.orcAbs : null;
+        const rev = tot.projIni != null ? tot.proj - tot.projIni : null;
+        const sn = v => v == null ? '-' : (v > 0 ? '+' : '') + this._fmt(v);
+        return 'Cota: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
+          + ' &#183; revisão ' + sn(rev) + ' vs. inicial';
+      })());
+
+    // ----- tabela de BUs com marcas retráteis -----
+    const th = t => '<th align="center" style="font-size:11px;line-height:17px;mso-line-height-rule:exactly;font-weight:bold;color:#0062AA;padding:4px 4px 6px;border-bottom:1.5px solid #00BFDF;">' + t + '</th>';
+    const td = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'center') + '" style="font-size:14px;line-height:20px;mso-line-height-rule:exactly;' + (o.it === false ? '' : 'font-style:italic;') + 'color:' + (o.c || '#292A2B') + ';font-weight:' + (o.b ? 'bold' : 'normal') + ';padding:' + (o.p || '5px 4px') + ';' + (o.bd || 'border-bottom:1px solid #EFEFEF;') + '">' + t + '</td>'; };
+    const tdSub = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'center') + '" style="font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:' + (o.c || '#5D5F61') + ';font-weight:' + (o.b ? 'bold' : 'normal') + ';padding:4px 4px;' + (o.pl || '') + 'border-bottom:1px solid #F2F7FB;background-color:#F7FBFE;">' + t + '</td>'; };
+
+    const COM_MARCA = ['CH', 'PP', 'SC', 'SG'];
+    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES', 'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura'];
+    const linhas = ordBU.map(k => {
+      const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
+      const isTot = k.indexOf('Total') === 0, muted = /COBERTURA|GENÉRICOS|SIMILARES/.test(k);
+      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'VIT NEO QUÍMICA' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
+      const cinza = muted ? '#5D5F61' : '#292A2B';
+      const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
+      const rot = COM_MARCA.indexOf(k) >= 0
+        ? '<label for="c-' + k + '" style="cursor:pointer;color:#0062AA;">' + k + ' <span style="font-size:10px;">&#9660;</span></label>'
+        : esc(k) + (k === 'COBERTURA' ? '*' : '');
+      let out = '<tr>' + td(rot, { it: false, b: true, c: isTot ? '#292A2B' : (muted ? '#5D5F61' : '#0062AA'), bd: bd, p: '5px 4px 5px 0' }) +
+        [r.realAA, r.real, r.proj].map(v => td(this._fmt(v), { c: cinza, b: isTot, bd: bd })).join('') +
+        td(this._pct(p1), { c: this._cor(p1), b: true, bd: bd }) +
+        td(this._fmt(r.projIni), { c: cinza, b: isTot, bd: bd }) +
+        td(this._pct(p2), { c: this._cor(p2), b: true, bd: bd }) +
+        td(this._fmt(r.orcAbs), { c: cinza, b: isTot, bd: bd }) +
+        td(this._pct(p3), { c: this._cor(p3), b: true, bd: bd }) +
+        (g2 ? td(this._fmt(r.forecast), { c: cinza, b: isTot, bd: bd })
+          + td(this._pct(this._vsFcst(r)), { c: this._cor(this._vsFcst(r)), b: true, bd: bd }) : '') +
+        td(this._pct(r.vd), { c: cinza, b: isTot, bd: bd }) +
+        td(this._pct(r.vi), { c: cinza, b: isTot, bd: bd, p: '5px 0 5px 4px' }) + '</tr>';
+      if (COM_MARCA.indexOf(k) >= 0) {
+        const projBU = r.proj || 0;
+        const marcasBU = F.filter(o => o.bu === k && o.rede === 'TOTAL' && o.marca !== 'TOTAL' && o.marca !== 'TOTAL PB')
+          .sort((a, b) => (a.marca === 'DEMAIS' ? 1 : b.marca === 'DEMAIS' ? -1 : (b.proj || 0) - (a.proj || 0)));
+        out += marcasBU.map(o => {
+          const pp = this._cres(o, 'proj');
+          const rep = projBU > 0 && o.proj != null ? (o.proj / projBU) * 100 : null;
+          const nome = (o.marca === 'DEMAIS' ? 'Demais marcas' : esc(o.marca))
+            + (rep != null ? ' <span style="color:#8A8C8E;font-weight:normal;">' + this._pct(rep) + '</span>' : '');
+          return '<tr class="sub s-' + k + '">' +
+            tdSub('&#8226; ' + nome, { a: 'left', c: '#434445', pl: 'padding-left:14px;' }) +
+            [o.realAA, o.real, o.proj].map(v => tdSub(this._fmt(v))).join('') +
+            tdSub(this._pct(pp), { c: this._cor(pp), b: true }) +
+            tdSub(this._fmt(o.projIni)) + tdSub(this._pct(this._cres(o, 'projIni'))) +
+            tdSub(this._fmt(o.orcAbs)) + tdSub(this._pct(this._cres(o, 'orcAbs'))) +
+            (g2 ? tdSub(this._fmt(o.forecast)) + tdSub(this._pct(this._vsFcst(o)), { c: this._cor(this._vsFcst(o)), b: true }) : '') +
+            tdSub(this._pct(o.vd)) + tdSub(this._pct(o.vi)) + '</tr>';
+        }).join('');
+      }
+      return out;
+    }).join('');
+
+    const botao = (href, texto, primario) =>
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:' + (primario ? '#0062AA' : '#FFFFFF') +
+      ';border:1px solid ' + (primario ? '#0062AA' : '#A9D0EE') + ';border-radius:8px;"><tr><td align="center" valign="middle" height="62" style="height:62px;padding:0 18px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<a href="' + esc(href) + '" style="display:block;font-size:18px;line-height:26px;mso-line-height-rule:exactly;font-weight:bold;color:' + (primario ? '#FFFFFF' : '#0062AA') + ';text-decoration:none;text-align:center;">' + texto + '</a></td></tr></table>';
+
+    const logo = window.LOGO_EMAIL_HYPERA || '';
+
+    return '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="color-scheme" content="light dark">\n<title>Boletim Sell Out - ' + esc(M.dataCorte) + '</title>\n' +
+      '<!--[if mso]>\n<style>table,td,div,p,a{font-family:Calibri,Arial,sans-serif !important;}</style>\n<![endif]-->\n' +
+      '<style>\n.tgl{display:none !important;}\n' +
+      '#c-CH:checked ~ table tr.s-CH,#c-PP:checked ~ table tr.s-PP,#c-SC:checked ~ table tr.s-SC,#c-SG:checked ~ table tr.s-SG{display:none;}\n' +
+      '@media only screen and (max-width:620px){\n' +
+      '.wrap{width:100% !important}\n.pad{padding-left:12px !important;padding-right:12px !important}\n' +
+      '.hdrcta{display:none !important}\n.hdrlogo{display:block !important;width:auto !important;padding:0 0 10px !important;border-right:0 !important}\n' +
+      '.hdrtit{display:block !important;padding-left:0 !important}\n.hdrh1{font-size:21px !important;line-height:27px !important}\n' +
+      '.kpi{display:block !important;width:100% !important;box-sizing:border-box !important;border-left:0 !important;border-right:0 !important;margin-bottom:10px !important}\n' +
+      '.tbl{table-layout:fixed !important;width:100% !important}\n.tbl colgroup{display:none !important}\n' +
+      '.tbl th,.tbl td{white-space:normal !important;word-break:break-word !important;overflow:hidden !important}\n' +
+      '.tbl td,.tbl th{font-size:12px !important;line-height:17px !important;padding:6px 3px !important}\n' +
+      (() => {
+        // no celular só as colunas que cabem: g2 mantém forecast e abre mão de VD/VI
+        const esconde = g2 ? [6, 7, 8, 9, 12, 13] : [6, 7, 8, 9];
+        return esconde.map(n => '.tbl th:nth-child(' + n + '),.tbl td:nth-child(' + n + ')').join(',') + '{display:none !important}\n';
+      })() +
+      '.cta2{display:block !important;width:100% !important;padding:0 0 10px !important}\n' +
+      // g2 tem duas colunas a mais: aperta padding e corpo para caber em 400px sem cortar
+      (g2 ? '.pad{padding-left:6px !important;padding-right:6px !important}\n'
+        + '.tbl td,.tbl th{font-size:11px !important;line-height:16px !important;padding:5px 2px !important}\n' : '') +
+      '}</style>\n</head>\n' +
+      '<body style="margin:0;padding:0;background-color:#FFFFFF;">\n' +
+      '<span style="display:none;font-size:1px;color:#FFF;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Boletim Sell Out de ' + esc(M.referencia) + ' atualizado com dados até ' + esc(M.dataCorte) + ', disponível no HUB na área Corp.</span>\n' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="left">\n' +
+      '<input class="tgl" type="checkbox" id="c-CH" checked><input class="tgl" type="checkbox" id="c-PP" checked><input class="tgl" type="checkbox" id="c-SC" checked><input class="tgl" type="checkbox" id="c-SG" checked>\n' +
+      '<table role="presentation" class="wrap" cellpadding="0" cellspacing="0" border="0" width="980" style="width:980px;max-width:980px;">\n' +
+      // cabeçalho
+      '<tr><td style="background-color:#0A3D80;background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%);border-bottom:2px solid #00BFDF;padding:18px 24px 20px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+      '<td class="hdrlogo" width="112" valign="middle" style="width:112px;padding-right:24px;border-right:1px solid rgba(169,208,238,0.45);">' +
+      (logo ? '<img src="' + logo + '" width="96" height="33" alt="Hypera" style="display:block;width:96px;height:33px;border:0;outline:none;text-decoration:none;" />' : '') + '</td>' +
+      '<td class="hdrtit" valign="middle" style="padding-left:24px;">' +
+      '<div class="hdrh1" style="font-size:26px;line-height:32px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;">Boletim Sell Out'
+      + (g2 ? ' &#183; Gestão Orçamentária' : '') + ' &#8211; ' + esc(M.referencia) + '</div>' +
+      '<div style="font-size:14px;line-height:21px;mso-line-height-rule:exactly;color:#A9D0EE;padding-top:3px;">Dados até ' + esc(M.dataCorte) + ' &#183; ' + M.diasUteis + ' dias úteis realizados</div></td>' +
+      '<td class="hdrcta" align="right" valign="middle" style="font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<a href="' + esc(M.links.deck || 'boletim-sell-out.dc.html') + '" style="display:inline-block;font-size:12px;line-height:16px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;text-decoration:none;border:1px solid #A9D0EE;border-radius:6px;padding:6px 11px;">Ver apresentação &#8594;</a></td>' +
+      '</tr></table></td></tr>\n' +
+      // cartões
+      '<tr><td class="pad" style="padding:22px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + c1 + c2 + c3 + '</tr></table>' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding:8px 0 0;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:19px;color:#5D5F61;">' +
+      '<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#A9D0EE;">&nbsp;</span> VD &#160;&#160;<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#074878;">&nbsp;</span> VI</td></tr></table></td></tr>\n' +
+      // tabela
+      '<tr><td class="pad" style="padding:26px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<div style="font-size:18px;line-height:26px;font-weight:bold;color:#0062AA;">Crescimento BUs <span style="font-weight:normal;font-size:14px;color:#5D5F61;">(' + esc(M.moeda) + ')</span></div>' +
+      '<table role="presentation" class="tbl" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;table-layout:fixed;border-collapse:collapse;font-family:Calibri,Arial,Helvetica,sans-serif;margin-top:12px;">' +
+      '<colgroup>' + (g2
+        ? ['17%', '8%', '7.5%', '7.5%', '6%', '8%', '6%', '7.5%', '7%', '7.5%', '6.5%', '6%', '5.5%']
+        : ['19%', '9%', '8.5%', '8.5%', '6.5%', '9%', '6.5%', '8%', '8%', '8.5%', '8.5%']).map(w => '<col style="width:' + w + '">').join('') + '</colgroup><tr>' +
+      ['BU', 'REAL AA', 'REAL', 'PROJ.', '% PROJ', 'PROJ. INICIAL', '% PROJ', 'ORÇ. ABS', '% CRES ORÇ']
+        .concat(g2 ? ['FORECAST', '% FCST'] : []).concat(['VD', 'VI']).map(th).join('') + '</tr>' + linhas + '</table>' +
+      '<div style="font-size:13px;line-height:19px;font-weight:bold;color:#0062AA;padding-top:6px;">*A cobertura não está incluída no Power BI do Boletim Sell Out.</div>' +
+      '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:2px;">Clique em CH, PP, SC ou SG para ver as marcas da BU.</div>' +
+      '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:4px;">Fonte: ' + esc(M.fonte) + '. Realizado atual: ' + M.diasUteis + ' dias úteis. MTD ano anterior: ' + M.diasUteisAA + ' dias úteis.</div>' +
+      '</td></tr>\n' +
+      // botões
+      '<tr><td class="pad" style="padding:26px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+      '<td class="cta2" width="50%" valign="top" style="width:50%;padding:0 6px;">' + botao(M.links.hub, 'Acesse o Boletim on-line', true) + '</td>' +
+      '<td class="cta2" width="50%" valign="top" style="width:50%;padding:0 6px;">' + botao(M.links.executivos, 'Demais relatórios de IM&amp;P', false) + '</td>' +
+      '</tr></table></td></tr>\n' +
+      '<tr><td class="pad" style="padding:12px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#FFFFFF;border:1px solid #0062AA;border-radius:8px;">' +
+      '<tr><td align="center" valign="middle" height="56" style="height:56px;padding:0 18px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<a href="' + esc(M.links.pdf || '#') + '" style="display:block;font-size:17px;line-height:24px;mso-line-height-rule:exactly;font-weight:bold;color:#0062AA;text-decoration:none;text-align:center;">Baixar apresentação completa (PDF) &#8594;</a>' +
+      '</td></tr></table></td></tr>\n' +
+      '<tr><td height="30" style="height:30px;line-height:30px;font-size:0;">&nbsp;</td></tr>\n' +
+      '</table></td></tr></table>\n</body>\n</html>\n';
+  }
+
+}
+</script>
+</body>
+</html>

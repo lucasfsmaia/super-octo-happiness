@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
+  <script src="base-boletim.js?v=20260902c"></script>
+</helmet>
+<div style="font-family:'Asap',sans-serif;">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#074878"></rect><g transform="translate(28,30)"><rect x="0" y="24" width="9" height="16" rx="2" fill="#00BFDF"></rect><rect x="13" y="12" width="9" height="28" rx="2" fill="#A9D0EE"></rect><rect x="26" y="0" width="9" height="40" rx="2" fill="#fff"></rect></g></svg></template>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1358" hint-size="100%,100%" data-uneditable="">
+
+  <section data-label="Capa" data-screen-label="01" data-speaker-notes="" style="position:relative; overflow:hidden; background:#074878;">
+    <img src="assets/cover-blue-textured-a4.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:left center; opacity:.5;">
+    <div style="position:absolute; inset:0; background:linear-gradient(105deg, rgba(7,72,120,.95) 0%, rgba(0,98,170,.78) 55%, rgba(0,191,223,.32) 100%);"></div>
+    <div style="position:relative; height:100%; box-sizing:border-box; padding:110px 120px; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
+      <div>
+        <div style="font-size:26px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Gestão Orçamentária</div>
+        <h1 style="font-size:92px; line-height:1.04; font-weight:700; margin:0;">Boletim Sell Out</h1>
+        <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:38px 0 30px;"></div>
+        <p id="capaRef" style="font-size:36px; font-weight:500; margin:0; color:#EDF6FC;">Agosto/26</p>
+      </div>
+      <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+        <span id="capaSelo" style="font-size:24px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 26px; border-radius:800px;">Dados até 15/08/26</span>
+        <img src="assets/logo-hypera-branco.svg" alt="Hypera Pharma" style="height:52px;">
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Sumário Executivo" data-screen-label="02" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Sumário Executivo</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div id="sumKpis" style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-top:18px;"></div>
+      <div style="display:grid; grid-template-columns:2.5fr 0.85fr; gap:60px; margin-top:34px;">
+        <div>
+          <div style="font-size:26px; font-weight:700; color:#292A2B; padding-bottom:6px;">Crescimento por BU</div>
+          <div style="font-size:22px; color:#5D5F61; padding-bottom:20px; white-space:nowrap;">projeção do mês vs. ano anterior, atingimento da cota e a principal marca de cada BU</div>
+          <div id="sumBUs"></div>
+        </div>
+        <div>
+          <div style="font-size:26px; font-weight:700; color:#292A2B; padding-bottom:6px;">Maiores redes</div>
+          <div style="font-size:22px; color:#5D5F61; padding-bottom:20px; white-space:nowrap;">projetado e % vs. ano anterior</div>
+          <div id="sumRedes"></div>
+        </div>
+      </div>
+      <div style="flex:1; min-height:0;"></div>
+      <div style="margin-top:20px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px;">
+          <div>
+            <div style="font-size:26px; font-weight:700; color:#292A2B; padding-bottom:6px;">Ritmo do mês</div>
+            <div style="font-size:22px; color:#5D5F61;">venda por dia, em R$ mi</div>
+          </div>
+          <div id="sumCurvaLeg" style="display:flex; align-items:center; gap:34px; flex-shrink:0;"></div>
+        </div>
+        <div id="sumCurva" style="margin-top:14px;"></div>
+      </div>
+      <div id="rodape2" style="font-size:19px; color:#5D5F61; margin-top:26px;"></div>
+    </div>
+  </section>
+
+  <section data-label="Crescimento BUs" data-screen-label="03" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Crescimento BUs</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; padding:36px 0 0;"><table data-tbl="bu" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div data-cards="bu" style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-top:34px;"></div>
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:40px; margin-top:26px;">
+        <div style="font-size:19px; color:#0062AA; font-weight:600;">*A cobertura não está incluída no Power BI do Boletim Sell Out.</div>
+        <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Crescimento Canal" data-screen-label="04" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Crescimento Canal</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; padding:36px 0 0;"><table data-tbl="canal" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div data-cards="canal" style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:12px;"></div>
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:40px; margin-top:26px;">
+        <div style="font-size:19px; color:#0062AA; font-weight:600;"></div>
+        <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Resumo CH" data-screen-label="05" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Resumo CH – Marcas e Redes</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="padding-top:30px;"><table data-tbl="pb:CH" data-compact="1" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="margin-top:44px; border-top:2px solid #DCEAF6; padding-top:22px; display:flex; align-items:baseline; gap:16px;">
+        <div style="font-size:28px; font-weight:700; color:#292A2B;">Crescimento por rede</div>
+        <div style="font-size:24px; color:#5D5F61;">MTD 2026 vs 2025 · redes ordenadas por peso na BU</div>
+      </div>
+      <div style="padding-top:14px;"><table data-tbl="hm:CH" style="width:100%; border-collapse:separate; border-spacing:3px 4px; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right; margin-top:26px;"></div>
+    </div>
+  </section>
+
+<section data-label="Resumo PP" data-screen-label="06" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Resumo PP – Marcas e Redes</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="padding-top:30px;"><table data-tbl="pb:PP" data-compact="1" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="margin-top:44px; border-top:2px solid #DCEAF6; padding-top:22px; display:flex; align-items:baseline; gap:16px;">
+        <div style="font-size:28px; font-weight:700; color:#292A2B;">Crescimento por rede</div>
+        <div style="font-size:24px; color:#5D5F61;">MTD 2026 vs 2025 · redes ordenadas por peso na BU</div>
+      </div>
+      <div style="padding-top:14px;"><table data-tbl="hm:PP" style="width:100%; border-collapse:separate; border-spacing:3px 4px; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right; margin-top:26px;"></div>
+    </div>
+  </section>
+
+<section data-label="Resumo SC" data-screen-label="07" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Resumo SC – Marcas e Redes</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="padding-top:30px;"><table data-tbl="pb:SC" data-compact="1" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="margin-top:44px; border-top:2px solid #DCEAF6; padding-top:22px; display:flex; align-items:baseline; gap:16px;">
+        <div style="font-size:28px; font-weight:700; color:#292A2B;">Crescimento por rede</div>
+        <div style="font-size:24px; color:#5D5F61;">MTD 2026 vs 2025 · redes ordenadas por peso na BU</div>
+      </div>
+      <div style="padding-top:14px;"><table data-tbl="hm:SC" style="width:100%; border-collapse:separate; border-spacing:3px 4px; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right; margin-top:26px;"></div>
+    </div>
+  </section>
+
+<section data-label="Resumo SG" data-screen-label="08" data-speaker-notes="" style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:64px 80px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:40px; border-bottom:4px solid #0062AA; padding-bottom:18px;">
+        <h2 style="font-size:40px; line-height:1.1; font-weight:700; color:#292A2B; margin:0; letter-spacing:-.01em;">Resumo SG – Marcas e Redes</h2>
+        <div style="display:flex; align-items:center; gap:26px; flex-shrink:0;">
+          <span style="font-size:24px; font-weight:600; color:#5D5F61; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;">R$ PX</span>
+          <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:36px;">
+        </div>
+      </div>
+      <div style="padding-top:30px;"><table data-tbl="pb:SG" data-compact="1" style="width:100%; border-collapse:collapse; table-layout:fixed;"></table></div>
+      <div style="margin-top:44px; border-top:2px solid #DCEAF6; padding-top:22px; display:flex; align-items:baseline; gap:16px;">
+        <div style="font-size:28px; font-weight:700; color:#292A2B;">Crescimento por rede</div>
+        <div style="font-size:24px; color:#5D5F61;">MTD 2026 vs 2025 · redes ordenadas por peso na BU</div>
+      </div>
+      <div style="padding-top:14px;"><table data-tbl="hm:SG" style="width:100%; border-collapse:separate; border-spacing:3px 4px; table-layout:fixed;"></table></div>
+      <div style="flex:1; min-height:0;"></div>
+      <div class="hy-fonte" style="font-size:18px; color:#5D5F61; text-align:right; margin-top:26px;"></div>
+    </div>
+  </section>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  <section data-label="Obrigado" data-screen-label="09" data-speaker-notes="Encerramento." style="position:relative; overflow:hidden; background:#074878;">
+    <div style="position:absolute; inset:0; background:linear-gradient(120deg,#074878 0%,#0062AA 60%,#00BFDF 140%);"></div>
+    <div style="position:relative; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:34px; color:#fff;">
+      <h2 style="font-size:96px; font-weight:700; margin:0;">Obrigado!</h2>
+      <div style="width:120px; height:6px; background:#00BFDF; border-radius:800px;"></div>
+      <img src="assets/logo-hypera-branco.svg" alt="Hypera Pharma" style="height:56px; margin-top:16px;">
+    </div>
+  </section>
+
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { this._wait(); }
+  _wait(n = 0) {
+    if (window.BASE_BOLETIM && document.querySelector('[data-tbl="bu"]')) return this._render();
+    if (n > 120) return; setTimeout(() => this._wait(n + 1), 60);
+  }
+
+  // ---------- acesso à base ----------
+  _get(bu, marca, rede) { return this._idx[bu + '|' + marca + '|' + rede] || null; }
+  _fmt(v, d) { return v == null ? '-' : v.toFixed(d == null ? 1 : d).replace('.', ','); }
+  _pct(v) { return v == null ? '-' : (v > 0 ? '' : '') + v.toFixed(1).replace('.', ',') + '%'; }
+  _cor(v) { return v == null ? '#8A8C8E' : (v < 0 ? '#B32B23' : '#17734A'); }
+  // % publicado no boletim quando existe; senão deriva de realizado AA
+  _cres(r, campo) {
+    if (!r) return null;
+    const pub = { proj: 'pProj', projIni: 'pIni', orcAbs: 'pOrc' }[campo];
+    if (pub && r[pub] != null) return r[pub];
+    const a = r.realAA, b = r[campo];
+    return (a && b != null && a !== 0) ? (b / a - 1) * 100 : null;
+  }
+
+  _tbl(el, head, rows) {
+    const n = head.length;
+    const m = rows.length;
+    const compacto = el.getAttribute('data-compact') === '1';
+    let fs = n <= 6 ? 30 : n <= 8 ? 27 : n <= 11 ? 24 : n <= 14 ? 21 : 19;
+    if (m >= 13) fs = Math.min(fs, 24);
+    else if (m >= 11) fs = Math.min(fs, 27);
+    if (compacto) fs = Math.min(fs, 27);
+    const hfs = compacto ? 24 : (n >= 11 ? 19 : Math.max(20, Math.round(fs * 0.84)));
+    const pad = compacto ? 19 : (fs >= 27 ? 19 : m >= 13 ? 14 : 17);
+    const w0 = n <= 6 ? 26 : n <= 8 ? 22 : n <= 10 ? 17 : 15;
+    const wr = ((100 - w0) / (n - 1)).toFixed(3) + '%';
+    const th = head.map((h, i) => '<th style="width:' + (i === 0 ? w0 + '%' : wr) + '; font-size:' + hfs + 'px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; line-height:1.2; padding:0 8px 10px; border-bottom:3px solid #00BFDF; text-align:' + (i === 0 ? 'left' : 'center') + '; vertical-align:bottom; white-space:nowrap;">' + h + '</th>').join('');
+    const body = rows.map((r, ri) => {
+      const st = r.style || {};
+      const bd = st.rule ? 'border-bottom:3px solid #00BFDF;' : 'border-bottom:1px solid #EFEFEF;';
+      const zebra = (m >= 10 && ri % 2 === 1) ? 'background-color:#FAFCFE;' : '';
+      const base = 'font-size:' + (st.small ? fs - 3 : fs) + 'px; line-height:1.25; padding:' + pad + 'px 8px;' + zebra + bd;
+      return '<tr>' + r.cells.map((c, i) => {
+        const cor = c.cor || (i === 0 ? (st.muted ? '#5D5F61' : '#0062AA') : (st.muted ? '#5D5F61' : '#292A2B'));
+        const fw = (i === 0 || st.bold) ? '700' : '400';
+        return '<td style="' + base + 'text-align:' + (i === 0 ? 'left' : 'center') + '; color:' + cor + '; font-weight:' + fw + '; font-variant-numeric:tabular-nums; white-space:nowrap;">' + c.t + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    el.innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>' + body + '</tbody>';
+  }
+
+  /** Projeção atual vs. forecast do ciclo. */
+  _vsFcst(r) { return (r && r.forecast) ? (r.proj / r.forecast - 1) * 100 : null; }
+  _cell(v, d) { return { t: this._fmt(v, d) }; }
+  _cellP(v) { return { t: this._pct(v), cor: this._cor(v) }; }
+
+  _render() {
+    const B = window.BASE_BOLETIM, M = B.META, C = B.COLUNAS;
+    this._idx = {};
+    B.FATOS.forEach(f => { const o = {}; C.forEach((c, i) => o[c] = f[i]); this._idx[o.bu + '|' + o.marca + '|' + o.rede] = o; });
+    const F = B.FATOS.map(f => { const o = {}; C.forEach((c, i) => o[c] = f[i]); return o; });
+    const $ = id => document.getElementById(id);
+
+    $('capaRef').textContent = M.referencia;
+    $('capaSelo').textContent = 'Dados até ' + M.dataCorte + ' · ' + M.diasUteis + ' dias úteis';
+    document.querySelectorAll('.hy-fonte').forEach(e => { e.textContent = 'Fonte: ' + M.fonte + '. Realizado atual: ' + M.diasUteis + ' dias úteis · MTD ano anterior: ' + M.diasUteisAA + ' dias úteis.'; });
+    $('rodape2').textContent = 'Fonte: ' + M.fonte + '. Valores em ' + M.moeda + '.';
+    this._sumario(F, M);
+
+    document.querySelectorAll('[data-tbl]').forEach(el => {
+      const spec = el.getAttribute('data-tbl'), bu = spec.split(':')[1];
+      if (spec === 'bu') this._tblBU(el, F);
+      else if (spec === 'canal') this._tblCanal(el, F);
+      else if (spec.startsWith('pb:')) this._tblPB(el, F, bu);
+      else if (spec.startsWith('mx:')) this._tblMx(el, F, bu);
+      else if (spec.startsWith('hm:')) this._tblHeat(el, F, bu);
+    });
+
+    document.querySelectorAll('[data-cards="bu"]').forEach(el => this._cardsBU(el, F));
+    document.querySelectorAll('[data-cards="canal"]').forEach(el => this._cardsCanal(el));
+  }
+
+  /** Sumário executivo: KPIs do mês, crescimento por BU e destaques. */
+  _sumario(F, M) {
+    const t = this._get('Total s/ Cobertura', 'TOTAL', 'TOTAL') || {};
+    const tt = this._get('TOTAL', 'TOTAL', 'TOTAL') || {};
+    const pk = v => ({ txt: this._pct(v), cor: this._cor(v) });
+    const k1 = pk(this._cres(t, 'proj')), k2 = pk(tt.cresc), k3 = pk(this._cres(t, 'projIni')), k4 = pk(this._cres(t, 'orcAbs'));
+    this._cards(document.getElementById('sumKpis'), [
+      { rot: 'Projeção do mês', val: this._fmt(t.proj), un: 'R$ mi', sub: k1.txt, corSub: k1.cor, leg: 'vs. ano anterior' },
+      { rot: 'Realizado', val: this._fmt(t.real), un: 'R$ mi', sub: k2.txt, corSub: k2.cor, leg: 'até ' + M.dataCorte + ' · ' + M.diasUteis + ' dias úteis' },
+      { rot: 'Projeção inicial', val: this._fmt(t.projIni), un: 'R$ mi', sub: k3.txt, corSub: k3.cor, leg: 'travada no mês' },
+      { rot: 'Orçamento', val: this._fmt(t.orcAbs), un: 'R$ mi', sub: k4.txt, corSub: k4.cor, leg: 'cota do mês' },
+      { rot: 'Forecast', val: this._fmt(t.forecast), un: 'R$ mi', sub: this._pct(this._vsFcst(t)), corSub: this._cor(this._vsFcst(t)), leg: 'reprojetado no ciclo' }
+    ], 200);
+    this._curva(M);
+
+    const bus = ['CH', 'PP', 'SC', 'SG'].map(b => ({ b, r: this._get(b, 'TOTAL', 'TOTAL') })).filter(x => x.r)
+      .concat([{ b: 'TOTAL', r: t }]);
+    const topMarca = bu => F.filter(x => x.bu === bu && x.rede === 'TOTAL'
+      && ['TOTAL', 'TOTAL PB', 'DEMAIS', 'OUTROS'].indexOf(x.marca) < 0 && x.proj != null)
+      .sort((a, b) => b.proj - a.proj)[0] || null;
+    const max = Math.max(...bus.map(x => Math.abs(this._cres(x.r, 'proj') || 0)), 1);
+    const cab = '<div style="display:flex; align-items:flex-end; gap:20px; padding-bottom:12px; border-bottom:2px solid #DCEAF6;">'
+      + '<div style="width:74px;"></div>'
+      + '<div style="width:132px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">Projetado</div>'
+      + '<div style="width:126px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right; padding-left:22px; box-sizing:border-box;">% proj</div>'
+      + '<div style="flex:1; min-width:220px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:center;">% da cota</div>'
+      + '<div style="width:250px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; padding-left:30px;">Principal marca</div>'
+      + '<div style="width:104px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">R$ mi</div>'
+      + '<div style="width:100px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">% proj</div></div>';
+    document.getElementById('sumBUs').innerHTML = cab + bus.map(x => {
+      const p = this._cres(x.r, 'proj'), tot = x.b === 'TOTAL';
+      const at = x.r.orcAbs ? x.r.proj / x.r.orcAbs * 100 : null;
+      const larg = at == null ? 0 : Math.max(2, Math.min(at, 118) / 1.18);
+      const m = tot ? null : topMarca(x.b);
+      return '<div style="display:flex; align-items:center; gap:20px; padding:15px 0; border-bottom:1px solid #EFEFEF;' + (tot ? ' border-bottom:none;' : '') + '">'
+        + '<div style="width:74px; font-size:26px; font-weight:700; color:' + (tot ? '#292A2B' : '#0062AA') + ';">' + (tot ? 'Total' : x.b) + '</div>'
+        + '<div style="width:132px; font-size:25px; color:#434445; font-variant-numeric:tabular-nums; text-align:right;">' + this._fmt(x.r.proj) + '</div>'
+        + '<div style="width:126px; padding-left:22px; box-sizing:border-box; font-size:26px; font-weight:700; color:' + this._cor(p) + '; text-align:right; font-variant-numeric:tabular-nums;">' + this._pct(p) + '</div>'
+        + '<div style="flex:1; min-width:220px; height:38px; background:#EDF6FC; border-radius:800px; position:relative; overflow:hidden;">'
+        + '<div style="width:' + larg.toFixed(1) + '%; height:100%; background:' + (at != null && at >= 100 ? '#1C7C54' : '#0062AA') + '; border-radius:800px; display:flex; align-items:center; justify-content:flex-end; padding-right:18px; box-sizing:border-box;">'
+        + '<span style="font-size:24px; font-weight:700; color:#FFFFFF; font-variant-numeric:tabular-nums; white-space:nowrap;">' + (at == null ? '' : this._fmt(at) + '%') + '</span></div>'
+        + '<div style="position:absolute; left:84.75%; top:0; bottom:0; width:2px; background:#8C9298;"></div></div>'
+        + '<div style="width:250px; font-size:23px; color:#434445; padding-left:30px; border-left:1px solid #EFEFEF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + (m ? m.marca : '') + '</div>'
+        + '<div style="width:104px; font-size:24px; color:#292A2B; text-align:right; font-variant-numeric:tabular-nums;">' + (m ? this._fmt(m.proj) : '') + '</div>'
+        + '<div style="width:100px; font-size:24px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; color:' + (m ? this._cor(this._cres(m, 'proj')) : '#434445') + ';">' + (m ? this._pct(this._cres(m, 'proj')) : '') + '</div></div>';
+    }).join('');
+
+    const redes = ['DROGASIL', 'DELIVERY', 'PAGUE MENOS', 'DROGARIA SAO PAULO', 'RAIA', 'SAO JOAO', 'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO']
+      .map(k => ({ k, r: this._get('TOTAL', 'TOTAL', k) })).filter(x => x.r && x.r.proj != null)
+      .sort((a, b) => b.r.proj - a.r.proj).slice(0, 5);
+    const cabR = '<div style="display:flex; align-items:flex-end; gap:14px; padding-bottom:12px; border-bottom:2px solid #DCEAF6;">'
+      + '<span style="flex:1; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em;">Rede</span>'
+      + '<span style="width:104px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">R$ mi</span>'
+      + '<span style="width:110px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">% proj</span></div>';
+    document.getElementById('sumRedes').innerHTML = cabR + redes.map(x =>
+      '<div style="display:flex; align-items:baseline; gap:14px; border-bottom:1px solid #EFEFEF; padding:15px 0;">'
+      + '<span style="flex:1; font-size:24px; color:#434445; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + (x.k === 'DROGARIA SAO PAULO' ? 'DROGARIA SP' : x.k) + '</span>'
+      + '<span style="width:104px; font-size:24px; color:#292A2B; text-align:right; font-variant-numeric:tabular-nums;">' + this._fmt(x.r.proj) + '</span>'
+      + '<span style="width:110px; font-size:24px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; color:' + this._cor(x.r.cresc) + ';">' + this._pct(x.r.cresc) + '</span></div>').join('');
+
+
+  }
+
+  /** Venda por dia corrido: ano anterior (barras), realizado e projeção (linhas). */
+  _curva(M) {
+    const el = document.getElementById('sumCurva'), leg = document.getElementById('sumCurvaLeg');
+    const c = M.curva; if (!el || !c) return;
+    const N = c.diasMes, d0 = c.diaAtual;
+    const ano = c.ano || 2026, mes = c.mes || 8;
+    const nCor = new Date(ano, mes, 0).getDate();
+    const uteis = Array.from({ length: nCor }, (_, i) => i + 1);
+    const dif = (arr, base) => arr.map((v, i) => v - (i ? arr[i - 1] : (base == null ? 0 : base)));
+    const aaD = dif(c.aa), realD = dif(c.real), projD = dif(c.proj, c.real[d0 - 1]);
+    const mediaOrc = c.orcTotal / N;
+    const teto = Math.max(...aaD, ...realD, ...projD, mediaOrc) * 1.38;
+    const W = 1760, H = 320, x0 = 40, x1 = 1748, yb = 258, yt = 46;
+    const passo = (x1 - x0) / nCor, X = d => x0 + passo * (d - 0.5), bw = passo * 0.56;
+    const Y = v => yb - v / teto * (yb - yt);
+    const pts = arr => arr.map((v, i) => v == null ? null : { d: uteis[i], v }).filter(Boolean);
+    const path = ps => ps.map((p, i) => (i ? 'L' : 'M') + X(p.d).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' ');
+    const barras = aaD.map((v, i) => '<rect x="' + (X(uteis[i]) - bw / 2).toFixed(1) + '" y="' + Y(v).toFixed(1)
+      + '" width="' + bw.toFixed(1) + '" height="' + (yb - Y(v)).toFixed(1) + '" fill="#DDDEDF"/>').join('');
+    const dias = Array.from({ length: nCor }, (_, i) => i + 1).map(d =>
+      '<text x="' + X(d).toFixed(1) + '" y="' + (yb + 30) + '" text-anchor="middle" font-size="21" fill="#8C9298">'
+      + (d < 10 ? '0' : '') + d + '</text>').join('');
+    const pReal = pts(realD), pProj = projD.map((v, i) => ({ d: uteis[d0 + i], v })).filter(p => p.d);
+    const rots = pReal.map(p => ({ p, real: true })).concat(pProj.map(p => ({ p, real: false })))
+      .map((o, i) => '<text x="' + X(o.p.d).toFixed(1) + '" y="' + (Y(o.p.v) - (i % 2 ? 40 : 16)).toFixed(1)
+      + '" text-anchor="middle" font-size="21" font-weight="700" fill="' + (o.real ? '#0062AA' : '#5D9CCB') + '">' + this._fmt(o.p.v) + '</text>').join('');
+    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%; height:auto; display:block; font-family:inherit;">'
+      + barras + dias
+      + '<line x1="' + x0 + '" y1="' + Y(mediaOrc).toFixed(1) + '" x2="' + x1 + '" y2="' + Y(mediaOrc).toFixed(1) + '" stroke="#00BFDF" stroke-width="3" stroke-dasharray="12 9"/>'
+      + '<line x1="' + x0 + '" y1="' + yb + '" x2="' + x1 + '" y2="' + yb + '" stroke="#DCEAF6" stroke-width="2"/>'
+      + '<path d="' + path([pReal[pReal.length - 1]].concat(pProj)) + '" fill="none" stroke="#5D9CCB" stroke-width="4.5" stroke-dasharray="13 9"/>'
+      + '<path d="' + path(pReal) + '" fill="none" stroke="#0062AA" stroke-width="5" stroke-linecap="round"/>'
+      + '<circle cx="' + X(pReal[pReal.length - 1].d).toFixed(1) + '" cy="' + Y(pReal[pReal.length - 1].v).toFixed(1) + '" r="8" fill="#0062AA"/>'
+      + rots
+      + '<text x="' + x0 + '" y="' + (yt - 20) + '" font-size="24" fill="#434445">Média diária necessária para o orçamento: <tspan font-weight="700" fill="#00A9C7">' + this._fmt(mediaOrc) + '</tspan>'
+      + ' · realizado médio até aqui: <tspan font-weight="700" fill="#292A2B">' + this._fmt(c.real[d0 - 1] / d0) + '</tspan></text>'
+      + '</svg>';
+    if (leg) leg.innerHTML = [['#DDDEDF', 'ano anterior', 2], ['#0062AA', 'realizado', 0], ['#5D9CCB', 'projeção', 1], ['#00BFDF', 'média p/ orçamento', 1]].map(l =>
+      '<span style="display:flex; align-items:center; gap:10px; font-size:22px; color:#5D5F61;">'
+      + (l[2] === 2 ? '<span style="width:26px; height:20px; background:' + l[0] + ';"></span>' : '<span style="width:30px; height:0; border-top:' + (l[2] ? '4px dashed ' : '5px solid ') + l[0] + ';"></span>') + l[1] + '</span>').join('');
+  }
+
+  /** Highlights da slide de canais. */
+  _cardsCanal(el) {
+    const nomes = ['DROGASIL', 'DELIVERY', 'PAGUE MENOS', 'DROGARIA SAO PAULO', 'RAIA', 'SAO JOAO', 'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO'];
+    const lista = nomes.map(k => ({ k, r: this._get('TOTAL', 'TOTAL', k) })).filter(x => x.r);
+    const porMtd = lista.filter(x => x.k !== 'DELIVERY').sort((a, b) => (b.r.cresc || -999) - (a.r.cresc || -999));
+    const porProj = lista.slice().sort((a, b) => (b.r.proj || 0) - (a.r.proj || 0));
+    const vd = this._get('TOTAL', 'TOTAL', 'VD') || {}, vi = this._get('TOTAL', 'TOTAL', 'VI') || {};
+    const curto = k => k === 'DROGARIA SAO PAULO' ? 'DROGARIA SP' : k;
+    const alta = porMtd[0], baixa = porMtd[porMtd.length - 1], lider = porProj[0];
+    const gapR = lista.map(x => ({ k: x.k, v: x.r.realAA != null && x.r.proj != null ? x.r.proj - x.r.realAA : null }))
+      .filter(x => x.v != null).sort((a, b) => a.v - b.v)[0];
+    this._cards(el, [
+      { rot: 'Maior crescimento', val: this._pct(alta.r.cresc), un: 'MTD', sub: curto(alta.k), corSub: this._cor(alta.r.cresc), leg: '' },
+      { rot: 'Maior queda', val: this._pct(baixa.r.cresc), un: 'MTD', sub: curto(baixa.k), corSub: this._cor(baixa.r.cresc), leg: '' },
+      { rot: 'Rede líder', val: this._fmt(lider.r.proj), un: 'R$ mi', sub: curto(lider.k), corSub: '#0062AA', leg: '' },
+      { rot: 'Maior gap', val: gapR ? (gapR.v > 0 ? '+' : '') + this._fmt(gapR.v) : '-', un: 'R$ mi', sub: gapR ? curto(gapR.k) : '', corSub: gapR ? this._cor(gapR.v) : '#0062AA', leg: '' }
+    ], 200);
+  }
+
+  /** Card padrão de highlight. */
+  _cards(el, cards, alt) {
+    const den = alt && alt < 220;
+    const gap = den ? 9 : 14, pad = den ? '18px 24px 16px' : '24px 26px 22px', legFs = 24;
+    el.innerHTML = cards.map(c =>
+      '<div style="background:#F7FBFE; border:1px solid #DCEAF6; border-top:4px solid #00BFDF; border-radius:14px; padding:' + pad + '; display:flex; flex-direction:column; gap:' + gap + 'px; min-height:' + (alt || 300) + 'px; box-sizing:border-box;">'
+      + '<div style="font-size:24px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#0062AA; line-height:1.15;">' + c.rot + '</div>'
+      + '<div style="display:flex; align-items:baseline; gap:10px;">'
+      + '<span style="font-size:' + (String(c.val).length > 11 ? 34 : 46) + 'px; font-weight:700; color:#292A2B; line-height:1.05; font-variant-numeric:tabular-nums;">' + c.val + '</span>'
+      + (c.un ? '<span style="font-size:24px; font-weight:600; color:#5D5F61;">' + c.un + '</span>' : '') + '</div>'
+      + '<div style="font-size:30px; font-weight:700; color:' + c.corSub + '; line-height:1; font-variant-numeric:tabular-nums;">' + c.sub + '</div>'
+      + '<div style="margin-top:auto; font-size:' + legFs + 'px; line-height:1.28; color:#5D5F61;">' + c.leg + '</div>'
+      + '</div>').join('');
+  }
+
+  /** Highlights da slide de BUs — todos calculados da base. */
+  _cardsBU(el, F) {
+    const g = (bu, marca, rede) => F.find(o => o.bu === bu && o.marca === marca && o.rede === rede) || null;
+    const t = g('Total s/ Cobertura', 'TOTAL', 'TOTAL') || {};
+    const tt = g('TOTAL', 'TOTAL', 'TOTAL') || {};
+    const bus = ['CH', 'PP', 'SC', 'SG'].map(b => ({ b, r: g(b, 'TOTAL', 'TOTAL') })).filter(x => x.r);
+    const top = bus.slice().sort((a, b) => (this._cres(b.r, 'proj') || -999) - (this._cres(a.r, 'proj') || -999))[0];
+    const acima = bus.filter(x => (this._cres(x.r, 'proj') || 0) >= (this._cres(t, 'proj') || 0)).map(x => x.b);
+    const pe = v => ({ txt: this._pct(v), cor: this._cor(v) });
+    const p3 = pe(top ? this._cres(top.r, 'proj') : null);
+    const sinal = v => (v > 0 ? '+' : '') + this._fmt(v);
+    const gap = t.orcAbs != null ? t.proj - t.orcAbs : null;
+    const ating = t.orcAbs ? t.proj / t.orcAbs * 100 : null;
+    const gapBU = bus.map(x => ({ b: x.b, v: x.r.orcAbs != null ? x.r.proj - x.r.orcAbs : null }))
+      .filter(x => x.v != null).sort((a, b) => a.v - b.v)[0];
+    const rev = t.projIni != null ? t.proj - t.projIni : null;
+    const revPct = t.projIni ? rev / t.projIni * 100 : null;
+    const revBU = bus.map(x => ({ b: x.b, v: x.r.projIni != null ? x.r.proj - x.r.projIni : null }))
+      .filter(x => x.v != null).sort((a, b) => Math.abs(b.v) - Math.abs(a.v))[0];
+    this._cards(el, [
+      { rot: 'Gap para o orçamento', val: sinal(gap), un: 'R$ mi', sub: this._fmt(ating) + '% da cota', corSub: this._cor(gap),
+        leg: gapBU ? 'maior gap: ' + gapBU.b + ', ' + sinal(gapBU.v) : 'projetado vs. orçamento absoluto' },
+      { rot: 'Gap para o forecast', val: sinal(t.forecast != null ? t.proj - t.forecast : null), un: 'R$ mi',
+        sub: this._pct(this._vsFcst(t)) + ' vs. forecast', corSub: this._cor(this._vsFcst(t)),
+        leg: t.forecast != null && t.orcAbs != null ? sinal(t.forecast - t.orcAbs) + ' vs. orçamento' : 'reprojetado no ciclo' },
+      { rot: 'Revisão da projeção', val: sinal(rev), un: 'R$ mi', sub: this._pct(revPct) + ' vs. inicial', corSub: this._cor(rev),
+        leg: revBU ? 'maior revisão: ' + revBU.b + ', ' + sinal(revBU.v) : 'vs. projeção travada no início do mês' },
+      { rot: 'Maior crescimento', val: top ? top.b : '-', un: 'BU', sub: p3.txt, corSub: p3.cor, leg: 'maior projeção vs. ano anterior' },
+      { rot: 'Mix de canal', val: this._pct(t.vd), un: 'VD', sub: this._pct(t.vi) + ' VI', corSub: '#0062AA', leg: 'participação no projetado do mês' }
+    ], 200);
+  }
+
+  _tblBU(el, F) {
+    const ord = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES', 'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura'];
+    const rule = { SG: 1, 'SG - SIMILARES': 1, 'VIT NEO QUÍMICA': 1, 'Total s/ Cobertura': 1 };
+    const muted = { COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - SIMILARES': 1 };
+    const rows = ord.map(k => {
+      const r = F.find(x => x.bu === k && x.marca === 'TOTAL' && x.rede === 'TOTAL'); if (!r) return null;
+      const tot = k.indexOf('Total') === 0;
+      return {
+        style: { rule: rule[k], muted: muted[k], small: muted[k] || k === 'SMART (EX-VIT)' || k === 'VIT NEO QUÍMICA', bold: tot },
+        cells: [{ t: k + (k === 'COBERTURA' ? '*' : ''), cor: tot ? '#292A2B' : (muted[k] ? '#5D5F61' : '#0062AA') },
+          this._cell(r.realAA), this._cell(r.real), this._cell(r.proj), this._cellP(this._cres(r, 'proj')),
+          this._cell(r.projIni), this._cellP(this._cres(r, 'projIni')),
+          this._cell(r.orcAbs), this._cellP(this._cres(r, 'orcAbs')),
+          this._cell(r.forecast), this._cellP(this._vsFcst(r)),
+          { t: this._pct(r.vd) }, { t: this._pct(r.vi) }]
+      };
+    }).filter(Boolean);
+    this._tbl(el, ['BU', 'REAL. AA', 'REALIZADO', 'PROJETADO', '% PROJ', 'PROJ. INI.', '% PROJ', 'ORÇ. ABS', '% ORÇ', 'FORECAST', '% FCST', 'VD', 'VI'], rows);
+  }
+
+  _tblCanal(el, F) {
+    const redes = ['DROGASIL', 'PAGUE MENOS', 'DROGARIA SAO PAULO', 'RAIA', 'SAO JOAO', 'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO', 'DELIVERY', 'OUTROS', 'VD', 'VI', 'TOTAL'];
+    const rows = redes.map(k => {
+      const r = this._get('TOTAL', 'TOTAL', k); if (!r) return null;
+      const tot = k === 'VD' || k === 'VI' || k === 'TOTAL';
+      return {
+        style: { rule: k === 'OUTROS' || k === 'VI', bold: tot },
+        cells: [{ t: k === 'VD' ? 'TOTAL VD' : (k === 'VI' ? 'INDEPENDENTES' : (k === 'DROGARIA SAO PAULO' ? 'DROGARIA SP' : k)), cor: tot ? '#292A2B' : '#0062AA' },
+          this._cell(r.realAA), this._cell(r.real), this._cell(r.proj), this._cellP(this._cres(r, 'proj')), this._cellP(r.cresc),
+          ...['CH', 'PP', 'SC', 'SG'].map(b => { const x = this._get(b, 'TOTAL', k); return this._cellP(x ? (k === 'TOTAL' ? this._cres(x, 'proj') : x.cresc) : null); })]
+      };
+    }).filter(Boolean);
+    this._tbl(el, ['REDE', 'REAL. AA', 'REALIZADO', 'PROJETADO', '% PROJ', 'MTD 26/25', 'CH', 'PP', 'SC', 'SG'], rows);
+  }
+
+  _tblPB(el, F, bu) {
+    const rows = F.filter(x => x.bu === bu && x.rede === 'TOTAL' && x.marca !== 'TOTAL' && x.marca !== 'TOTAL PB')
+      .concat(F.filter(x => x.bu === bu && x.rede === 'TOTAL' && x.marca === 'TOTAL PB'))
+      .map(r => ({
+        style: { bold: r.marca === 'TOTAL PB', rule: r.marca === 'DEMAIS' },
+        cells: [{ t: r.marca === 'TOTAL PB' ? 'TOTAL' : (r.marca === 'DEMAIS' ? 'DEMAIS MARCAS' : r.marca), cor: r.marca === 'TOTAL PB' ? '#292A2B' : '#0062AA' },
+          this._cell(r.realAA), this._cell(r.real), this._cell(r.proj), this._cellP(this._cres(r, 'proj')), this._cellP(r.cresc),
+          { t: this._pct(r.vd) }, { t: this._pct(r.vi) }]
+      }));
+    this._tbl(el, ['MARCA', 'REAL. AA', 'REALIZADO', 'PROJETADO', '% PROJ', 'MTD 26/25', 'VD', 'VI'], rows);
+  }
+
+  _faixas() {
+    return [
+      { lim: -20, bg: '#F6D9D4', rot: 'abaixo de -20%' },
+      { lim: -5, bg: '#FBEBE8', rot: '-20% a -5%' },
+      { lim: 5, bg: '#F2F4F5', rot: '-5% a 5%' },
+      { lim: 20, bg: '#E7F5EC', rot: '5% a 20%' },
+      { lim: Infinity, bg: '#CFEBDA', rot: 'acima de 20%' }
+    ];
+  }
+
+  _faixa(v) {
+    if (v == null) return '#FFFFFF';
+    return this._faixas().find(f => v < f.lim || f.lim === Infinity).bg;
+  }
+
+  /** Heatmap marca × rede: uma linha por marca, uma coluna por rede. */
+  _tblHeat(el, F, bu) {
+    const marcas = F.filter(x => x.bu === bu && x.rede === 'TOTAL' && x.marca !== 'TOTAL'
+      && x.marca !== 'TOTAL PB' && x.marca !== 'DEMAIS' && x.marca !== 'OUTROS').map(x => x.marca);
+    const peso = k => {
+      const b = this._get(bu, 'TOTAL', k), t = this._get('TOTAL', 'TOTAL', k);
+      return (b && b.proj) || (t && t.proj) || 0;
+    };
+    const abrev = { 'DROGARIA SAO PAULO': 'DROG. SP', 'PAGUE MENOS': 'PAGUE M.', DELIVERY: 'DELIV.',
+      'SAO JOAO': 'S. JOAO', VD: 'TOTAL VD', VI: 'INDEP.' };
+    const redes = ['DROGASIL', 'DELIVERY', 'PAGUE MENOS', 'DROGARIA SAO PAULO', 'RAIA', 'SAO JOAO',
+      'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO'].filter(k => this._get(bu, 'TOTAL', k) || this._get('TOTAL', 'TOTAL', k))
+      .sort((a, b) => (a === 'DELIVERY' ? -1e9 : peso(a)) < (b === 'DELIVERY' ? -1e9 : peso(b)) ? 1 : -1);
+    const cols = redes.concat(['VD', 'VI']);
+    const w0 = 15, wr = ((100 - w0) / cols.length).toFixed(3) + '%';
+    const th = ['MARCA', ...cols.map(k => abrev[k] || k)].map((h, i) =>
+      '<th style="width:' + (i === 0 ? w0 + '%' : wr) + '; font-size:20px; font-weight:700; color:#0062AA; text-transform:uppercase;'
+      + ' padding:0 4px 12px; text-align:' + (i === 0 ? 'left' : 'center') + '; white-space:nowrap;">' + h + '</th>').join('');
+    const linha = (rot, marca, forte) => {
+      const vals = cols.map(k => {
+        const r = this._get(bu, marca, k === 'TOTAL' ? 'TOTAL' : k);
+        return r ? (k === 'TOTAL' ? this._cres(r, 'proj') : r.cresc) : null;
+      });
+      if (!vals.some(v => v != null)) return '';
+      return '<tr><td style="font-size:21px; font-weight:700; color:' + (forte ? '#292A2B' : '#0062AA')
+        + '; padding:17px 10px 17px 0; white-space:nowrap;">' + rot + '</td>'
+        + vals.map((v, i) => '<td style="font-size:24px; font-weight:' + (forte || i >= cols.length - 2 ? '700' : '400') + '; color:#292A2B; text-align:center;'
+          + ' padding:17px 4px; border-radius:6px; font-variant-numeric:tabular-nums; background:' + this._faixa(v) + ';">'
+          + this._pct(v) + '</td>').join('') + '</tr>';
+    };
+    const temDemais = !!this._get(bu, 'DEMAIS', 'TOTAL');
+    el.innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>'
+      + marcas.map(m => linha(m, m, false)).join('')
+      + (temDemais ? linha('DEMAIS MARCAS', 'DEMAIS', false) : '')
+      + linha('TOTAL BU', 'TOTAL', true) + '</tbody>';
+  }
+
+  _tblMx(el, F, bu) {
+    const redes = ['DROGASIL', 'DELIVERY', 'PAGUE MENOS', 'DROGARIA SAO PAULO', 'RAIA', 'SAO JOAO', 'PANVEL', 'PACHECO', 'DROGAL', 'ARAUJO', 'VD', 'VI', 'TOTAL'];
+    const marcas = F.filter(x => x.bu === bu && x.rede === 'TOTAL' && x.marca !== 'TOTAL' && x.marca !== 'TOTAL PB' && x.marca !== 'DEMAIS' && x.marca !== 'OUTROS').map(x => x.marca);
+    const rows = redes.map(k => {
+      const tot = k === 'VD' || k === 'VI' || k === 'TOTAL';
+      const totRow = this._get(bu, 'TOTAL', k === 'TOTAL' ? 'TOTAL' : k);
+      return {
+        style: { bold: tot, rule: k === 'ARAUJO' || k === 'VI' },
+        cells: [{ t: k === 'VD' ? 'TOTAL VD' : (k === 'VI' ? 'INDEPENDENTES' : k), cor: tot ? '#292A2B' : '#0062AA' },
+          ...marcas.map(m => {
+            const r = this._get(bu, m, k === 'TOTAL' ? 'TOTAL' : k);
+            return this._cellP(r ? (k === 'TOTAL' ? this._cres(r, 'proj') : r.cresc) : null);
+          }),
+          this._cellP(totRow ? (k === 'TOTAL' ? this._cres(totRow, 'proj') : totRow.cresc) : null)]
+      };
+    });
+    this._tbl(el, ['REDE', ...marcas, 'Total'], rows);
+  }
+
+}
+</script>
+</body>
+</html>

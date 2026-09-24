@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arquitetura de Dados — Boletim Sell Out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
+  <style>
+    body { margin: 0; background: #F4F7FA; }
+    a { color: #0062AA; }
+    a:hover { color: #08356E; }
+  </style>
+</helmet>
+
+<div style="font-family:Asap,Calibri,Arial,sans-serif; color:#292A2B; background:#F4F7FA; padding:0 0 80px;">
+
+  <div style="background:#0A3D80; background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%); border-bottom:3px solid #00BFDF; padding:38px 48px 34px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div style="font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#9FD4F0; margin-bottom:10px;">Boletim Sell Out · Arquitetura</div>
+      <h1 style="margin:0 0 10px; font-size:40px; line-height:1.1; font-weight:700; color:#fff;">Onde cada cálculo acontece</h1>
+      <p style="margin:0; font-size:17px; line-height:1.5; color:#D6E9F7; max-width:840px; text-wrap:pretty;">Com 100 mil linhas por dia, a base bruta não pode entrar no navegador. Este documento separa o que o fluxo do Power Automate precisa entregar do que as páginas fazem — para que o histórico cresça sem que nada fique mais lento.</p>
+    </div>
+  </div>
+
+  <div style="max-width:1180px; margin:0 auto; padding:36px 48px 0;">
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">1. O problema em números</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">O Simulador lê hoje um arquivo de 50 KB e responde instantaneamente. Quem não escala é o <b>Atualizador</b>, que abre a planilha bruta inteira dentro do navegador para agregá-la.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:16px;">
+      <sc-for list="{{ numeros }}" as="n" hint-placeholder-count="4">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+          <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA; margin-bottom:8px;">{{ n.rotulo }}</div>
+          <div style="font-size:28px; font-weight:700; line-height:1.1; color:#292A2B; font-variant-numeric:tabular-nums;">{{ n.valor }}</div>
+          <div style="font-size:14px; line-height:1.4; color:#5D5F61; margin-top:6px;">{{ n.nota }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border:1px solid #F0D9A0; background:#FDF6E6; border-radius:12px; padding:16px 20px; font-size:15px; line-height:1.55; color:#7A5A12; margin-bottom:40px;">
+      Os tamanhos de arquivo são estimativas a partir da base atual (536 linhas agregadas = 50 KB) e devem ser conferidos na primeira extração real. A conclusão não muda com a margem de erro: um mês de base bruta é duas ordens de grandeza maior do que um navegador processa com folga.
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">2. Três camadas</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">A regra que organiza tudo: <b>agregação pesada a montante, apresentação no navegador</b>. A fronteira entre a camada 1 e a 2 é onde o volume cai de milhões de linhas para centenas.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:40px;">
+      <sc-for list="{{ camadas }}" as="c" hint-placeholder-count="3">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-top:4px solid #00BFDF; border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#0062AA;">Camada {{ c.n }}</div>
+          <div style="font-size:19px; font-weight:700; line-height:1.25;">{{ c.titulo }}</div>
+          <div style="font-size:15px; line-height:1.5; color:#434445;">{{ c.texto }}</div>
+          <div style="margin-top:auto; padding-top:12px; border-top:1px solid #F1F5F9; font-size:13.5px; line-height:1.45; color:#5D5F61;"><b style="color:#08356E;">Onde roda:</b> {{ c.onde }}</div>
+          <div style="font-size:13.5px; line-height:1.45; color:#5D5F61;"><b style="color:#08356E;">Volume:</b> {{ c.volume }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">3. Os arquivos que o fluxo entrega</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Tudo numa pasta <span style="font-family:'JetBrains Mono',monospace; color:#0062AA;">dados/</span> ao lado das páginas do portal. O navegador nunca tem mais que índice + histórico mensal + um ou dois meses carregados — algo em torno de 250 KB, constante, tenha a empresa 6 meses ou 6 anos de histórico.</p>
+
+    <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; overflow:hidden; margin-bottom:40px;">
+      <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+        <thead>
+          <tr style="background:#EDF6FC;">
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Arquivo</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Grão</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Conteúdo</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Tamanho</th>
+            <th align="left" style="padding:12px 16px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#0062AA; border-bottom:1.5px solid #00BFDF;">Quando carrega</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ arquivos }}" as="arq" hint-placeholder-count="4">
+            <tr>
+              <td style="padding:12px 16px; border-bottom:1px solid #F1F5F9; font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:500; color:#08356E; white-space:nowrap; vertical-align:top;">{{ arq.nome }}</td>
+              <td style="padding:12px 16px; border-bottom:1px solid #F1F5F9; color:#434445; vertical-align:top;">{{ arq.grao }}</td>
+              <td style="padding:12px 16px; border-bottom:1px solid #F1F5F9; color:#434445; vertical-align:top;">{{ arq.conteudo }}</td>
+              <td style="padding:12px 16px; border-bottom:1px solid #F1F5F9; color:#434445; white-space:nowrap; vertical-align:top; font-variant-numeric:tabular-nums;">{{ arq.tam }}</td>
+              <td style="padding:12px 16px; border-bottom:1px solid #F1F5F9; color:#434445; vertical-align:top;">{{ arq.quando }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">4. O que o fluxo precisa calcular</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">São quatro agregações sobre a mesma base bruta. Nenhuma depende de decisão humana, então todas podem rodar sem supervisão no horário da extração.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-bottom:24px;">
+      <sc-for list="{{ agregacoes }}" as="g" hint-placeholder-count="4">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+          <div style="font-size:17px; font-weight:700; margin-bottom:6px;">{{ g.titulo }}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#0062AA; background:#EDF6FC; border-radius:6px; padding:8px 11px; margin-bottom:10px; line-height:1.5;">{{ g.chave }}</div>
+          <div style="font-size:15px; line-height:1.5; color:#434445;">{{ g.texto }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border:1px solid #CFE4F5; background:#EDF6FC; border-radius:12px; padding:16px 20px; font-size:15px; line-height:1.55; color:#08356E; margin-bottom:40px;">
+      <b>Regra de fechamento:</b> o top 5 de marcas e a linha “Demais” precisam ser recalculados dentro do fluxo, não no navegador — caso contrário o navegador voltaria a precisar das marcas fora do top 5. Pelo mesmo motivo, o rateio VD/VI segue o mix por BU antes do rateio, para que as somas fechem em todos os níveis.
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">5. O que muda em cada ferramenta</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:40px;">
+      <sc-for list="{{ mudancas }}" as="m" hint-placeholder-count="3">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:20px 22px;">
+          <div style="font-size:17px; font-weight:700; margin-bottom:10px;">{{ m.alvo }}</div>
+          <div style="font-size:14.5px; line-height:1.5; color:#434445; margin-bottom:10px;"><b style="color:#08356E;">Hoje:</b> {{ m.hoje }}</div>
+          <div style="font-size:14.5px; line-height:1.5; color:#434445;"><b style="color:#08356E;">Depois:</b> {{ m.depois }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">6. Ordem de implantação</h2>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.55; color:#5D5F61; max-width:900px;">Cada passo entrega valor sozinho e nada quebra no meio do caminho — o formato de arquivo do passo 1 é o mesmo que as páginas já leem hoje.</p>
+
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:40px;">
+      <sc-for list="{{ passos }}" as="p" hint-placeholder-count="4">
+        <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:18px 22px; display:flex; gap:18px; align-items:flex-start;">
+          <div style="flex:none; width:34px; height:34px; border-radius:800px; background:#0062AA; color:#fff; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center;">{{ p.n }}</div>
+          <div style="flex:1;">
+            <div style="font-size:17px; font-weight:700; margin-bottom:4px;">{{ p.titulo }}</div>
+            <div style="font-size:15px; line-height:1.55; color:#434445;">{{ p.texto }}</div>
+          </div>
+          <div style="flex:none; font-size:13px; font-weight:600; color:#0062AA; background:#EDF6FC; border-radius:800px; padding:6px 14px; white-space:nowrap;">{{ p.quem }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="margin:0 0 6px; font-size:26px; font-weight:700;">7. Duas decisões que já estão tomadas</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:34px;">
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:22px 24px;">
+        <div style="font-size:17px; font-weight:700; margin-bottom:8px;">Por que <span style="font-family:'JetBrains Mono',monospace; color:#0062AA;">.js</span> e não <span style="font-family:'JetBrains Mono',monospace; color:#0062AA;">.json</span></div>
+        <div style="font-size:15px; line-height:1.55; color:#434445;">Um arquivo <span style="font-family:'JetBrains Mono',monospace;">.js</span> carrega por tag de script e funciona abrindo a página direto de uma pasta de rede ou do SharePoint sincronizado, sem servidor e sem bloqueio de origem. Um <span style="font-family:'JetBrains Mono',monospace;">.json</span> exigiria servidor HTTP. O conteúdo é o mesmo — muda só a primeira linha do arquivo.</div>
+      </div>
+      <div style="background:#fff; border:1px solid #E3EBF2; border-radius:12px; padding:22px 24px;">
+        <div style="font-size:17px; font-weight:700; margin-bottom:8px;">Simulação simultânea não gera conflito</div>
+        <div style="font-size:15px; line-height:1.55; color:#434445;">Os cenários rodam no navegador de cada pessoa e ficam salvos na máquina dela. Quinze pessoas simulando ao mesmo tempo é o mesmo que quinze cópias de uma planilha: ninguém sobrescreve ninguém. Para compartilhar, o Simulador baixa o cenário como arquivo — que vai para o SharePoint como qualquer outro documento.</div>
+      </div>
+    </div>
+
+    <div style="font-size:14px; color:#5D5F61; border-top:1px solid #E3EBF2; padding-top:18px;">
+      <a href="portal-boletim-sell-out.dc.html">Portal do boletim</a> · <a href="formato-da-base.dc.html">Formato da base</a> · <a href="simulador-sell-out.dc.html">Simulador</a>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      numeros: [
+        { rotulo: 'Base bruta', valor: '100 mil', nota: 'linhas por dia, grão dia × BU × marca × SKU × canal × cliente' },
+        { rotulo: 'Um mês acumulado', valor: '~2,2 mi', nota: 'linhas ao fim de 22 dias úteis' },
+        { rotulo: 'Planilha do mês', valor: '~300 MB', nota: 'ordem de grandeza; o navegador trava bem antes disso' },
+        { rotulo: 'Base agregada', valor: '50 KB', nota: 'o que o Simulador realmente precisa ler hoje' }
+      ],
+      camadas: [
+        {
+          n: '1', cor: '#08356E', titulo: 'Bruta — nunca entra no navegador',
+          texto: 'A extração diária como ela sai da fonte. Fica no SharePoint ou no lake, é lida só por máquina e serve de rastro para auditoria.',
+          onde: 'SharePoint / lake', volume: 'cresce indefinidamente, e tudo bem'
+        },
+        {
+          n: '2', cor: '#0062AA', titulo: 'Agregada — a entrega do fluxo',
+          texto: 'Arquivos pequenos e prontos, um por mês mais o histórico consolidado. É o contrato entre o Power Automate e as páginas.',
+          onde: 'Power Query / Power Automate', volume: 'dezenas de KB por mês'
+        },
+        {
+          n: '3', cor: '#00BFDF', titulo: 'Apresentação — as páginas',
+          texto: 'Simulador, boletim e e-mail leem apenas a camada 2. Fatiam, somam e simulam sobre dados já agregados.',
+          onde: 'navegador de cada usuário', volume: '~250 KB carregados por vez'
+        }
+      ],
+      arquivos: [
+        { nome: 'dados/indice.js', grao: 'um registro por mês', conteudo: 'meses disponíveis, referência, data de corte e quais arquivos existem', tam: '~2 KB', quando: 'sempre, na abertura' },
+        { nome: 'dados/base-AAAA-MM.js', grao: 'BU × marca × rede + curva diária por BU × canal', conteudo: 'o que o base-boletim.js já é hoje, com data no nome', tam: '~50 KB', quando: 'mês corrente na abertura; fechados sob demanda' },
+        { nome: 'dados/historico-mensal.js', grao: 'mês × BU × marca', conteudo: 'série fechada para tendência e comparações de 12 a 36 meses', tam: '~30–80 KB', quando: 'sempre, na abertura' },
+        { nome: 'dados/detalhe-AAAA-MM.js', grao: 'dia × BU × marca × cliente', conteudo: 'abertura fina de um mês fechado, sem SKU', tam: '~300 KB–1 MB', quando: 'só quando alguém abre aquele mês no detalhe' }
+      ],
+      agregacoes: [
+        { titulo: 'Fato do mês corrente', chave: 'BU × MARCA × REDE → real, projeção, orçamento, forecast, AA', texto: 'Substitui o que o Atualizador faz hoje no navegador. Inclui o top 5 por BU e a linha “Demais”, já resolvidos.' },
+        { titulo: 'Curva diária', chave: 'DIA × BU × CANAL → realizado, projetado, ano anterior', texto: 'Alimenta os gráficos e a tabela dia a dia do Simulador. É o que permite espalhar o delta da simulação pelos dias não realizados.' },
+        { titulo: 'Fechamento mensal', chave: 'MÊS × BU × MARCA → realizado, orçamento, AA', texto: 'Roda uma vez por mês, no fechamento, e é anexado ao histórico. Nunca mais muda.' },
+        { titulo: 'Detalhe sob demanda', chave: 'DIA × BU × MARCA × CLIENTE → realizado', texto: 'Gerado só para os meses que alguém precisar reabrir no detalhe. Sem SKU: é o que corta o volume em uma ordem de grandeza.' }
+      ],
+      mudancas: [
+        { alvo: 'Power Automate', hoje: 'arquiva os envios e grava o historico-boletim.json.', depois: 'passa a ser o motor de agregação — lê a base bruta e grava os quatro arquivos da camada 2.' },
+        { alvo: 'Atualizador', hoje: 'abre os CSVs brutos (um por tabela, partes numeradas quando grandes), agrega tudo no navegador e gera a base.', depois: 'vira editor de metadados, considerações e destaques, e gerador do e-mail. O upload manual continua como contingência, já com base agregada.' },
+        { alvo: 'Simulador', hoje: 'lê um único base-boletim.js do mês corrente.', depois: 'lê o índice, carrega o mês corrente e busca meses fechados sob demanda. O motor de simulação não muda.' }
+      ],
+      passos: [
+        { n: '1', titulo: 'Mover a agregação do mês corrente para o fluxo', texto: 'O Power Query passa a gerar o mesmo arquivo que o Atualizador gera hoje, com o mesmo formato. Nada muda nas páginas — elas continuam lendo um arquivo só. Já resolve o travamento.', quem: 'TI / BI' },
+        { n: '2', titulo: 'Nomear por mês e publicar o índice', texto: 'O arquivo passa a se chamar base-AAAA-MM.js e ganha um índice ao lado. O Simulador aprende a ler o índice e a escolher o mês.', quem: 'TI + ajuste nas páginas' },
+        { n: '3', titulo: 'Acumular o histórico mensal', texto: 'No fechamento de cada mês, o fluxo anexa a linha do mês ao histórico consolidado. Abre a comparação de tendência longa sem custo de tamanho.', quem: 'TI / BI' },
+        { n: '4', titulo: 'Detalhe diário sob demanda', texto: 'Só depois de tudo acima, e só se o uso pedir: gerar o arquivo de detalhe para os meses que alguém precise reabrir no grão fino.', quem: 'sob demanda' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
