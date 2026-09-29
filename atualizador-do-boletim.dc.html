@@ -29,13 +29,13 @@
       <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:34px;">
     </div>
 
-    <p style="font-size:16px; line-height:1.55; margin:18px 0 22px; max-width:760px;">Quatro etapas: carregar a base do dia, validar a base e revisar os pontos de atenção, montar o resumo do Teams e disparar os e-mails. Nenhum percentual é digitado — tudo sai da base. Colunas e regras de cálculo estão em <a href="formato-da-base.dc.html" style="font-weight:600;">Formato da Base</a>.</p>
+    
 
-    <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:26px;"></div>
+    <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:24px 0 26px;"></div>
 
     <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
       <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
-      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um <b>.csv</b> por tabela, todos de uma vez: <b>vendas</b>, <b>vendas-aa</b>, <b>projecao-inicial</b>, <b>projecao-atual</b>, <b>orcamento</b> e <b>curva</b>. Pode vir no grão bruto de SKU: arquivo acima de 15 MB é lido em fatias e somado por BU × marca × canal × cliente × dia, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte, mês de referência e dias úteis saem da própria base. O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
+      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um arquivo por tabela, todos de uma vez: <b>VENDAS</b>, <b>VENDAS_AA</b>, <b>PROJECOES_INIOCIAL_RATEADA</b>, <b>PROJECOES_ATUAL</b>, <b>ORCAMENTO</b> e <b>CURVA</b>. Valores em reais, com <b>.</b> de decimal — o relatório converte para R$ milhões. A curva só precisa de <b>DIA;BU;CANAL;PROJ</b>: realizado e ano anterior são somados de VENDAS e VENDAS_AA por dia. Pode vir no grão bruto de SKU: arquivo acima de 15 MB é lido em fatias e somado por BU × marca × canal × cliente × dia, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte e mês de referência saem da própria base, e os dias úteis são calculados por calendário (seg-sex, exceto feriados nacionais). O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
       <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
         <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivos<input id="inpFile" type="file" accept=".csv,.txt,.xlsx,.xls" multiple="multiple" style="display:none;"></label>
         <button id="btnModel" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Baixar modelo (CSV)</button>
@@ -110,15 +110,15 @@
       <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 16px;">Checagens estruturais e, na sequência, as principais variações por produto e por cliente lidas da base carregada. Esta etapa é obrigatória: o envio e o arquivamento só liberam depois que os pontos forem revisados.</p>
       <div id="valPanel" style="border:1px solid #E3EBF2; background:#F7FBFE; border-radius:10px; padding:16px 18px; margin-bottom:20px;"></div>
       <div id="alertaPanel"></div>
-      <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer; margin-top:18px;"><input id="chkAlertas" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pontos de atenção revisados</label>
+      <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer; margin-top:18px;"><input id="chkAlertas" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pontos de atenção revisados</label><p style="font-size:16px; line-height:1.55; margin:18px 0 22px; max-width:760px;">Colunas e regras de cálculo estão em <a href="formato-da-base.dc.html" style="font-weight: 600;">Formato da Base</a>.</p>
     </div>
 
     <div id="secEnvio" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
-        <div style="font-size:18px; font-weight:700; color:#292A2B;">Envio dos e-mails</div>
+        <div style="font-size:18px; font-weight:700; color:#292A2B;">E-mails do dia</div>
         <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;"><input id="chkPronto" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pronto para envio</label>
       </div>
-      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 18px;"><b>Pronto para envio</b> é a trava que o fluxo automático lê antes de disparar — só libera depois que as considerações do dia forem validadas. Saem dois e-mails do mesmo fechamento: o <b>comercial</b> (orçamento) e o de <b>Gestão Orçamentária</b> (orçamento + forecast do ciclo). Para enviar à mão, use os botões <b>Copiar</b> e cole no Outlook.</p>
+      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 18px;"><b>Pronto para envio</b> marca que o fechamento do dia está conferido — só libera depois que as considerações forem validadas. Saem dois e-mails do mesmo fechamento: o <b>comercial</b> (orçamento) e o de <b>Gestão Orçamentária</b> (orçamento + forecast do ciclo). <b>Abrir no Outlook</b> baixa o e-mail já montado — destinatários, assunto e formatação prontos, basta revisar e enviar. Os botões <b>Copiar</b> continuam disponíveis para colar o corpo à mão.</p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px;">
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Para<input id="inpPara" placeholder="lista@hypera.com.br" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Cc<input id="inpCc" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
@@ -127,11 +127,15 @@
       </div>
       <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:24px;">
         <button id="btnPrev" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 22px; cursor:pointer;">Pré-visualizar</button>
-        <button id="btnArquivar" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:11px 22px; cursor:pointer;">Arquivar este envio</button>
-        <button id="btnCopiar2" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0a7d34; background:#fff; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Copiar Gestão Orçamentária</button>
-        <button id="btnCopiar" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Copiar e-mail comercial</button>
-        <span id="envInfo" style="font-size:14px; color:#5D5F61; align-self:center;"></span>
+        <button id="btnEml" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Abrir no Outlook · comercial</button>
+        <button id="btnEml2" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Abrir no Outlook · Gestão Orçamentária</button>
+        <span id="envInfo" style="font-size:14px; color:#5D5F61; align-self:center; flex-basis:100%;"></span>
       </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:12px;">
+        <button id="btnCopiar" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#5D5F61; background:#fff; border:1.5px solid #EFEFEF; border-radius:8px; padding:9px 18px; cursor:pointer;">Copiar corpo · comercial</button>
+        <button id="btnCopiar2" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#5D5F61; background:#fff; border:1.5px solid #EFEFEF; border-radius:8px; padding:9px 18px; cursor:pointer;">Copiar corpo · Gestão Orçamentária</button>
+      </div>
+      <div style="font-size:13.5px; line-height:1.5; color:#5D5F61; margin-top:16px; border-top:1px solid #F1F5F9; padding-top:14px;">A apresentação e o simulador já estão com esta base neste navegador. Para que a equipe veja o mesmo, <a id="lnkBase" href="#" style="font-weight:600;">baixe o base-boletim.js</a> e substitua o arquivo no repositório.</div>
     </div>
 
     <div id="prevBox" style="display:none; background:#fff; border:1px solid #EFEFEF; border-radius:12px; overflow:hidden; margin-top:8px;">
@@ -161,9 +165,37 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   componentDidMount() { this._wait(); }
+  componentDidUpdate() { this._aplicarBinds(); }
   _wait(n = 0) {
     if (window.BASE_BOLETIM && document.getElementById('inpRef')) return this._init();
     if (n > 120) return; setTimeout(() => this._wait(n + 1), 60);
+  }
+
+  /**
+   * O template chega em partes: quando _init roda, os botões do fim da página
+   * ainda podem não existir. Os binds ficam guardados e são aplicados assim que
+   * cada elemento aparece — e de novo a cada render, caso o nó seja trocado.
+   */
+  _aplicarBinds() {
+    let novos = 0;
+    (this._binds || []).forEach(b => {
+      const el = document.getElementById(b[0]);
+      if (!el) return;
+      if (el.__binds && el.__binds[b[3]]) return;
+      el.__binds = el.__binds || {};
+      el.__binds[b[3]] = 1;
+      el.addEventListener(b[1], b[2]);
+      novos++;
+    });
+    if (novos && this.base) {
+      try { this._consEstado(); } catch (e) { /* trava reavaliada no próximo render */ }
+    }
+    if (this._bindTent == null) this._bindTent = 0;
+    if (this._bindTent < 40 && (this._binds || []).some(b => !document.getElementById(b[0]))) {
+      this._bindTent++;
+      clearTimeout(this._bindT);
+      this._bindT = setTimeout(() => this._aplicarBinds(), 120);
+    }
   }
 
   /** Três etapas na mesma página: base · validação · envio. */
@@ -173,8 +205,7 @@ class Component extends DCLogic {
     const defs = [
       [1, 'Base do dia', 'Arquivos e cabeçalho'],
       [2, 'Validação da base', 'Checagens e alertas'],
-      [3, 'Resumo', 'Texto para o Teams'],
-      [4, 'Envio', 'E-mails e arquivamento']
+      [3, 'Publicar', 'Resumo e e-mails']
     ];
     box.innerHTML = defs.map(d => {
       const on = this._etapa === d[0];
@@ -186,13 +217,13 @@ class Component extends DCLogic {
         + '<span style="display:block; font-size:12.5px; margin-top:1px; color:' + (on ? '#D6E9F7' : '#5D5F61') + ';">' + d[2] + '</span></span></button>';
     }).join('');
     box.querySelectorAll('button[data-etapa]').forEach(b => b.onclick = () => this._irEtapa(Number(b.dataset.etapa)));
-    const visiveis = { 1: ['dropZone', 'secCab'], 2: ['secAlertas'], 3: ['secResumo'], 4: ['secEnvio'] }[this._etapa] || [];
+    const visiveis = { 1: ['dropZone', 'secCab'], 2: ['secAlertas'], 3: ['secResumo', 'secEnvio'] }[this._etapa] || [];
     ['dropZone', 'secCab', 'secResumo', 'secAlertas', 'secEnvio'].forEach(id => {
       const el = this.$(id);
       if (el) el.style.display = visiveis.indexOf(id) >= 0 ? '' : 'none';
     });
     const pb = this.$('prevBox');
-    if (pb && this._etapa !== 4) pb.style.display = 'none';
+    if (pb && this._etapa !== 3) pb.style.display = 'none';
   }
   _irEtapa(n) { this._etapa = n; this._pintarEtapas(); }
 
@@ -202,7 +233,8 @@ class Component extends DCLogic {
     const $ = id => document.getElementById(id); this.$ = $;
     const set = (id, v) => { const el = $(id); if (el) el.value = v; };
     const chk = (id, v) => { const el = $(id); if (el) el.checked = v; };
-    const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+    this._binds = [];
+    const on = (id, ev, fn) => { this._binds.push([id, ev, fn, id + '|' + ev + '|' + this._binds.length]); };
     this._etapa = 1; this._pintarEtapas();
     set('inpRef', B.META.referencia || '');
     set('inpCorte', B.META.dataCorte || '');
@@ -241,10 +273,12 @@ class Component extends DCLogic {
       .forEach(id => ['input', 'change'].forEach(ev => on(id, ev, () => { this._faltSalvar(); this._gerarResumo(); })));
     on('btnCopiar', 'click', () => this._copiar(false));
     on('btnCopiar2', 'click', () => this._copiar(true));
+    on('btnEml', 'click', () => this._eml(false));
+    on('btnEml2', 'click', () => this._eml(true));
     on('btnModel', 'click', () => this._modelo());
     on('btnBase', 'click', () => this._dl('base-boletim.js', this._baseFile(), 'text/javascript'));
     on('btnPrev', 'click', () => this._preview());
-    on('btnArquivar', 'click', () => this._arquivar());
+    on('lnkBase', 'click', e => { e.preventDefault(); this._dl('base-boletim.js', this._baseFile(), 'text/javascript'); });
     on('prevG1', 'click', () => this._prevGrupo(false));
     on('prevG2', 'click', () => this._prevGrupo(true));
     on('prevDesk', 'click', () => this._prevLargura(1000));
@@ -265,6 +299,7 @@ class Component extends DCLogic {
       const b = this.$('btnCopiarAlertas');
       if (b) { const o = b.textContent; b.textContent = 'Copiado'; setTimeout(() => { b.textContent = o; }, 2000); }
     });
+    this._aplicarBinds();
     [() => this._validar(), () => this._gerarAlertas(), () => this._gerarCons(), () => this._gerarResumo(), () => this._consEstado()]
       .forEach(fn => { try { fn(); } catch (e) { console.warn('etapa do init falhou', e); } });
   }
@@ -389,27 +424,57 @@ class Component extends DCLogic {
       M.referencia = MESES[dc.getUTCMonth()] + '/' + String(dc.getUTCFullYear()).slice(-2);
       derivado.push('referência ' + M.referencia);
     }
-    // dia útil = dia com movimento na base que não cai em sábado ou domingo
-    const uteis = lista => {
-      const vistos = {};
-      lista.forEach(v => {
-        if (!v.data) return;
-        const w = this._dataDe(v.data).getUTCDay();
-        if (w !== 0 && w !== 6) vistos[v.data] = 1;
-      });
-      return Object.keys(vistos).length;
-    };
+    // dia útil = dia de calendário (seg-sex) que não é feriado nacional
+    const diaCorte = dc.getUTCDate();
     if (!this._num(M.diasUteis)) {
-      const n = uteis(vendas.filter(v => v.data <= corteSerial));
-      if (n) { M.diasUteis = n; derivado.push(n + ' dias úteis'); }
+      const n = this._diasUteisCal(dc.getUTCFullYear(), dc.getUTCMonth(), diaCorte);
+      if (n) { M.diasUteis = n; derivado.push(n + ' dias úteis de calendário'); }
     }
-    if (!this._num(M.diasUteisAA) && vendasAA.length) {
-      const diaCorte = dc.getUTCDate();
-      const n = uteis(vendasAA.filter(v => v.data && this._dataDe(v.data).getUTCDate() <= diaCorte));
-      if (n) { M.diasUteisAA = n; derivado.push(n + ' dias úteis no ano anterior'); }
+    if (!this._num(M.diasUteisAA)) {
+      const anoAA = dc.getUTCFullYear() - 1, mes = dc.getUTCMonth();
+      const ultimo = new Date(Date.UTC(anoAA, mes + 1, 0)).getUTCDate();
+      const n = this._diasUteisCal(anoAA, mes, Math.min(diaCorte, ultimo));
+      if (n) { M.diasUteisAA = n; derivado.push(n + ' dias úteis de calendário no ano anterior'); }
     }
     this._metaDerivada = derivado;
     return derivado;
+  }
+
+  /** Feriados nacionais (fixos + móveis de Páscoa) de um ano, como Set de 'MM-DD'. */
+  _feriados(ano) {
+    if (!this._cacheFer) this._cacheFer = {};
+    if (this._cacheFer[ano]) return this._cacheFer[ano];
+    const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+    const pascoa = Date.UTC(ano, mes - 1, dia);
+    const dd = n => String(n).padStart(2, '0');
+    const chave = ts => { const x = new Date(ts); return dd(x.getUTCMonth() + 1) + '-' + dd(x.getUTCDate()); };
+    const DIA = 86400000;
+    const s = new Set(['01-01', '04-21', '05-01', '09-07', '10-12', '11-02', '11-15', '11-20', '12-25']);
+    s.add(chave(pascoa - 48 * DIA)); // segunda de carnaval
+    s.add(chave(pascoa - 47 * DIA)); // terça de carnaval
+    s.add(chave(pascoa - 2 * DIA));  // sexta-feira santa
+    s.add(chave(pascoa + 60 * DIA)); // corpus christi
+    this._cacheFer[ano] = s;
+    return s;
+  }
+
+  /** Dias úteis de calendário do dia 1 até diaFim (inclusive) de um mês. */
+  _diasUteisCal(ano, mes, diaFim) {
+    const fer = this._feriados(ano);
+    const dd = n => String(n).padStart(2, '0');
+    let n = 0;
+    for (let d = 1; d <= diaFim; d++) {
+      const dt = new Date(Date.UTC(ano, mes, d)), w = dt.getUTCDay();
+      if (w === 0 || w === 6) continue;
+      if (fer.has(dd(mes + 1) + '-' + dd(d))) continue;
+      n++;
+    }
+    return n;
   }
 
   /** AOA de uma aba. Aba vinda de CSV já carrega o AOA cru — evita o round-trip por planilha. */
@@ -425,13 +490,67 @@ class Component extends DCLogic {
   /** S, G e VIT NQ são as três sublinhas de SG nos CSVs da extração. */
   get _ALIAS_BU() { return { 'S': 'SG', 'G': 'SG', 'VIT NQ': 'SG', 'VITNQ': 'SG', 'SMART': 'SG', 'GEN': 'SG' }; }
 
+  /**
+   * SG chega quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas.
+   * Cada extração escreve as sublinhas com um código próprio: a planilha usa nome longo,
+   * os CSVs de orçamento e projeção usam S, G e VIT NQ. Os três apontam para a mesma sub-BU.
+   */
+  get _ALIAS_SUB() {
+    return {
+      'S': 'SG - SMART (EX-VIT)', 'SMART': 'SG - SMART (EX-VIT)', 'SG - SMART': 'SG - SMART (EX-VIT)',
+      'SG - SMART (EX-VIT)': 'SG - SMART (EX-VIT)',
+      'G': 'SG - GENÉRICOS', 'GEN': 'SG - GENÉRICOS', 'GENERICOS': 'SG - GENÉRICOS',
+      'GENÉRICOS': 'SG - GENÉRICOS', 'SG - GENERICOS': 'SG - GENÉRICOS', 'SG - GENÉRICOS': 'SG - GENÉRICOS',
+      'VIT NQ': 'VIT NEO QUÍMICA', 'VITNQ': 'VIT NEO QUÍMICA', 'VIT': 'VIT NEO QUÍMICA',
+      'VIT NEO QUIMICA': 'VIT NEO QUÍMICA', 'VIT NEO QUÍMICA': 'VIT NEO QUÍMICA'
+    };
+  }
+
+  /** BU no mesmo código que a curva usa: sublinhas de SG colapsam em SG. */
+  _buCanon(b) {
+    const t = String(b == null ? '' : b).trim().toUpperCase();
+    const a = this._ALIAS_BU[t] || t;
+    return this._ALIAS_SUB[a] ? 'SG' : a;
+  }
+
+  /**
+   * Colunas de valor dos seis arquivos diários. Todas vêm em reais, com "." de decimal —
+   * o cabeçalho é prova suficiente e dispensa a heurística de separador.
+   */
+  get _COLS_VALOR() {
+    return /^(VALOR_REAL|VALOR_REAL_AA|VALOR_PROJETADO_ATUAL|VALOR_PROJETADO_REAL|ORCAMENTO|OR\u00c7AMENTO|FORECAST|PROJ)$/;
+  }
+
+  _decDoCab(cab) {
+    const h = (cab || []).map(c => String(c == null ? '' : c).trim().toUpperCase().replace(/\s+/g, '_'));
+    return h.some(n => this._COLS_VALOR.test(n)) ? 'dot' : null;
+  }
+
+  /**
+   * Venda somada por dia do mês, nas três aberturas que a curva pode pedir:
+   * BU × canal, BU e total. Valores já saem em R$ mi (vêm divididos de _lerTrans).
+   */
+  _porDia(arr) {
+    const m = {};
+    (arr || []).forEach(v => {
+      if (!v.data) return;
+      const dt = this._dataDe(v.data); if (!dt) return;
+      const d = dt.getUTCDate();
+      const bu = this._buCanon(v.bu), can = (v.canal || 'VD').toUpperCase();
+      // as quatro combinações de BU e CANAL, que na curva são colunas opcionais
+      [bu + '|' + can + '|' + d, bu + '||' + d, '|' + can + '|' + d, '||' + d]
+        .forEach(k => { m[k] = (m[k] || 0) + (v.real || 0); });
+    });
+    return m;
+  }
+
   _lerTrans(X, ws, divisor) {
     const g = this._aoa(X, ws);
     if (!g.length) return [];
     const head = g[0].map(c => String(c == null ? '' : c).trim().toUpperCase().replace(/\s+/g, '_'));
     const col = (...alt) => { for (const a of alt) { const i = head.indexOf(a); if (i >= 0) return i; } return -1; };
     const iData = col('DATA', 'DIA'), iBU = col('BU'), iMar = col('MARCA'), iSku = col('SKU'),
-      iCan = col('CANAL'), iCli = col('CLIENTE', 'REDE'), iReal = col('VALOR_REAL', 'REAL'),
+      iCan = col('CANAL'), iCli = col('CLIENTE', 'REDE'), iReal = col('VALOR_REAL', 'VALOR_REAL_AA', 'REAL'),
       iIni = col('VALOR_PROJETADO_INICIAL', 'PROJ_INICIAL', 'PROJETADO_INICIAL', 'VALOR_PROJETADO_REAL', 'VALOR_PROJETADO_RATEADO'),
       iPro = col('VALOR_PROJETADO_ATUAL', 'PROJ_ATUAL', 'PROJETADO_ATUAL'),
       iOrc = col('ORCAMENTO', 'ORÇAMENTO', 'ORC'),
@@ -461,7 +580,7 @@ class Component extends DCLogic {
    */
   _abasProjecao(X, wb, divisor) {
     const cand = wb.SheetNames.filter(n => /proje/i.test(n) && !/resumo|m[ée]todo/i.test(n));
-    const nIni = cand.find(n => /inicial/i.test(n));
+    const nIni = cand.find(n => /ini[o]?cial|ratead/i.test(n));
     const nAtu = cand.find(n => /atual|vigente/i.test(n));
     if (!nIni && !nAtu) {
       const unica = cand[0];
@@ -485,7 +604,10 @@ class Component extends DCLogic {
   }
 
   /** Aba Curva (venda por dia corrido) -> acumulados do gráfico de ritmo do mês. */
-  _lerCurva(X, wb, divisor) {
+  _lerCurva(X, wb, divisor, vendas, vendasAA) {
+    // cada carga recomeça: curva de outra base não pode sobreviver a uma base nova
+    this._curva = null; this._curvaBU = null; this._curvaBUCanal = null;
+    this._semAAporBU = false; this._baseCarregada = true;
     const nomeCurva = wb.SheetNames.find(n => /curva|ritmo/i.test(n));
     if (nomeCurva) {
       const wsCv = wb.Sheets[nomeCurva];
@@ -493,18 +615,33 @@ class Component extends DCLogic {
       // CSV da extração vem em reais; curva preenchida à mão no .xlsx já vem em R$ mi
       const dv = (wsCv && wsCv.__aoa) ? (divisor || this._divisor || 1) : 1;
       const q = v => { const x = this._num(v); return x == null ? null : x / dv; };
-      const buCv = b => { const t = String(b || '').trim().toUpperCase(); return this._ALIAS_BU[t] || t; };
+      const dimCv = x => { const t = String(x == null ? '' : x).trim().toUpperCase(); return /^(NULL|NULO|N\/A|NA|#N\/D|-)$/.test(t) ? '' : t; };
+      const buCv = b => { const t = dimCv(b); return this._ALIAS_BU[t] || t; };
       const cab = (bruto[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
       const ci = (...alt) => { for (const a of alt) { const i = cab.indexOf(a); if (i >= 0) return i; } return -1; };
       const iD = Math.max(0, ci('DIA', 'DATA')), iBU = ci('BU'), iCanal = ci('CANAL'),
-        iAA = ci('REALAA', 'REAL AA', 'AA'), iR = ci('REAL', 'REALIZADO'), iP = ci('PROJ', 'PROJEÇÃO', 'PROJECAO');
-      const cAA = iAA < 0 ? 1 : iAA, cR = iR < 0 ? 2 : iR, cP = iP < 0 ? 3 : iP;
+        iAA = ci('REALAA', 'REAL_AA', 'REAL AA', 'AA'), iR = ci('REAL', 'REALIZADO'), iP = ci('PROJ', 'PROJEÇÃO', 'PROJECAO');
+      const cP = iP < 0 ? 3 : iP;
+      // CURVA traz só DIA;BU;CANAL;PROJ — realizado e ano anterior saem das vendas por dia
+      const mReal = iR < 0 ? this._porDia(vendas) : null;
+      const mAA = iAA < 0 ? this._porDia(vendasAA) : null;
+      const doMapa = (m, bu, canal, d) => {
+        if (!m) return null;
+        const k = (iBU >= 0 ? bu || '' : '') + '|' + (iCanal >= 0 ? canal || '' : '') + '|' + d;
+        return m[k] == null ? null : m[k];
+      };
       const cr = bruto.slice(1);
-      const linhas = cr.map(r => ({
-        d: this._num(r[iD]), bu: iBU < 0 ? null : buCv(r[iBU]),
-        canal: iCanal < 0 ? null : String(r[iCanal] || '').trim().toUpperCase(),
-        aa: q(r[cAA]), real: q(r[cR]), proj: q(r[cP])
-      })).filter(x => x.d);
+      const linhas = cr.map(r => {
+        const d = this._num(r[iD]);
+        const bu = iBU < 0 ? null : (buCv(r[iBU]) || null);
+        const canal = iCanal < 0 ? null : (dimCv(r[iCanal]) || null);
+        return {
+          d, bu, canal,
+          aa: iAA >= 0 ? q(r[iAA]) : doMapa(mAA, bu, canal, d),
+          real: iR >= 0 ? q(r[iR]) : doMapa(mReal, bu, canal, d),
+          proj: q(r[cP])
+        };
+      }).filter(x => x.d);
       // com coluna CANAL, guarda também a curva de cada BU por canal
       this._curvaBUCanal = null;
       if (iBU >= 0 && iCanal >= 0 && linhas.some(x => x.bu && x.canal)) {
@@ -622,14 +759,7 @@ class Component extends DCLogic {
     // SG chega na planilha quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas
     // Cada extração escreve as sublinhas com um código próprio: a planilha usa nome longo,
     // os CSVs de orçamento e projeção usam S, G e VIT NQ. Os três apontam para a mesma sub-BU.
-    const ALIAS_SUB = {
-      'S': 'SG - SMART (EX-VIT)', 'SMART': 'SG - SMART (EX-VIT)', 'SG - SMART': 'SG - SMART (EX-VIT)',
-      'SG - SMART (EX-VIT)': 'SG - SMART (EX-VIT)',
-      'G': 'SG - GENÉRICOS', 'GEN': 'SG - GENÉRICOS', 'GENERICOS': 'SG - GENÉRICOS',
-      'GENÉRICOS': 'SG - GENÉRICOS', 'SG - GENERICOS': 'SG - GENÉRICOS', 'SG - GENÉRICOS': 'SG - GENÉRICOS',
-      'VIT NQ': 'VIT NEO QUÍMICA', 'VITNQ': 'VIT NEO QUÍMICA', 'VIT': 'VIT NEO QUÍMICA',
-      'VIT NEO QUIMICA': 'VIT NEO QUÍMICA', 'VIT NEO QUÍMICA': 'VIT NEO QUÍMICA'
-    };
+    const ALIAS_SUB = this._ALIAS_SUB;
     const canonSub = b => ALIAS_SUB[b] || b;
     const norm = arr => arr.map(v => { const sub = canonSub(v.bu); return Object.assign({}, v, { sub: sub, bu: ALIAS_SUB[v.bu] ? 'SG' : v.bu }); });
     vendas = norm(vendas); vendasAA = norm(vendasAA); plano = norm(plano || []); cota = norm(cota || []);
@@ -652,7 +782,10 @@ class Component extends DCLogic {
     if (T0 && T0.proj > 0 && T0.orc > 0) {
       const razao = T0.orc / T0.proj;
       if (razao > 10 || razao < 0.1) {
-        this._orcDescartado = { orc: T0.orc, proj: T0.proj, razao: razao };
+        const vezes = razao >= 1000
+          ? '10^' + Math.round(Math.log10(razao)) + ' vezes'
+          : this._fmt(razao) + ' vezes';
+        this._orcDescartado = { orc: T0.orc, proj: T0.proj, razao: razao, vezes: vezes };
         Object.keys(mapa).forEach(k => { mapa[k].orc = 0; mapa[k].forecast = 0; });
       }
     }
@@ -806,7 +939,7 @@ class Component extends DCLogic {
             for (let li = 1; li < aoa.length; li++)
               for (let ci = 0; ci < aoa[li].length; ci++)
                 if (this._ehAmostra(aoa[li][ci])) am.push(aoa[li][ci]);
-            return { aoa: aoa, datas: null, sep: this._sepAtual, dec: this._decimal(am) };
+            return { aoa: aoa, datas: null, sep: this._sepAtual, dec: this._decDoCab(aoa[0]) || this._decimal(am) };
           });
       return p.then(r => {
         lidoMB += mb;
@@ -852,7 +985,7 @@ class Component extends DCLogic {
     const DIM = { BU: 'BU', MARCA: 'MARCA', CANAL: 'CANAL', CLIENTE: 'CLIENTE', REDE: 'CLIENTE' };
     const IGNORA = { SKU: 1, DATA: 1, DIA: 1, EAN: 1, PRODUTO: 1, DESCRICAO: 1 };
     // DATA entra no grão como serial; SKU é o único eixo que a soma descarta.
-    const VALOR_CONHECIDO = /^(VALOR_REAL|REAL|REALIZADO|PROJ_INICIAL|PROJETADO_INICIAL|VALOR_PROJETADO_INICIAL|VALOR_PROJETADO_REAL|VALOR_PROJETADO_RATEADO|PROJ_ATUAL|PROJETADO_ATUAL|VALOR_PROJETADO_ATUAL|ORCAMENTO|OR\u00c7AMENTO|ORC|FORECAST|FCST|ORCAMENTO_REPROJETADO)$/;
+    const VALOR_CONHECIDO = /^(VALOR_REAL|VALOR_REAL_AA|REAL|REALIZADO|PROJ|PROJ_INICIAL|PROJETADO_INICIAL|VALOR_PROJETADO_INICIAL|VALOR_PROJETADO_REAL|VALOR_PROJETADO_RATEADO|PROJ_ATUAL|PROJETADO_ATUAL|VALOR_PROJETADO_ATUAL|ORCAMENTO|OR\u00c7AMENTO|ORC|FORECAST|FCST|ORCAMENTO_REPROJETADO)$/;
     const dec = new TextDecoder('utf-8');
     const mapa = new Map(), datas = new Set();
     let resto = '', sep = ';', pronto = false, iData = -1;
@@ -946,7 +1079,7 @@ class Component extends DCLogic {
           const cs = partir(amostra[i].replace(/\r$/, ''));
           for (let j = 0; j < cs.length; j++) if (this._ehAmostra(cs[j])) vals.push(cs[j]);
         }
-        this._decAtual = this._decimal(vals);
+        this._decAtual = this._decDoCab(partir(amostra[0].replace(/\r$/, ''))) || this._decimal(vals);
       }
       nomeDim = []; iDim = []; cands = []; iData = -1;
       return laco(0);
@@ -1030,10 +1163,11 @@ class Component extends DCLogic {
         if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
         if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % da cota');
         const corte = this._serial(M.dataCorte);
-        const ag = this._agregar(vendas.filter(v => !corte || v.data <= corte), vendasAA, plano, M, topN, cota);
+        const vendasCorte = vendas.filter(v => !corte || v.data <= corte);
+        const ag = this._agregar(vendasCorte, vendasAA, plano, M, topN, cota);
         this.fatos = ag.fatos; this._idx = null;
         this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
-        this._lerCurva(X, wb, divisor);
+        this._lerCurva(X, wb, divisor, vendasCorte, vendasAA);
       this._lerExtras(X, wb);
         // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
         const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
@@ -1118,8 +1252,8 @@ class Component extends DCLogic {
     if (this._semAAporBU) avisos.push('<b>curva</b> sem <b>REALAA</b> por BU — as colunas BU MAIOR VAR e VAR DA BU do ritmo ficam indisponíveis. O total continua comparável.');
     if (this._orcDescartado) {
       const o = this._orcDescartado;
-      falhas.push('<b>orcamento</b> descartado: o total lido (R$ ' + this._fmt(o.orc) + ' mi) é ' + this._fmt(o.razao)
-        + '× a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O formato numérico do arquivo perdeu a posição do decimal. '
+      falhas.push('<b>orcamento</b> descartado: o total lido (R$ ' + this._fmt(o.orc) + ' mi) é cerca de ' + o.vezes
+        + ' a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O formato numérico do arquivo perdeu a posição do decimal. '
         + 'Reexporte com <b>ponto como decimal e sem separador de milhar</b>. Até então o boletim sai sem orçamento e sem forecast.');
     }
     const li = (t, c) => '<li style="margin-bottom:6px; color:' + c + ';">' + t + '</li>';
@@ -1163,8 +1297,8 @@ class Component extends DCLogic {
     if (this._orcDescartado) {
       const o = this._orcDescartado;
       add('Crítico', 'Orçamento descartado por escala implausível',
-        'O total de orçamento lido em <b>orcamento.csv</b> soma R$ ' + this._fmt(o.orc) + ' mi, ' + this._fmt(o.razao)
-        + '× a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O arquivo mistura formatos numéricos (ex.: <b>475812.25</b> ao lado de '
+        'O total de orçamento lido em <b>orcamento.csv</b> soma R$ ' + this._fmt(o.orc) + ' mi, cerca de ' + o.vezes
+        + ' a projeção do mês (R$ ' + this._fmt(o.proj) + ' mi). O arquivo mistura formatos numéricos (ex.: <b>475812.25</b> ao lado de '
         + '<b>129.322.822.265.625</b>) e a posição do decimal não é recuperável. Orçamento e forecast saem do boletim até o arquivo ser '
         + 'reexportado com ponto como decimal e sem separador de milhar.');
     }
@@ -1309,7 +1443,7 @@ class Component extends DCLogic {
     const ant = (this._snaps() || {}).anterior;
     if (ant && ant.bus && ant.bus['Total s/ Cobertura'] && ant.bus['Total s/ Cobertura'].proj != null && t.proj != null) {
       L.push('');
-      const cvA = this._curva || (this.base.META && this.base.META.curva);
+      const cvA = this._curvaVigente();
       const rA = (ant.curva && ant.curva.real) || [], rN = (cvA && cvA.real) || [];
       if (rA.length && rN.length) {
         const i = Math.min(rA.length, rN.length) - 1;
@@ -1335,7 +1469,7 @@ class Component extends DCLogic {
       const r = this._row(b, 'TOTAL', 'TOTAL'); if (!r) return;
       bus[b] = { realAA: r.realAA, real: r.real, proj: r.proj, projIni: r.projIni, orcAbs: r.orcAbs, pProj: this._cres(r, 'proj') };
     });
-    const cv = this._curva || (this.base.META && this.base.META.curva);
+    const cv = this._curvaVigente();
     const curva = cv ? { diasMes: cv.diasMes, diaAtual: cv.diaAtual, aa: cv.aa, real: cv.real, proj: cv.proj } : null;
     const curvaBU = this._curvaBUAtual() || null;
     return { corte: (this._v('inpCorte') || '').trim(), ref: (this._v('inpRef') || '').trim(), em: new Date().toLocaleString('pt-BR'), bus, curva, curvaBU };
@@ -1352,9 +1486,16 @@ class Component extends DCLogic {
   }
 
   /** Curva por BU: da base quando a aba Curva traz a coluna BU; senão rateada pelo mix projetado. */
+  /** Curva vigente. Depois de uma carga, só a curva dos arquivos conta. */
+  _curvaVigente() {
+    if (this._curva) return this._curva;
+    if (this._baseCarregada) return null;
+    return (this.base.META && this.base.META.curva) || null;
+  }
+
   _curvaBUAtual() {
     if (this._curvaBU) { this._buRateado = false; return this._curvaBU; }
-    const cv = this._curva || (this.base.META && this.base.META.curva);
+    const cv = this._curvaVigente();
     if (!cv || !cv.real || !cv.real.length) return null;
     const share = {}; let somaProj = 0;
     ['CH', 'PP', 'SC', 'SG'].forEach(b => {
@@ -1405,7 +1546,7 @@ class Component extends DCLogic {
     const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
     const temFcst = this.fatos.some(r => r[this.cols.indexOf('forecast')] != null);
     const ant = (this._snaps() || {}).anterior;
-    const cv = this._curva || (this.base.META && this.base.META.curva);
+    const cv = this._curvaVigente();
 
     if (nome === 'HIGHLIGHTS') {
       const tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
@@ -1515,9 +1656,7 @@ class Component extends DCLogic {
         if (!temBU) return '';
       }
       const aa = (cv && cv.aa) || [], real = (cv && cv.real) || [], proj = (cv && cv.proj) || [];
-      // só compara com a base anterior se o corte dela for outro: mesmo corte dá coluna idêntica
-      const cortesIguais = !!(ant && ant.corte) && ant.corte === this._corteTxt();
-      const antS = (ant && ant.curva && !cortesIguais) ? serie(ant.curva) : null, atS = serie(cv) || [];
+      const antS = null, atS = serie(cv) || [];
       const S = {}, corteBU = {};
       nomes.forEach(b => { S[b] = serie(cb[b]) || []; corteBU[b] = (cb[b].real || []).length; });
       const dias = Math.max.apply(null, [(cv && cv.diasMes) || atS.length].concat(nomes.map(b => cb[b].diasMes || S[b].length)));
@@ -1624,7 +1763,6 @@ class Component extends DCLogic {
         realAnt: b => cmp[b].ant,
         realMesmoDia: b => cmp[b].atual
       };
-      const temAnt = colunas.some(b => val.ant(b) != null);
       let zi = 0;
       const cel = (t2, o) => '<td align="' + (o.a || 'right') + '" style="font-size:13px;line-height:19px;color:' + o.c +
         ';font-weight:' + (o.b ? '700' : '400') + ';padding:' + (o.p || '5px 10px') + ';background-color:' + o.bg +
@@ -1680,15 +1818,7 @@ class Component extends DCLogic {
         linhaF('% vs AA', pctVsAA, { cor: true, pct: true, forte: true }) +
         grupoL('Realizado') +
         linhaF('Realizado até o corte', val.real) +
-        (temAnt ? linhaF('Realizado dia ' + dia + ' · base atual', val.realMesmoDia) +
-          linhaF('Realizado dia ' + dia + ' · base ant.', val.realAnt) +
-          linhaF('Var do realizado', b => { const a = val.realAnt(b), x = val.realMesmoDia(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) : '') +
-        (temAnt ? grupoL('vs. última base' + ((ant && ant.corte) ? ' (' + ant.corte + ')' : '')) +
-          linhaF('Projeção base ant.', val.ant) +
-          linhaF('Var da projeção', b => { const a = val.ant(b), x = val.fim(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) +
-          linhaF('% var', b => { const a = val.ant(b), x = val.fim(b); return (a && x != null) ? Math.round((x / a - 1) * 1000) / 10 : null; }, { cor: true, pct: true, forte: true }) +
-          linhaF('% vs AA na base ant.', pAnt, { pct: true, cor: true }) +
-          linhaF('Evolução (p.p.)', b => { const a = pAnt(b), x = pctVsAA(b); return (a != null && x != null) ? Math.round((x - a) * 10) / 10 : null; }, { cor: true, forte: true }) : '') +
+
         grupoL('Ritmo médio por dia (R$ mi)') +
         linhaF('Total · real', b => rit[b].totR) +
         linhaF('Total · previsto', b => rit[b].totP) +
@@ -1759,7 +1889,7 @@ class Component extends DCLogic {
     // sem o bloco de considerações na tela não há o que validar — a trava sai do caminho
     const ok = (!this.$('inpCons') || (this._ck('chkCons') && !!this._v('inpCons').trim()))
       && (!this.$('chkAlertas') || this._ck('chkAlertas'));
-    ['btnCopiar', 'btnCopiar2', 'btnArquivar'].forEach(id => {
+    ['btnCopiar', 'btnCopiar2', 'btnEml', 'btnEml2'].forEach(id => {
       const b = this.$(id); if (!b) return;
       b.disabled = !ok;
       b.style.opacity = ok ? '1' : '.45';
@@ -1793,12 +1923,24 @@ class Component extends DCLogic {
     if (tt) { M.mtd = Object.assign({}, M.mtd, { atual: { vd: vd && vd.real, vi: vi && vi.real, total: tt.real }, cresc: tt.cresc }); }
     if (this._mtdAA) M.mtd = Object.assign({}, M.mtd, { aa: this._mtdAA });
     if (this._destaques) M.destaques = this._destaques;
-    if (this._curva) M.curva = Object.assign({}, M.curva, this._curva);
-    if (this._curvaBU) M.curvaBU = this._curvaBU;
-    if (this._curvaBUCanal) M.curvaBUCanal = this._curvaBUCanal;
-    if (this._historicoMensal) M.historicoMensal = this._historicoMensal;
-    if (this._resumoProj) M.resumoProjecao = this._resumoProj;
-    if (this._clientes) M.clientes = this._clientes;
+    // Depois de uma carga, o que os arquivos não trouxeram não existe. Estas tabelas são
+    // recalculadas ou zeradas em toda leitura, então a atribuição é incondicional — o "if (x)"
+    // deixava sobreviver a tabela da base anterior, que volta pelo localStorage no publish.
+    if (this._baseCarregada) {
+      M.curva = this._curva ? JSON.parse(JSON.stringify(this._curva)) : null;
+      M.curvaBU = this._curvaBU || null;
+      M.curvaBUCanal = this._curvaBUCanal || null;
+      M.historicoMensal = this._historicoMensal || null;
+      M.resumoProjecao = this._resumoProj || null;
+      M.clientes = this._clientes || null;
+    } else {
+      if (this._curva) M.curva = JSON.parse(JSON.stringify(this._curva));
+      if (this._curvaBU) M.curvaBU = this._curvaBU;
+      if (this._curvaBUCanal) M.curvaBUCanal = this._curvaBUCanal;
+      if (this._historicoMensal) M.historicoMensal = this._historicoMensal;
+      if (this._resumoProj) M.resumoProjecao = this._resumoProj;
+      if (this._clientes) M.clientes = this._clientes;
+    }
     M.faltantes = this._faltantes();
     if (M.curva && t && t.orcAbs != null) M.curva.orcTotal = t.orcAbs;
     M.envio = this._envio();
@@ -1812,22 +1954,14 @@ class Component extends DCLogic {
    * precisar substituir o arquivo no repositório e dar push.
    */
   _publicarBase(M) {
-    const b = { META: M, COLUNAS: this.cols, FATOS: this.fatos, geradoEm: new Date().toISOString() };
-    const iso = this._iso(M && M.dataCorte);
     try {
-      localStorage.setItem('boletim.base.v1', JSON.stringify(b));
-      if (iso) localStorage.setItem('boletim.base.v1.' + iso, JSON.stringify(b));
+      localStorage.setItem('boletim.base.v1', JSON.stringify({
+        META: M, COLUNAS: this.cols, FATOS: this.fatos, geradoEm: new Date().toISOString()
+      }));
       return true;
     } catch (e) { return false; }
   }
 
-  /** dd/mm/aa|aaaa -> AAAA-MM-DD, para nomear a base do dia. */
-  _iso(txt) {
-    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(txt || '').trim());
-    if (!m) return null;
-    const a = m[3].length === 2 ? '20' + m[3] : m[3];
-    return a + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
-  }
 
   _baseFile() {
     const M = this._meta();
@@ -1870,54 +2004,7 @@ class Component extends DCLogic {
     return linhas;
   }
 
-  /** Registra o envio do dia no histórico do portal: e-mail em arquivo + índice JSON. */
-  _arquivar() {
-    const CHAVE = 'boletim.historico.v1';
-    const st = this.$('status');
-    const M = this._meta();
-    const p = String(M.dataCorte || '').split(/[\/\-.]/);
-    if (p.length !== 3 || !Number(p[0]) || !Number(p[1])) {
-      st.style.color = '#B32B23';
-      st.textContent = 'Preencha a data de corte no formato dd/mm/aa antes de arquivar.';
-      return;
-    }
-    let ano = Number(p[2]); if (ano < 100) ano += 2000;
-    const mes = Number(p[1]), dia = Number(p[0]);
-    const mm = String(mes).padStart(2, '0'), dd = String(dia).padStart(2, '0');
-    const id = ano + '-' + mm + '-' + dd;
-    // sem fluxo automático: cada publicação abre a apresentação viva com ?data=,
-    // que resolve a base daquele dia
-    const edicao = {
-      id, ano, mes, dia,
-      data: dd + '/' + mm + '/' + String(ano).slice(2),
-      referencia: String(M.referencia || '').trim(),
-      enviadoEm: new Date().toLocaleDateString('pt-BR'),
-      email: 'boletim-sell-out-email.html',
-      email2: 'boletim-sell-out-email-gestao-orcamentaria.html',
-      deck: 'boletim-sell-out.dc.html?data=' + id,
-      deck2: 'boletim-sell-out-gestao-orcamentaria.dc.html?data=' + id,
-      baseJs: 'base-boletim-' + id + '.js',
-      destinatarios: (M.envio && M.envio.para) || ''
-    };
-    let hist = [];
-    try { hist = JSON.parse(localStorage.getItem(CHAVE) || '[]'); } catch (e) { hist = []; }
-    if (!Array.isArray(hist)) hist = [];
-    hist = hist.filter(e => e && e.id !== id).concat([edicao]).sort((a, b) => a.id < b.id ? 1 : -1);
-    try { localStorage.setItem(CHAVE, JSON.stringify(hist)); } catch (e) { /* modo privado */ }
-    this._dl('base-boletim-' + id + '.js', this._baseFile(), 'text/javascript');
-    this._dl('email.html', this._emailFile(false), 'text/html');
-    this._dl('email-gestao-orcamentaria.html', this._emailFile(true), 'text/html');
-    this._dl('historico-boletim.json', JSON.stringify({ atualizadoEm: edicao.enviadoEm, edicoes: hist }, null, 2), 'application/json');
-    st.style.color = '#0a7d34';
-    st.innerHTML = '✓ envio de <b>' + edicao.data + '</b> arquivado. Coloque na pasta <b>' + pasta + '</b> do portal: '
-      + '<b>email.html</b> e <b>email-gestao-orcamentaria.html</b> (baixados), '
-      + '<b>apresentacao.pdf</b>, <b>apresentacao-gestao-orcamentaria.pdf</b> e <b>base.xlsx</b>. '
-      + 'O <b>historico-boletim.json</b> vai na raiz do portal.'
-      + '<br><br>A <b>apresentação</b> e o <b>simulador</b> já mostram esta base neste navegador. '
-      + 'Para que a equipe veja, comite na raiz do repositório o <b>base-boletim-' + id + '.js</b> baixado — '
-      + 'o portal abre a publicação deste dia com <b>?data=' + id + '</b> e a apresentação carrega esse arquivo. '
-      + 'Para que ele seja também a base padrão, copie-o sobre o <b>base-boletim.js</b>.';
-  }
+
 
   _modelo() {
     const info = this.$('impInfo');
@@ -2010,7 +2097,8 @@ class Component extends DCLogic {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([txt], { type: mime + ';charset=utf-8' }));
     a.download = nome; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    this.$('status').textContent = nome + ' baixado.';
+    const s = this.$('status');
+    if (s) s.textContent = nome + ' baixado.';
   }
 
   _preview() {
@@ -2080,6 +2168,62 @@ class Component extends DCLogic {
       assunto: this._v('inpAssunto').trim() || this._assunto(),
       pronto: this._ck('chkPronto')
     };
+  }
+
+  /** Assunto do dia — usa o campo se preenchido, senão monta com a referência e o corte. */
+  _assunto(g2) {
+    const digitado = (this._v('inpAssunto') || '').trim();
+    if (digitado) return digitado;
+    // lê o cabeçalho direto, sem passar pela agregação — roda antes dela existir
+    const B = (this.base && this.base.META) || {};
+    const M = { referencia: this._v('inpRef') || B.referencia || '',
+                dataCorte: this._v('inpCorte') || B.dataCorte || '' };
+    return 'Boletim Sell Out' + (g2 ? ' · Gestão Orçamentária' : '')
+      + (M.referencia ? ' — ' + M.referencia : '')
+      + (M.dataCorte ? ' (dados até ' + M.dataCorte + ')' : '');
+  }
+
+  /** Cabeçalho MIME com acento vira palavra codificada em base64. */
+  _mimeWord(s) {
+    if (!/[^\x20-\x7E]/.test(s)) return s;
+    return '=?UTF-8?B?' + this._b64(s) + '?=';
+  }
+
+  _b64(s) {
+    const bytes = new TextEncoder().encode(s);
+    let bin = '';
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    return btoa(bin);
+  }
+
+  /** Gera um .eml pronto para abrir como rascunho no Outlook. */
+  _eml(g2) {
+    const info = this.$('envInfo');
+    try {
+      const html = this._emailFile(g2);
+      const para = (this._v(g2 ? 'inpPara2' : 'inpPara') || '').trim();
+      const cc = g2 ? '' : (this._v('inpCc') || '').trim();
+      const assunto = this._assunto(g2);
+      const corpo = this._b64(html).replace(/(.{76})/g, '$1\r\n');
+      const h = [
+        'To: ' + para,
+        cc ? 'Cc: ' + cc : null,
+        'Subject: ' + this._mimeWord(assunto),
+        'X-Unsent: 1',
+        'MIME-Version: 1.0',
+        'Content-Type: text/html; charset=utf-8',
+        'Content-Transfer-Encoding: base64'
+      ].filter(Boolean).join('\r\n');
+      const dia = (this._v('inpCorte') || '').replace(/\D/g, '') || 'atual';
+      const nome = 'boletim-sell-out' + (g2 ? '-gestao-orcamentaria' : '') + '-' + dia + '.eml';
+      this._dl(nome, h + '\r\n\r\n' + corpo + '\r\n', 'message/rfc822');
+      info.style.color = '#0a7d34';
+      info.textContent = '✓ ' + nome + ' baixado. Abra o arquivo: o Outlook cria o rascunho com destinatários, assunto e formatação prontos.'
+        + (para ? '' : ' O campo "Para" está vazio — preencha no Outlook antes de enviar.');
+    } catch (e) {
+      info.style.color = '#B32B23';
+      info.textContent = 'Não foi possível gerar o arquivo. Use "Copiar corpo" e cole no Outlook.';
+    }
   }
 
   _copiar(g2) {
@@ -2248,7 +2392,7 @@ class Component extends DCLogic {
       '<td class="hdrtit" valign="middle" style="padding-left:24px;">' +
       '<div class="hdrh1" style="font-size:26px;line-height:32px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;">Boletim Sell Out'
       + (g2 ? ' &#183; Gestão Orçamentária' : '') + ' &#8211; ' + esc(M.referencia) + '</div>' +
-      '<div style="font-size:14px;line-height:21px;mso-line-height-rule:exactly;color:#A9D0EE;padding-top:3px;">Dados até ' + esc(M.dataCorte) + ' &#183; ' + M.diasUteis + ' dias úteis realizados</div></td>' +
+      '<div style="font-size:14px;line-height:21px;mso-line-height-rule:exactly;color:#A9D0EE;padding-top:3px;">Dados até ' + esc(M.dataCorte) + ' &#183; ' + M.diasUteis + ' dias úteis realizados' + (M.atualizadoEm ? ' &#183; publicado em ' + esc(M.atualizadoEm) : '') + '</div></td>' +
       '<td class="hdrcta" align="right" valign="middle" style="font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<a href="' + esc(M.links.deck || 'boletim-sell-out.dc.html') + '" style="display:inline-block;font-size:12px;line-height:16px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;text-decoration:none;border:1px solid #A9D0EE;border-radius:6px;padding:6px 11px;">Ver apresentação &#8594;</a></td>' +
       '</tr></table></td></tr>\n' +

@@ -29,7 +29,10 @@
         <p id="capaRef" style="font-size:36px; font-weight:500; margin:0; color:#EDF6FC;">Agosto/26</p>
       </div>
       <div style="display:flex; align-items:flex-end; justify-content:space-between;">
-        <span id="capaSelo" style="font-size:24px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 26px; border-radius:800px;">Dados até 15/08/26</span>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <span id="capaSelo" style="align-self:flex-start; font-size:24px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 26px; border-radius:800px;">Dados até 15/08/26</span>
+          <span id="capaPub" style="font-size:26px; font-weight:500; color:#A9D0EE;">Publicado em 15/08/2026</span>
+        </div>
         <img src="assets/logo-hypera-branco.svg" alt="Hypera Pharma" style="height:52px;">
       </div>
     </div>
@@ -486,6 +489,7 @@ class Component extends DCLogic {
 
     $('capaRef').textContent = M.referencia;
     $('capaSelo').textContent = 'Dados até ' + M.dataCorte + ' · ' + M.diasUteis + ' dias úteis';
+    { const p = $('capaPub'); if (p) p.textContent = 'Publicado em ' + (M.atualizadoEm || new Date().toLocaleDateString('pt-BR')); }
     document.querySelectorAll('.hy-fonte').forEach(e => { e.textContent = 'Fonte: ' + M.fonte + '. Realizado atual: ' + M.diasUteis + ' dias úteis · MTD ano anterior: ' + M.diasUteisAA + ' dias úteis.'; });
     $('rodape2').textContent = 'Fonte: ' + M.fonte + '. Valores em ' + M.moeda + '.';
     this._sumario(F, M);

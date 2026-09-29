@@ -533,73 +533,21 @@ window.BASE_BOLETIM = {
   ]
 };
 
-/* Resolução da base, em ordem de precedência:
- *   1. ?data=AAAA-MM-DD na URL  -> a base daquele dia (armazenamento local, ou o arquivo
- *      base-boletim-AAAA-MM-DD.js do repositório)
- *   2. a última base publicada pelo Atualizador neste navegador
- *   3. a base do arquivo acima, que é a versão do repositório
- * BOLETIM_LIMPAR_BASE_LOCAL() apaga o que foi publicado localmente. */
+/* Base publicada pelo Atualizador neste navegador.
+ * O arquivo acima é a versão do repositório. Quando o Atualizador processa uma base nova
+ * ele grava o resultado aqui, e a apresentação e o simulador passam a ler essa versão sem
+ * precisar de push. BOLETIM_LIMPAR_BASE_LOCAL() volta para a versão do repositório. */
 (function () {
-  var RAIZ = 'boletim.base.v1';
-  var valida = function (b) {
-    return b && b.META && b.COLUNAS && b.COLUNAS.length && b.FATOS && b.FATOS.length;
-  };
-  var ler = function (chave) {
-    try { return JSON.parse(localStorage.getItem(chave) || 'null'); } catch (e) { return null; }
-  };
+  var CHAVE = 'boletim.base.v1';
   window.BOLETIM_LIMPAR_BASE_LOCAL = function () {
-    try {
-      var fora = [];
-      for (var i = localStorage.length - 1; i >= 0; i--) {
-        var k = localStorage.key(i);
-        if (k && k.indexOf(RAIZ) === 0) { fora.push(k); localStorage.removeItem(k); }
-      }
-      return fora.length + ' base(s) local(is) removida(s). Recarregue a página.';
-    } catch (e) { return 'Armazenamento indisponível.'; }
+    try { localStorage.removeItem(CHAVE); } catch (e) {}
+    return 'Base local removida. Recarregue a página.';
   };
-  window.BOLETIM_DATAS_LOCAIS = function () {
-    var out = [];
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (k && k.indexOf(RAIZ + '.') === 0) out.push(k.slice(RAIZ.length + 1));
-      }
-    } catch (e) {}
-    return out.sort().reverse();
-  };
-
-  var data = null;
   try {
-    var m = /[?&]data=(\d{4}-\d{2}-\d{2})/.exec(window.location.search || '');
-    if (m) data = m[1];
-  } catch (e) {}
-
-  var escolhida = null;
-  if (data) {
-    escolhida = ler(RAIZ + '.' + data);
-    if (!valida(escolhida)) {
-      // arquivo do dia versionado no repositório
-      try {
-        var req = new XMLHttpRequest();
-        req.open('GET', 'base-boletim-' + data + '.js', false);
-        req.send(null);
-        if (req.status === 200 || req.status === 0) {
-          var guarda = window.BASE_BOLETIM;
-          new Function(req.responseText).call(window);
-          if (valida(window.BASE_BOLETIM) && window.BASE_BOLETIM !== guarda) {
-            escolhida = window.BASE_BOLETIM;
-            window.BASE_BOLETIM = guarda;
-          }
-        }
-      } catch (e) { /* arquivo do dia ausente — cai para a base do repositório */ }
+    var b = JSON.parse(localStorage.getItem(CHAVE) || 'null');
+    if (b && b.META && b.COLUNAS && b.COLUNAS.length && b.FATOS && b.FATOS.length) {
+      window.BASE_BOLETIM = b;
+      window.BASE_BOLETIM_LOCAL = true;
     }
-    if (!valida(escolhida)) window.BASE_BOLETIM_DATA_AUSENTE = data;
-  }
-  if (!valida(escolhida)) escolhida = ler(RAIZ);
-
-  if (valida(escolhida)) {
-    window.BASE_BOLETIM = escolhida;
-    window.BASE_BOLETIM_LOCAL = true;
-    window.BASE_BOLETIM_DATA = data || null;
-  }
+  } catch (e) { /* modo privado ou JSON corrompido — segue com a base do arquivo */ }
 })();

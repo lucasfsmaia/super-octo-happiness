@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/shadows.css">
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
   <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
+  <script src="./base-boletim.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block">
@@ -33,43 +34,43 @@
       <div>
         <div style="font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; margin-bottom:8px;">Hypera Pharma</div>
         <div style="font-size:32px; font-weight:700; color:#fff; line-height:1.1;">Boletim Sell Out diário</div>
-        <div style="font-size:16px; color:#CFE4F5; margin-top:6px;">Histórico por ano, mês e dia · comercial e gestão orçamentária</div>
+        <div style="font-size:16px; color:#CFE4F5; margin-top:6px;">Comercial e gestão orçamentária</div>
       </div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button id="btnFerr" style="font-family:inherit; font-size:14px; font-weight:600; color:#074878; background:#fff; border:1px solid #fff; border-radius:8px; padding:9px 18px; cursor:pointer; display:flex; align-items:center; gap:7px;" title="Ferramentas de produção do boletim — pede código de acesso" style-hover="background:#EDF6FC;"><span class="material-symbols-outlined" style="font-size:18px;">lock</span>Área restrita</button>
-      </div>
+      <button id="btnFerr" style="font-family:inherit; font-size:14px; font-weight:600; color:#074878; background:#fff; border:1px solid #fff; border-radius:8px; padding:9px 18px; cursor:pointer; display:flex; align-items:center; gap:7px;" title="Ferramentas de produção do boletim — pede código de acesso" style-hover="background:#EDF6FC;"><span class="material-symbols-outlined" style="font-size:18px;">lock</span>Área restrita</button>
     </div>
   </div>
 
   <div style="max-width:1120px; margin:0 auto; padding:30px 32px 72px;">
 
-    <div style="font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin-bottom:10px;">Acesso rápido</div>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-bottom:28px;">
-      <a href="simulador-sell-out.dc.html" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:15px 16px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
+    <div id="faixaBase" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#fff; border:1px solid #CFE4F5; border-left:5px solid #00BFDF; border-radius:12px; padding:16px 22px; margin-bottom:28px; box-shadow:0 1px 3px rgba(7,72,120,.06);"></div>
+
+    <div style="font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin-bottom:10px;">Boletim do dia</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin-bottom:30px;">
+      <a href="boletim-sell-out.dc.html" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
+        <span class="material-symbols-outlined" style="font-size:24px; color:#0062AA;">slideshow</span>
+        <span><span style="display:block; font-size:15px; font-weight:700; color:#292A2B; line-height:1.25;">Apresentação · Comercial</span>
+        <span style="display:block; font-size:12.5px; line-height:1.4; color:#5D5F61; margin-top:4px;">Crescimento por BU, canais e ritmo do mês.</span></span>
+      </a>
+      <a href="boletim-sell-out-email.html" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
+        <span class="material-symbols-outlined" style="font-size:24px; color:#0062AA;">mail</span>
+        <span><span style="display:block; font-size:15px; font-weight:700; color:#292A2B; line-height:1.25;">E-mail · Comercial</span>
+        <span style="display:block; font-size:12.5px; line-height:1.4; color:#5D5F61; margin-top:4px;">Versão enviada à lista comercial.</span></span>
+      </a>
+    </div>
+
+    <div style="font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin-bottom:10px;">Análise</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px;">
+      <a href="simulador-sell-out.dc.html" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
         <span class="material-symbols-outlined" style="font-size:24px; color:#0062AA;">insights</span>
         <span><span style="display:block; font-size:15px; font-weight:700; color:#292A2B; line-height:1.25;">Simulador</span>
         <span style="display:block; font-size:12.5px; line-height:1.4; color:#5D5F61; margin-top:4px;">Curva diária por recorte, abertura por marca e cliente e simulação do mês.</span></span>
       </a>
-      <a href="https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&amp;experience=power-bi" target="_blank" rel="noopener" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #EFEFEF; border-top:4px solid transparent; border-radius:12px; padding:15px 16px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
+      <a href="https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&amp;experience=power-bi" target="_blank" rel="noopener" style="display:flex; flex-direction:column; gap:9px; text-decoration:none; background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(7,72,120,.06);" style-hover="background:#EDF6FC;">
         <span class="material-symbols-outlined" style="font-size:24px; color:#0062AA;">bar_chart</span>
         <span><span style="display:block; font-size:15px; font-weight:700; color:#292A2B; line-height:1.25;">Hub Power BI</span>
         <span style="display:block; font-size:12.5px; line-height:1.4; color:#5D5F61; margin-top:4px;">Relatório completo de sell out, com os cortes que não entram no boletim.</span></span>
       </a>
     </div>
-
-    <div id="ultima"></div>
-
-    <div style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; box-shadow:0 1px 3px rgba(7,72,120,.06); overflow:hidden; margin-bottom:26px;">
-      <div id="nivelAno" style="padding:20px 26px 18px;"></div>
-      <div id="nivelMes" style="padding:0 26px 20px;"></div>
-      <div id="nivelDia" style="border-top:1px solid #F1F6FA; padding:20px 26px 24px; background:#FBFDFE;"></div>
-    </div>
-
-    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:20px; margin-bottom:14px; flex-wrap:wrap;">
-      <div id="tituloLista" style="font-size:19px; font-weight:700; color:#292A2B;">Publicações</div>
-      <div id="contagem" style="font-size:14px; color:#5D5F61;"></div>
-    </div>
-    <div id="lista"></div>
 
   </div>
 
@@ -91,319 +92,74 @@
       </div>
     </div>
   </div>
-
-  <input id="inpIndice" type="file" accept=".json" style="display:none;">
 </div>
-
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;codigoFerramentas&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;sellout&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Área restrita&quot;},&quot;indiceUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;historico-boletim.json&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Histórico&quot;},&quot;pastaEdicoes&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;edicoes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Histórico&quot;}}">
-const MES_LONGO = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-const MES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-const DIA_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
-const CHAVE = 'boletim.historico.v1';
-const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-
-/** Um envio diário, no formato que o fluxo grava no índice. */
-const SEMENTE = [{
-  id: '2026-08-17',
-  email: 'boletim-sell-out-email.html',
-  base: 'modelo-base-boletim-sell-out.xlsx'
-}];
-
+<script type="text/x-dc" data-dc-script data-props="{&quot;codigoFerramentas&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;sellout&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Área restrita&quot;}}">
 class Component extends DCLogic {
-  state = { edicoes: [], ano: null, mes: null, dia: null, liberado: false };
-
   componentDidMount() {
-    this.$('btnFerr').onclick = () => this._modal(true);
-    this.$('btnFerrFechar').onclick = () => this._modal(false);
-    this.$('btnFerrEntrar').onclick = () => this._entrar();
-    this.$('inpCod').onkeydown = e => { if (e.key === 'Enter') this._entrar(); };
-    this.$('inpIndice').onchange = e => this._importar(e.target.files[0]);
-    this.$('modalFerr').onclick = e => { if (e.target === this.$('modalFerr')) this._modal(false); };
-    this._pintar();
-    this._carregar();
+    this.$ = id => document.getElementById(id);
+    this._faixa();
+    const on = (id, ev, fn) => { const el = this.$(id); if (el) el.addEventListener(ev, fn); };
+    on('btnFerr', 'click', () => this._abrir());
+    on('btnFerrFechar', 'click', () => { this.$('modalFerr').style.display = 'none'; });
+    on('btnFerrEntrar', 'click', () => this._entrar());
+    on('inpCod', 'keydown', e => { if (e.key === 'Enter') this._entrar(); });
   }
 
-  $(id) { return document.getElementById(id); }
-
-  async _carregar() {
-    let arquivo = [];
-    try {
-      const r = await fetch(this.props.indiceUrl || 'historico-boletim.json', { cache: 'no-store' });
-      if (r.ok) arquivo = this._normalizar(await r.json());
-    } catch (e) { /* file:// ou índice ausente — segue com o armazenamento local */ }
-    let local = [];
-    try { local = this._normalizar(JSON.parse(localStorage.getItem(CHAVE) || '[]')); } catch (e) { local = []; }
-    this._aplicar(this._normalizar(SEMENTE).concat(arquivo, local));
+  /** De quando é a base que está no ar, e de onde ela veio. */
+  _faixa() {
+    const el = this.$('faixaBase'); if (!el) return;
+    const B = (typeof window !== 'undefined' && window.BASE_BOLETIM) || null;
+    const M = (B && B.META) || {};
+    const local = typeof window !== 'undefined' && window.BASE_BOLETIM_LOCAL;
+    if (!B) {
+      el.innerHTML = '<div style="font-size:15px; color:#5D5F61;">Base não carregada. '
+        + 'Rode a <b>Produção do Boletim</b> na área restrita.</div>';
+      return;
+    }
+    const origem = local
+      ? 'publicada pelo Atualizador neste navegador'
+      : 'versão do repositório';
+    el.innerHTML =
+      '<div style="flex:1 1 320px; min-width:0;">'
+      + '<div style="font-size:11.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#0062AA; margin-bottom:5px;">Base no ar</div>'
+      + '<div style="font-size:21px; font-weight:700; color:#292A2B; line-height:1.2;">'
+      + (M.referencia || '—') + ' · corte ' + (M.dataCorte || '—') + '</div>'
+      + '<div style="font-size:13.5px; color:#5D5F61; margin-top:5px;">'
+      + (M.atualizadoEm ? 'atualizada em ' + M.atualizadoEm + ' · ' : '') + origem + '</div></div>'
+      + (local ? '<div style="flex:none; font-size:12.5px; font-weight:600; color:#0F7B4A; background:#ECFDF3; border:1px solid #B7E4C7; border-radius:800px; padding:6px 14px;">local</div>' : '');
   }
 
-  _aplicar(entradas, persistir) {
-    const mapa = {};
-    entradas.forEach(e => { if (e && e.id) mapa[e.id] = Object.assign({}, mapa[e.id] || {}, e); });
-    const edicoes = Object.keys(mapa).map(k => mapa[k]).sort((a, b) => a.id < b.id ? 1 : -1);
-    if (persistir) { try { localStorage.setItem(CHAVE, JSON.stringify(edicoes)); } catch (e) { /* modo privado */ } }
-    const u = edicoes[0];
-    const ano = this.state.ano || (u ? u.ano : null);
-    const mes = this.state.ano ? this.state.mes : (u ? u.mes : null);
-    this.setState({ edicoes, ano, mes });
-    this._pintar(edicoes, { ano, mes, dia: this.state.dia });
-  }
-
-  /** Aceita id ISO ou data dd/mm/aa; deriva ano, mês, dia e os caminhos padrão da pasta do portal. */
-  _normalizar(lista) {
-    if (!Array.isArray(lista)) lista = lista && lista.edicoes ? lista.edicoes : [];
-    return lista.map(e => {
-      const o = Object.assign({}, e);
-      let iso = /^\d{4}-\d{2}-\d{2}$/.test(String(o.id || '')) ? o.id : '';
-      if (!iso) {
-        const p = String(o.data || o.dataCorte || '').split(/[\/\-.]/);
-        if (p.length === 3) {
-          let y = Number(p[2]); if (y < 100) y += 2000;
-          iso = y + '-' + String(Number(p[1])).padStart(2, '0') + '-' + String(Number(p[0])).padStart(2, '0');
-        }
-      }
-      if (!iso) return null;
-      const [y, m, d] = iso.split('-').map(Number);
-      if (!y || !(m >= 1 && m <= 12) || !(d >= 1 && d <= 31)) return null;
-      o.id = iso; o.ano = y; o.mes = m; o.dia = d;
-      o.data = o.data || (String(d).padStart(2, '0') + '/' + String(m).padStart(2, '0') + '/' + String(y).slice(2));
-      o.referencia = o.referencia || (cap(MES_LONGO[m - 1]) + '/' + String(y).slice(2));
-      if (o.email === undefined) o.email = 'boletim-sell-out-email.html';
-      if (o.email2 === undefined) o.email2 = 'boletim-sell-out-email-gestao-orcamentaria.html';
-      // ?data= faz a apresentação resolver a base daquele dia (base-boletim-AAAA-MM-DD.js)
-      const isoDia = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-      if (o.deck === undefined) o.deck = 'boletim-sell-out.dc.html?data=' + isoDia;
-      if (o.deck2 === undefined) o.deck2 = 'boletim-sell-out-gestao-orcamentaria.dc.html?data=' + isoDia;
-      return o;
-    }).filter(Boolean);
-  }
-
-  _importar(f) {
-    if (!f) return;
-    const fr = new FileReader();
-    fr.onload = () => {
-      try { this._aplicar(this.state.edicoes.concat(this._normalizar(JSON.parse(fr.result))), true); }
-      catch (e) { alert('Índice inválido: ' + e.message); }
-    };
-    fr.readAsText(f);
-  }
-
-  _modal(abrir) {
-    this.$('modalFerr').style.display = abrir ? 'flex' : 'none';
-    if (abrir && !this.state.liberado) setTimeout(() => this.$('inpCod').focus(), 30);
+  _abrir() {
+    const m = this.$('modalFerr');
+    m.style.display = 'flex';
+    this.$('ferrErro').textContent = '';
+    const i = this.$('inpCod');
+    if (i) { i.value = ''; setTimeout(() => i.focus(), 40); }
   }
 
   _entrar() {
-    const cod = (this.props.codigoFerramentas || 'sellout').trim().toLowerCase();
-    if (this.$('inpCod').value.trim().toLowerCase() !== cod) {
+    const cod = (this.props.codigoFerramentas || 'sellout').trim();
+    const dado = (this.$('inpCod').value || '').trim();
+    if (dado.toLowerCase() !== cod.toLowerCase()) {
       this.$('ferrErro').textContent = 'Código incorreto.';
       return;
     }
-    this.setState({ liberado: true });
     this.$('ferrGate').style.display = 'none';
-    this.$('btnFerrEntrar').style.display = 'none';
     this.$('ferrTexto').textContent = 'Ferramentas de produção do boletim.';
-    const box = this.$('ferrLinks');
-    box.style.display = 'block';
-    box.innerHTML = [
-      ['atualizador-do-boletim.dc.html', 'edit_note', 'Produção do boletim', 'Base do dia, validação do resumo e envio dos e-mails.'],
-      ['agregacao-power-query.dc.html', 'account_tree', 'Agregação no Power Query', 'Prepara os CSVs da extração no grão que o Atualizador lê.'],
-      ['formato-da-base.dc.html', 'table_chart', 'Formato da base', 'Abas, colunas e regras de cálculo da planilha.'],
-      ['modelo-base-boletim-sell-out.xlsx', 'download', 'Modelo da planilha', 'Arquivo base para preencher a extração do dia.']
-    ].map(l => '<a href="' + l[0] + '" style="display:flex; align-items:flex-start; gap:12px; text-decoration:none; '
-      + 'border:1px solid #EFEFEF; border-radius:8px; padding:13px 15px; margin-bottom:9px;">'
-      + '<span class="material-symbols-outlined" style="font-size:22px; color:#0062AA;">' + l[1] + '</span>'
-      + '<span><span style="display:block; font-size:15.5px; font-weight:600; color:#292A2B;">' + l[2] + '</span>'
-      + '<span style="display:block; font-size:13.5px; line-height:1.45; color:#5D5F61; margin-top:2px;">' + l[3] + '</span></span></a>').join('')
-      + this._bases()
-      + '<div style="margin-top:16px; border-top:1px solid #EFEFEF; padding-top:14px;">'
-      + '<div style="font-size:11.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#5D5F61; margin-bottom:10px;">Histórico de publicações</div>'
-      + '<button id="btnImportar" style="font-family:inherit; font-size:14px; font-weight:600; color:#0062AA; background:#fff; border:1px solid #CFE4F5; '
-      + 'border-radius:8px; padding:9px 16px; cursor:pointer; display:flex; align-items:center; gap:8px;" '
-      + 'title="Carrega o arquivo historico-boletim.json e atualiza a lista de publicações do portal">'
-      + '<span class="material-symbols-outlined" style="font-size:19px;">sync</span>Recarregar do arquivo</button>'
-      + '<div id="impIndInfo" style="font-size:13px; color:#5D5F61; margin-top:8px;"></div></div>';
-    const sb = this.$('selBase');
-    if (sb) sb.onchange = () => { this.$('lnkBase').href = sb.value; };
-    const bi = this.$('btnImportar');
-    if (bi) bi.onclick = () => this.$('inpIndice').click();
+    const links = [
+      ['atualizador-do-boletim.dc.html', 'play_circle', 'Produção do Boletim', 'Carrega a base do dia, valida e publica.'],
+      ['validacao-da-base.dc.html', 'fact_check', 'Validação da base', 'Checagens, variações por produto e cliente e pontos de atenção.']
+    ];
+    const el = this.$('ferrLinks');
+    el.style.display = 'block';
+    el.innerHTML = links.map(([href, ic, tit, sub]) =>
+      '<a href="' + href + '" style="display:flex; gap:12px; align-items:flex-start; text-decoration:none; border:1px solid #EFEFEF; border-radius:10px; padding:12px 14px; margin-bottom:8px;">'
+      + '<span class="material-symbols-outlined" style="font-size:20px; color:#0062AA; margin-top:1px;">' + ic + '</span>'
+      + '<span><span style="display:block; font-size:14.5px; font-weight:600; color:#292A2B;">' + tit + '</span>'
+      + '<span style="display:block; font-size:12.5px; line-height:1.4; color:#5D5F61; margin-top:2px;">' + sub + '</span></span></a>').join('');
   }
-
-  /** Bases do dia arquivadas — só dentro da área restrita. */
-  _bases() {
-    const eds = (this.state.edicoes || []).filter(e => e.base);
-    if (!eds.length) return '';
-    const grupos = [];
-    eds.forEach(e => {
-      const k = e.ano + '-' + e.mes;
-      let g = grupos.find(x => x.k === k);
-      if (!g) { g = { k: k, rot: MES_LONGO[e.mes - 1] + ' de ' + e.ano, itens: [] }; grupos.push(g); }
-      g.itens.push(e);
-    });
-    return '<div style="margin-top:16px; border-top:1px solid #EFEFEF; padding-top:14px;">'
-      + '<div style="font-size:11.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#5D5F61; margin-bottom:4px;">Bases do dia</div>'
-      + '<div style="display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:10px;">'
-      + '<select id="selBase" style="font-family:inherit; font-size:14px; color:#292A2B; background:#fff; border:1px solid #D7E3EE; border-radius:8px; padding:9px 11px; flex:1; min-width:190px;">'
-      + grupos.map(g => '<optgroup label="' + g.rot + '">'
-        + g.itens.map(e => '<option value="' + e.base + '">' + this._rotulo(e) + '</option>').join('') + '</optgroup>').join('')
-      + '</select>'
-      + '<a id="lnkBase" href="' + eds[0].base + '" download style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#fff; '
-      + 'background:#0062AA; text-decoration:none; border:1px solid #0062AA; border-radius:8px; padding:9px 16px;">'
-      + '<span class="material-symbols-outlined" style="font-size:19px;">download</span>Baixar</a>'
-      + '</div></div>';
-  }
-
-  _ir(nivel, valor) {
-    const s = this.state;
-    let sel;
-    if (nivel === 'ano') sel = { ano: valor, mes: null, dia: null };
-    else if (nivel === 'mes') sel = { ano: s.ano, mes: s.mes === valor ? null : valor, dia: null };
-    else sel = { ano: s.ano, mes: s.mes, dia: s.dia === valor ? null : valor };
-    this.setState(sel);
-    this._pintar(s.edicoes, sel);
-  }
-
-  // ---------------- render ----------------
-
-  _acao(href, icone, rotulo, baixar) {
-    return href
-      ? '<a href="' + href + '"' + (baixar ? ' download' : '') + ' style="display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:600; '
-        + 'color:#0062AA; text-decoration:none; border:1px solid #CFE4F5; background:#fff; border-radius:8px; padding:9px 16px;">'
-        + '<span class="material-symbols-outlined" style="font-size:19px;">' + icone + '</span>' + rotulo + '</a>'
-      : '<span style="display:flex; align-items:center; gap:8px; font-size:14.5px; color:#A8B4BF; border:1px solid #EFEFEF; '
-        + 'background:#FAFCFE; border-radius:8px; padding:9px 16px;" title="não gravado nesta publicação">'
-        + '<span class="material-symbols-outlined" style="font-size:19px;">' + icone + '</span>' + rotulo + '</span>';
-  }
-
-  /** Uma faixa de ações por grupo de envio. */
-  _grupo(rot, email, compacto, deck) {
-    return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">'
-      + '<span style="font-size:' + (compacto ? '12px' : '12.5px') + '; font-weight:600; letter-spacing:.08em; text-transform:uppercase; '
-      + 'color:#8A9199; min-width:' + (compacto ? '118px' : '132px') + ';">' + rot + '</span>'
-      + (deck ? this._acao(deck, 'slideshow', 'Apresentação', false) : '')
-      + this._acao(email, 'mail', 'E-mail', false) + '</div>';
-  }
-
-  _rotulo(e) { return String(e.dia).padStart(2, '0') + ' de ' + MES_LONGO[e.mes - 1] + ' de ' + e.ano; }
-
-  _pintar(edicoes, sel) {
-    edicoes = edicoes || this.state.edicoes;
-    sel = sel || { ano: this.state.ano, mes: this.state.mes, dia: this.state.dia };
-    if (!this.$('nivelAno')) return;
-    const porId = {}; edicoes.forEach(e => porId[e.id] = e);
-
-    // ---- último envio
-    const u = edicoes[0];
-    this.$('ultima').innerHTML = u
-      ? '<div style="background:#fff; border:1px solid #CFE4F5; border-left:5px solid #00BFDF; border-radius:12px; box-shadow:0 1px 3px rgba(7,72,120,.06); '
-        + 'padding:22px 26px 24px; margin-bottom:26px; display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap;">'
-        + '<div><div style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#0062AA; margin-bottom:6px;">Última publicação</div>'
-        + '<div style="font-size:26px; font-weight:700; color:#292A2B;">' + u.data + '</div>'
-        + '<div style="font-size:14px; color:#5D5F61; margin-top:4px;">' + this._rotulo(u)
-        + (u.enviadoEm ? ' · publicado em ' + u.enviadoEm : '') + '</div>'
-        + '</div><div style="display:flex; flex-direction:column; gap:9px;">'
-        + this._grupo('Comercial', u.email, false, u.deck)
-        + this._grupo('Gestão Orçam.', u.email2, false, u.deck2)
-        + '</div></div>'
-      : '';
-
-    // ---- nível 1: anos
-    const anos = [...new Set(edicoes.map(e => e.ano))].sort((a, b) => b - a);
-    this.$('nivelAno').innerHTML = anos.length
-      ? '<div style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin-bottom:10px;">Ano</div>'
-        + '<div style="display:flex; gap:8px; flex-wrap:wrap;">' + anos.map(a => {
-          const on = sel.ano === a, n = edicoes.filter(e => e.ano === a).length;
-          return '<button data-ano="' + a + '" style="font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; border-radius:8px; padding:10px 20px; '
-            + 'border:1px solid ' + (on ? '#0062AA' : '#CFE4F5') + '; background:' + (on ? '#0062AA' : '#fff') + '; color:' + (on ? '#fff' : '#0062AA') + ';">'
-            + a + '<span style="font-weight:400; font-size:13.5px; opacity:.72; margin-left:8px;">' + n + '</span></button>';
-        }).join('') + '</div>'
-      : '<div style="font-size:14.5px; color:#5D5F61;">Nenhuma publicação arquivada ainda.</div>';
-    this.$('nivelAno').querySelectorAll('button[data-ano]').forEach(b => b.onclick = () => this._ir('ano', Number(b.dataset.ano)));
-
-    // ---- nível 2: meses do ano selecionado
-    const doAno = edicoes.filter(e => e.ano === sel.ano);
-    this.$('nivelMes').innerHTML = sel.ano
-      ? '<div style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin:16px 0 10px;">Mês</div>'
-        + '<div style="display:grid; grid-template-columns:repeat(12,1fr); gap:6px;">' + MES_CURTO.map((m, i) => {
-          const n = doAno.filter(e => e.mes === i + 1).length, on = sel.mes === i + 1;
-          if (!n) return '<span title="sem publicação" style="text-align:center; font-size:13.5px; color:#C3CDD6; border:1px dashed #E3EBF2; border-radius:6px; padding:10px 0;">' + m + '</span>';
-          return '<button data-mes="' + (i + 1) + '" style="font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer; border-radius:6px; padding:10px 0; '
-            + 'border:1px solid ' + (on ? '#0062AA' : '#CFE4F5') + '; background:' + (on ? '#0062AA' : '#EDF6FC') + '; color:' + (on ? '#fff' : '#0062AA') + ';">'
-            + m + '<span style="display:block; font-weight:400; font-size:11.5px; opacity:.75;">' + n + '</span></button>';
-        }).join('') + '</div>'
-      : '';
-    this.$('nivelMes').querySelectorAll('button[data-mes]').forEach(b => b.onclick = () => this._ir('mes', Number(b.dataset.mes)));
-
-    // ---- nível 3: dias do mês selecionado
-    const nd = sel.ano && sel.mes ? new Date(sel.ano, sel.mes, 0).getDate() : 0;
-    this.$('nivelDia').innerHTML = nd
-      ? '<div style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#8A9199; margin-bottom:10px;">Dia · '
-        + cap(MES_LONGO[sel.mes - 1]) + ' ' + sel.ano + '</div>'
-        + '<div style="display:flex; gap:5px; flex-wrap:wrap;">' + Array.from({ length: nd }, (v, k) => k + 1).map(d => {
-          const id = sel.ano + '-' + String(sel.mes).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-          const dow = new Date(sel.ano, sel.mes - 1, d).getDay(), fds = dow === 0 || dow === 6, on = sel.dia === d;
-          return porId[id]
-            ? '<button data-dia="' + d + '" title="' + porId[id].data + ' · ' + DIA_SEM[dow] + '" style="font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; '
-              + 'width:32px; height:32px; padding:0; border-radius:6px; border:1px solid ' + (on ? '#00BFDF' : '#0062AA') + '; '
-              + 'background:' + (on ? '#00BFDF' : '#0062AA') + '; color:#fff;">' + d + '</button>'
-            : '<span title="' + String(d).padStart(2, '0') + '/' + String(sel.mes).padStart(2, '0') + ' · sem publicação" style="display:flex; align-items:center; justify-content:center; '
-              + 'width:32px; height:32px; box-sizing:border-box; border-radius:6px; font-size:12.5px; '
-              + 'border:1px dashed ' + (fds ? '#EFEFEF' : '#E3EBF2') + '; background:' + (fds ? '#F7FAFC' : '#fff') + '; color:#C3CDD6;">' + d + '</span>';
-        }).join('') + '</div>'
-      : (sel.ano ? '<div style="font-size:14px; color:#8A9199;">Escolha um mês para ver os dias.</div>' : '');
-    this.$('nivelDia').querySelectorAll('button[data-dia]').forEach(b => b.onclick = () => this._ir('dia', Number(b.dataset.dia)));
-
-    // ---- lista do recorte atual
-    let vis = edicoes, titulo = 'Todas as publicações';
-    if (sel.ano && sel.mes && sel.dia) {
-      const id = sel.ano + '-' + String(sel.mes).padStart(2, '0') + '-' + String(sel.dia).padStart(2, '0');
-      vis = edicoes.filter(e => e.id === id);
-      titulo = 'Publicação de ' + (vis[0] ? this._rotulo(vis[0]) : id);
-    } else if (sel.ano && sel.mes) {
-      vis = doAno.filter(e => e.mes === sel.mes);
-      titulo = 'Publicações de ' + MES_LONGO[sel.mes - 1] + ' de ' + sel.ano;
-    } else if (sel.ano) {
-      vis = doAno; titulo = 'Publicações de ' + sel.ano;
-    }
-    this.$('tituloLista').textContent = titulo;
-    this.$('contagem').textContent = vis.length + (vis.length === 1 ? ' publicação' : ' publicações');
-
-    if (!vis.length) {
-      this.$('lista').innerHTML = '<div style="background:#fff; border:1px dashed #CFE4F5; border-radius:12px; padding:38px 30px; text-align:center;">'
-        + '<div style="font-size:16.5px; font-weight:600; color:#292A2B; margin-bottom:6px;">Nenhuma publicação neste recorte</div>'
-        + '<div style="font-size:14.5px; line-height:1.5; color:#5D5F61; max-width:600px; margin:0 auto;">Cada publicação registrada no Atualizador aparece aqui e abre a '
-        + 'apresentação e o e-mail do dia.</div></div>';
-      return;
-    }
-
-    let atual = '';
-    this.$('lista').innerHTML = vis.map(e => {
-      let cab = '';
-      const k = e.ano + '-' + e.mes;
-      if (k !== atual && !(sel.mes && sel.dia)) {
-        atual = k;
-        cab = '<div style="font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#8A9199; margin:22px 0 10px; padding-left:2px;">'
-          + MES_LONGO[e.mes - 1] + ' ' + e.ano + '</div>';
-      }
-      return cab + '<div style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; box-shadow:0 1px 3px rgba(7,72,120,.06); '
-        + 'padding:16px 22px 17px; margin-bottom:9px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">'
-        + '<div style="display:flex; align-items:center; gap:16px; min-width:200px;">'
-        + '<div style="width:58px; flex:none; text-align:center; border-right:1px solid #EFEFEF; padding-right:14px;">'
-        + '<div style="font-size:22px; font-weight:700; color:#292A2B; line-height:1;">' + String(e.dia).padStart(2, '0') + '</div>'
-        + '<div style="font-size:12px; color:#8A9199; margin-top:3px;">' + DIA_SEM[new Date(e.ano, e.mes - 1, e.dia).getDay()] + '</div></div>'
-        + '<div><div style="font-size:16px; font-weight:600; color:#292A2B;">' + this._rotulo(e) + '</div>'
-        + (e.enviadoEm ? '<div style="font-size:13.5px; color:#5D5F61; margin-top:2px;">publicado em ' + e.enviadoEm + '</div>' : '')
-        + '</div></div>'
-        + '<div style="display:flex; flex-direction:column; gap:8px;">'
-        + this._grupo('Comercial', e.email, true, e.deck)
-        + this._grupo('Gestão Orçam.', e.email2, true, e.deck2)
-        + '</div></div>';
-    }).join('');
-  }
-
-  renderVals() { return {}; }
 }
-
 </script>
 </body>
 </html>

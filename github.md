@@ -3,14 +3,14 @@ branch: main
 
 ## Last sync
 
-date: 2026-09-24T21:12:18Z
+date: 2026-09-29T00:00:00Z
 
 ### Updated in this project
 
-- Atualizador lê CSV grande em fatias e agrega no grão BU × marca × canal × cliente, sem limite de tamanho.
-- Etapa obrigatória de validação da base e pontos de atenção antes do envio.
-- Nova página com o passo a passo da agregação no Power Query, mantida como contingência.
-- Arquivos renomeados para minúsculas sem acento; `index.html` de entrada para o GitHub Pages.
+- Portal enxuto: "Boletim do dia" com apenas Apresentação e E-mail comercial; cards padronizados com borda superior ciano.
+- Páginas não utilizadas removidas (Formato da base, Agregação no Power Query, Arquitetura de dados) e links da área restrita corrigidos.
+- Atualizador com o novo esquema de seis arquivos (CURVA, ORCAMENTO, PROJECOES_ATUAL, PROJECOES_INICIAL_RATEADA, VENDAS, VENDAS_AA); REALAA e REAL calculados por dia × BU × canal.
+- Colunas numéricas lidas em reais com separador decimal "." e exibidas em milhões.
 
 ## Screen map
 
@@ -20,12 +20,12 @@ date: 2026-09-24T21:12:18Z
 | Portal Boletim Sell Out | portal-boletim-sell-out.dc.html | portal-boletim-sell-out.dc.html |
 | Atualizador do Boletim | atualizador-do-boletim.dc.html | atualizador-do-boletim.dc.html |
 | Validação da Base | validacao-da-base.dc.html | validacao-da-base.dc.html |
-| Agregação no Power Query | agregacao-power-query.dc.html | agregacao-power-query.dc.html |
 | Boletim Sell Out | boletim-sell-out.dc.html | boletim-sell-out.dc.html |
 | Boletim Sell Out — Gestão Orçamentária | boletim-sell-out-gestao-orcamentaria.dc.html | boletim-sell-out-gestao-orcamentaria.dc.html |
+| E-mail comercial | boletim-sell-out-email.html | boletim-sell-out-email.html |
+| E-mail gestão orçamentária | boletim-sell-out-email-gestao-orcamentaria.html | boletim-sell-out-email-gestao-orcamentaria.html |
 | Simulador Sell Out | simulador-sell-out.dc.html | simulador-sell-out.dc.html |
-| Formato da Base | formato-da-base.dc.html | formato-da-base.dc.html |
-| Arquitetura de Dados | arquitetura-de-dados.dc.html | arquitetura-de-dados.dc.html |
+| Base publicada | base-boletim.js | base-boletim.js |
 
 ## Sync history
 
