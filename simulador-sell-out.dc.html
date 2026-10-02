@@ -794,8 +794,7 @@ class Component extends DCLogic {
     this.$('uControles').innerHTML =
       (this.state.visao === 'bu' ? '<div>' + rot('Canal') + seg('canal', [['TOTAL', 'Total'], ['VD', 'VD'], ['VI', 'VI']], this.state.canal) + '</div>' : '')
       + this._dropdown('marcas', 'Marcas', this._marcasEscopo(), this.state.marcas)
-      + this._dropdown('clientes', 'Clientes', this._redes(), this.state.clientes)
-      + '<div>' + rot('Exibir') + seg('ver', [['ambos', 'Gráficos e tabela'], ['graficos', 'Só gráficos'], ['tabela', 'Só tabela']], this.state.ver) + '</div>';
+      + this._dropdown('clientes', 'Clientes', this._redes(), this.state.clientes);
 
     const filtroAtivo = !this._selVazia(this.state.marcas) || !this._selVazia(this.state.clientes);
     this.$('uAviso').innerHTML = (this.rateado ? '<div style="border:1px solid #F0D9A0; background:#FDF6E6; border-radius:8px; padding:11px 15px; font-size:13px; color:#7A5A12; margin-bottom:12px;">'
@@ -821,12 +820,12 @@ class Component extends DCLogic {
       if (t.length) teto = Math.max.apply(null, t);
     }
     const fim = d => d ? this._nn(this._soma1(d.real) + this._soma1(d.proj)) : '—';
-    this.$('uGraficos').innerHTML = this.state.ver === 'tabela' ? '' : this._secao('graficos',
+    this.$('uGraficos').innerHTML = this._secao('graficos',
       'Gráficos diários · ' + c.rotulo, 'total ' + fim(c.Total) + ' · VD ' + fim(c.VD) + ' · VI ' + fim(c.VI) + (sufixo ? ' · cenário simulado' : ''),
       this._grafico('Total — realizado vs projetado vs ano anterior' + sufixo, c.Total, teto)
       + this._grafico('VD — realizado vs projetado vs ano anterior' + sufixo, c.VD, teto)
       + this._grafico('VI — realizado vs projetado vs ano anterior' + sufixo, c.VI, teto));
-    this.$('uTabela').innerHTML = this.state.ver === 'graficos' ? '' :
+    this.$('uTabela').innerHTML =
       this._secao('dias', 'Vendas por dia · ' + c.rotulo, 'simulação dos dias não realizados', this._tabelaDias())
       + this._secao('tabela', 'Abertura por BU, marca e cliente', 'clique na linha para abrir o nível seguinte', this._tabela());
 

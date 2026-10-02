@@ -51,7 +51,7 @@
       <div style="display:grid; grid-template-columns:2.5fr 0.85fr; gap:60px; margin-top:34px;">
         <div>
           <div style="font-size:26px; font-weight:700; color:#292A2B; padding-bottom:6px;">Crescimento por BU</div>
-          <div style="font-size:22px; color:#5D5F61; padding-bottom:20px; white-space:nowrap;">projeção do mês vs. ano anterior, atingimento da cota e a principal marca de cada BU</div>
+          <div style="font-size:22px; color:#5D5F61; padding-bottom:20px; white-space:nowrap;">projeção do mês vs. ano anterior, atingimento do orçamento e a principal marca de cada BU</div>
           <div id="sumBUs"></div>
         </div>
         <div>
@@ -315,7 +315,7 @@ class Component extends DCLogic {
       { rot: 'Projeção do mês', val: this._fmt(t.proj), un: 'R$ mi', sub: k1.txt, corSub: k1.cor, leg: 'vs. ano anterior' },
       { rot: 'Realizado', val: this._fmt(t.real), un: 'R$ mi', sub: k2.txt, corSub: k2.cor, leg: 'até ' + M.dataCorte + ' · ' + M.diasUteis + ' dias úteis' },
       { rot: 'Projeção inicial', val: this._fmt(t.projIni), un: 'R$ mi', sub: k3.txt, corSub: k3.cor, leg: 'travada no mês' },
-      { rot: 'Orçamento', val: this._fmt(t.orcAbs), un: 'R$ mi', sub: k4.txt, corSub: k4.cor, leg: 'cota do mês' },
+      { rot: 'Orçamento', val: this._fmt(t.orcAbs), un: 'R$ mi', sub: k4.txt, corSub: k4.cor, leg: 'orçamento do mês' },
       { rot: 'Forecast', val: this._fmt(t.forecast), un: 'R$ mi', sub: this._pct(this._vsFcst(t)), corSub: this._cor(this._vsFcst(t)), leg: 'reprojetado no ciclo' }
     ], 200);
     this._curva(M);
@@ -330,7 +330,7 @@ class Component extends DCLogic {
       + '<div style="width:74px;"></div>'
       + '<div style="width:132px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">Projetado</div>'
       + '<div style="width:126px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right; padding-left:22px; box-sizing:border-box;">% proj</div>'
-      + '<div style="flex:1; min-width:220px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:center;">% da cota</div>'
+      + '<div style="flex:1; min-width:220px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:center;">% do orçamento</div>'
       + '<div style="width:250px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; padding-left:30px;">Principal marca</div>'
       + '<div style="width:104px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">R$ mi</div>'
       + '<div style="width:100px; font-size:24px; font-weight:700; color:#0062AA; text-transform:uppercase; letter-spacing:.04em; text-align:right;">% proj</div></div>';
@@ -464,7 +464,7 @@ class Component extends DCLogic {
     const revBU = bus.map(x => ({ b: x.b, v: x.r.projIni != null ? x.r.proj - x.r.projIni : null }))
       .filter(x => x.v != null).sort((a, b) => Math.abs(b.v) - Math.abs(a.v))[0];
     this._cards(el, [
-      { rot: 'Gap para o orçamento', val: sinal(gap), un: 'R$ mi', sub: this._fmt(ating) + '% da cota', corSub: this._cor(gap),
+      { rot: 'Gap para o orçamento', val: sinal(gap), un: 'R$ mi', sub: this._fmt(ating) + '% do orçamento', corSub: this._cor(gap),
         leg: gapBU ? 'maior gap: ' + gapBU.b + ', ' + sinal(gapBU.v) : 'projetado vs. orçamento absoluto' },
       { rot: 'Gap para o forecast', val: sinal(t.forecast != null ? t.proj - t.forecast : null), un: 'R$ mi',
         sub: this._pct(this._vsFcst(t)) + ' vs. forecast', corSub: this._cor(this._vsFcst(t)),
@@ -477,14 +477,14 @@ class Component extends DCLogic {
   }
 
   _tblBU(el, F) {
-    const ord = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES', 'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura'];
-    const rule = { SG: 1, 'SG - SIMILARES': 1, 'VIT NEO QUÍMICA': 1, 'Total s/ Cobertura': 1 };
-    const muted = { COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - SIMILARES': 1 };
+    const ord = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura'];
+    const rule = { SG: 1, 'SG - SIMILARES': 1, 'Vitaminas': 1, 'Total s/ Cobertura': 1 };
+    const muted = { COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - COBERTURA': 1, 'SG - SIMILARES': 1 };
     const rows = ord.map(k => {
       const r = F.find(x => x.bu === k && x.marca === 'TOTAL' && x.rede === 'TOTAL'); if (!r) return null;
       const tot = k.indexOf('Total') === 0;
       return {
-        style: { rule: rule[k], muted: muted[k], small: muted[k] || k === 'SMART (EX-VIT)' || k === 'VIT NEO QUÍMICA', bold: tot },
+        style: { rule: rule[k], muted: muted[k], small: muted[k] || k === 'Similares (Ex-Vit)' || k === 'Vitaminas', bold: tot },
         cells: [{ t: k + (k === 'COBERTURA' ? '*' : ''), cor: tot ? '#292A2B' : (muted[k] ? '#5D5F61' : '#0062AA') },
           this._cell(r.realAA), this._cell(r.real), this._cell(r.proj), this._cellP(this._cres(r, 'proj')),
           this._cell(r.projIni), this._cellP(this._cres(r, 'projIni')),

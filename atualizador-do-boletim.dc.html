@@ -35,8 +35,8 @@
 
     <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
       <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
-      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um arquivo por tabela, todos de uma vez: <b>VENDAS</b>, <b>VENDAS_AA</b>, <b>PROJECOES_INIOCIAL_RATEADA</b>, <b>PROJECOES_ATUAL</b>, <b>ORCAMENTO</b> e <b>CURVA</b>. Valores em reais, com <b>.</b> de decimal — o relatório converte para R$ milhões. A curva só precisa de <b>DIA;BU;CANAL;PROJ</b>: realizado e ano anterior são somados de VENDAS e VENDAS_AA por dia. Pode vir no grão bruto de SKU: arquivo acima de 15 MB é lido em fatias e somado por BU × marca × canal × cliente × dia, sem limite de tamanho. Tabela quebrada em partes numeradas (<b>vendas-01.csv</b>, <b>vendas-02.csv</b>…) é unida na leitura. <b>meta.csv</b> é opcional: sem ele, data de corte e mês de referência saem da própria base, e os dias úteis são calculados por calendário (seg-sex, exceto feriados nacionais). O .xlsx de aba única continua sendo aceito, mas só até 40 MB.</div>
-      <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
+      
+      <div style="font-size:14px; line-height:1.55; color:#5D5F61; margin:0 auto 18px; max-width:660px;">Um arquivo por tabela, todos de uma vez: <b>VENDAS</b>, <b>VENDAS_AA</b>, <b>PROJECAO_INICIAL_RATEADA</b>, <b>PROJECAO_ATUAL</b>, <b>ORCAMENTO</b> e <b>CURVA</b>.</div><div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
         <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivos<input id="inpFile" type="file" accept=".csv,.txt,.xlsx,.xls" multiple="multiple" style="display:none;"></label>
         <button id="btnModel" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 24px; cursor:pointer;">Baixar modelo (CSV)</button>
       </div>
@@ -531,7 +531,7 @@ class Component extends DCLogic {
 
   /** Lê uma aba transacional (DIA | BU | MARCA | SKU | CANAL | CLIENTE | valores). */
   /** S, G e VIT NQ são as três sublinhas de SG nos CSVs da extração. */
-  get _ALIAS_BU() { return { 'S': 'SG', 'G': 'SG', 'VIT NQ': 'SG', 'VITNQ': 'SG', 'SMART': 'SG', 'GEN': 'SG' }; }
+  get _ALIAS_BU() { return { 'S': 'SG', 'G': 'SG', 'V': 'SG', 'C': 'SG', 'VIT NQ': 'SG', 'VITNQ': 'SG', 'SMART': 'SG', 'GEN': 'SG' }; }
 
   /**
    * SG chega quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas.
@@ -544,7 +544,8 @@ class Component extends DCLogic {
       'SG - SMART (EX-VIT)': 'SG - SMART (EX-VIT)',
       'G': 'SG - GENÉRICOS', 'GEN': 'SG - GENÉRICOS', 'GENERICOS': 'SG - GENÉRICOS',
       'GENÉRICOS': 'SG - GENÉRICOS', 'SG - GENERICOS': 'SG - GENÉRICOS', 'SG - GENÉRICOS': 'SG - GENÉRICOS',
-      'VIT NQ': 'VIT NEO QUÍMICA', 'VITNQ': 'VIT NEO QUÍMICA', 'VIT': 'VIT NEO QUÍMICA',
+      'C': 'SG - COBERTURA', 'SG - COBERTURA': 'SG - COBERTURA',
+      'V': 'VIT NEO QUÍMICA', 'VIT NQ': 'VIT NEO QUÍMICA', 'VITNQ': 'VIT NEO QUÍMICA', 'VIT': 'VIT NEO QUÍMICA',
       'VIT NEO QUIMICA': 'VIT NEO QUÍMICA', 'VIT NEO QUÍMICA': 'VIT NEO QUÍMICA'
     };
   }
@@ -818,7 +819,9 @@ class Component extends DCLogic {
     // os CSVs de orçamento e projeção usam S, G e VIT NQ. Os três apontam para a mesma sub-BU.
     const ALIAS_SUB = this._ALIAS_SUB;
     const canonSub = b => ALIAS_SUB[b] || b;
-    const norm = arr => arr.map(v => { const sub = canonSub(v.bu); return Object.assign({}, v, { sub: sub, bu: ALIAS_SUB[v.bu] ? 'SG' : v.bu }); });
+    // SG - Cobertura (C) é toda VI e toda do cliente Independente, qualquer que seja o canal/cliente da origem
+    const norm = arr => arr.map(v => { const sub = canonSub(v.bu); const o = Object.assign({}, v, { sub: sub, bu: ALIAS_SUB[v.bu] ? 'SG' : v.bu });
+      if (sub === 'SG - COBERTURA') { o.canal = 'VI'; o.cliente = 'INDEPENDENTE'; } return o; });
     vendas = norm(vendas); vendasAA = norm(vendasAA); plano = norm(plano || []); cota = norm(cota || []);
     const z = () => ({ realAA: 0, realAAmtd: 0, real: 0, proj: 0, projIni: 0, orc: 0, forecast: 0, projVD: 0, projVI: 0 });
     const mapa = {}, pega = k => (mapa[k] = mapa[k] || z());
@@ -878,9 +881,10 @@ class Component extends DCLogic {
     if (temCob) fatos.push(linha('COBERTURA', 'TOTAL', 'TOTAL', mapa['BU|COBERTURA']));
     const somaSub = rots => { const s = z(); rots.forEach(r => soma(s, mapa['SUB|' + r])); return s; };
     [['SG - GENÉRICOS', ['SG - GENÉRICOS']],
+      ['SG - COBERTURA', ['SG - COBERTURA']],
       ['SG - SIMILARES', ['SG - SMART (EX-VIT)', 'VIT NEO QUÍMICA']],
-      ['SMART (EX-VIT)', ['SG - SMART (EX-VIT)']],
-      ['VIT NEO QUÍMICA', ['VIT NEO QUÍMICA']]].forEach(([rot, rots]) => {
+      ['Similares (Ex-Vit)', ['SG - SMART (EX-VIT)']],
+      ['Vitaminas', ['VIT NEO QUÍMICA']]].forEach(([rot, rots]) => {
       const s = somaSub(rots);
       if (s.realAA || s.proj || s.real) fatos.push(linha(rot, 'TOTAL', 'TOTAL', s));
     });
@@ -1226,7 +1230,7 @@ class Component extends DCLogic {
         if (!nomeMetaT) { M.dataCorte = ''; M.referencia = ''; M.diasUteis = null; M.diasUteisAA = null; }
         this._derivarMeta(M, diasDe(nomeVendas) || vendas, diasDe(nomeAA) || vendasAA);
         if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
-        if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % da cota');
+        if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % do orçamento');
         const corte = this._serial(M.dataCorte);
         const vendasCorte = vendas.filter(v => !corte || v.data <= corte);
         const ag = this._agregar(vendasCorte, vendasAA, plano, M, topN, cota);
@@ -1425,7 +1429,7 @@ class Component extends DCLogic {
 
     if (t.orcAbs != null && t.orcAbs > 0) {
       const at = (t.proj / t.orcAbs) * 100, gap = t.proj - t.orcAbs;
-      frases.push('O atingimento da cota está em ' + f(at) + '%, ' + (gap >= 0 ? 'R$ ' + f(gap) + ' mi acima' : 'R$ ' + f(-gap) + ' mi abaixo') + ' do orçamento.');
+      frases.push('O atingimento do orçamento está em ' + f(at) + '%, ' + (gap >= 0 ? 'R$ ' + f(gap) + ' mi acima' : 'R$ ' + f(-gap) + ' mi abaixo') + ' do orçamento.');
     }
     if (t.forecast != null && t.forecast > 0) {
       const vf = this._vsFcst(t), gf = t.proj - t.forecast;
@@ -2053,8 +2057,8 @@ class Component extends DCLogic {
     const naBase = [...new Set(this.fatos.map(r => r[2]))];
     const REDES = ORD_REDE.filter(r => naBase.indexOf(r) >= 0)
       .concat(naBase.filter(r => ORD_REDE.indexOf(r) < 0));
-    const ORD_BU = ['CH', 'PP', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES',
-      'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura', 'VITNQ'];
+    const ORD_BU = ['CH', 'PP', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES',
+      'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'VITNQ'];
     const idx = {};
     this.fatos.forEach(r => { idx[r[0] + '|' + r[1] + '|' + r[2]] = r; });
     const bus = ORD_BU.filter(b => this.fatos.some(r => r[0] === b))
@@ -2161,7 +2165,7 @@ class Component extends DCLogic {
       + '<b>meta</b> (parâmetros, links e trava de envio), <b>historico-mensal</b> (venda mensal por ano, BU e canal), '
       + '<b>resumo-projecao</b> (método, dados e ajustes por BU), <b>clientes</b> (de/para cliente → rede), <b>curva</b> '
       + '(venda por dia corrido, por BU e canal, em R$ mi — alimenta o ritmo do mês da apresentação e do resumo do Teams). Na coluna BU use CH, PP, SC '
-      + 'e as três sublinhas de SG (SG - GENÉRICOS, SG - SMART (EX-VIT), VIT NEO QUÍMICA): SG e SG - SIMILARES são calculadas. '
+      + 'e as sublinhas de SG (G = Genéricos, S = Similares (Ex-Vit), V = Vitaminas, C = SG - Cobertura, sempre VI e cliente Independente): SG e SG - SIMILARES são calculadas. '
       + 'Cole a extração diária nos arquivos de venda, em R$, e devolva todos aqui de uma vez. Arquivo grande pode ser quebrado em vendas-01.csv, vendas-02.csv…';
   }
 
@@ -2369,7 +2373,7 @@ class Component extends DCLogic {
         const gap = tot.orcAbs != null ? tot.proj - tot.orcAbs : null;
         const rev = tot.projIni != null ? tot.proj - tot.projIni : null;
         const sn = v => v == null ? '-' : (v > 0 ? '+' : '') + this._fmt(v);
-        return 'Cota: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
+        return 'Orçamento: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
           + ' &#183; revisão ' + sn(rev) + ' vs. inicial';
       })());
 
@@ -2379,11 +2383,11 @@ class Component extends DCLogic {
     const tdSub = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'center') + '" style="font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:' + (o.c || '#5D5F61') + ';font-weight:' + (o.b ? 'bold' : 'normal') + ';padding:4px 4px;' + (o.pl || '') + 'border-bottom:1px solid #F2F7FB;background-color:#F7FBFE;">' + t + '</td>'; };
 
     const COM_MARCA = ['CH', 'PP', 'SC', 'SG'];
-    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - SIMILARES', 'SMART (EX-VIT)', 'VIT NEO QUÍMICA', 'Total', 'Total s/ Cobertura'];
+    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura'];
     const linhas = ordBU.map(k => {
       const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
       const isTot = k.indexOf('Total') === 0, muted = /COBERTURA|GENÉRICOS|SIMILARES/.test(k);
-      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'VIT NEO QUÍMICA' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
+      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
       const cinza = muted ? '#5D5F61' : '#292A2B';
       const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
       const rot = COM_MARCA.indexOf(k) >= 0

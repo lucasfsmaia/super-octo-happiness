@@ -3,14 +3,14 @@ branch: main
 
 ## Last sync
 
-date: 2026-10-02T12:00:00Z
+date: 2026-10-02T15:30:00Z
 
 ### Updated in this project
 
-- Datas lidas em aaaammdd (texto ou número), além de dd/mm/aaaa, aaaa-mm-dd e serial do Excel; corte, referência e dias úteis saem do último dia do VENDAS.
-- Realizado: VD/VI fecham com o Total s/ Cobertura, MTD do ano anterior aberto por canal e cortado no mesmo dia um ano antes.
-- Cabeçalho corrigido à mão é republicado para apresentação, simulador e validação; card "Apresentação gerada" na etapa Publicar.
-- Projeção atual e inicial somam todas as linhas do mesmo grão (antes a última linha sobrescrevia as demais); fechamento do resumo usa os mesmos números do quadro por BU.
+- SG reorganizada: SG - Genéricos (G), SG - Cobertura (C) e SG - Similares = Similares (Ex-Vit) (S) + Vitaminas (V).
+- SG - Cobertura nova sub-BU, sempre no canal VI e no cliente Independente.
+- "SMART (EX-VIT)" renomeado para "Similares (Ex-Vit)" e "VIT NEO QUÍMICA" para "Vitaminas" em apresentações e e-mails.
+- Simulador sem o seletor "Exibir": gráficos e tabela sempre visíveis.
 
 ## Screen map
 
@@ -29,5 +29,6 @@ date: 2026-10-02T12:00:00Z
 
 ## Sync history
 
+- 2026-10-02 — datas aaaammdd, realizado VD/VI fechando com Total s/ Cobertura, cabeçalho republicado, projeções somadas por grão.
 - 2026-09-29 — páginas não utilizadas removidas, esquema de seis arquivos no Atualizador, portal padronizado.
 - 2026-09-24 — primeiro push do projeto (repo estava vazio).
