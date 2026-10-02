@@ -639,7 +639,8 @@ class Component extends DCLogic {
         if (!mapa[k]) { mapa[k] = Object.assign({}, o, { projIni: 0, proj: 0 }); ordem.push(k); }
         // numa aba dedicada o valor pode vir na coluna específica ou na genérica
         const v = o[campo] || o.proj || o.projIni || o.real || 0;
-        mapa[k][campo] = v;
+        // a mesma chave aparece uma vez por dia (DATA) — soma, não sobrescreve
+        mapa[k][campo] += v;
       });
     };
     juntar(nIni, 'projIni');
@@ -1819,10 +1820,14 @@ class Component extends DCLogic {
       };
       const cmp = {}; colunas.forEach(b => cmp[b] = mesmoDia(b));
       const diaCmp = colunas.map(b => cmp[b].dia).filter(Boolean)[0] || null;
+      // realizado e projeção fim de mês saem dos mesmos FATOS do quadro "Crescimento e projeção por BU"
+      // (PROJECOES_ATUAL + VENDAS até o corte); a curva só entra quando a BU não tem linha nos FATOS
+      const linhaFatos = b => b === 'TOTAL' ? (typeof t !== 'undefined' && t ? t : this._row('TOTAL', 'TOTAL', 'TOTAL')) : this._row(b, 'TOTAL', 'TOTAL');
+      const doFato = (b, k) => { const r = linhaFatos(b); return r && r[k] != null ? Math.round(r[k] * 10) / 10 : null; };
       const val = {
         aa: b => aaMes(curvas[b]),
-        real: b => { const r = (curvas[b] && curvas[b].real) || []; return r.length ? r[r.length - 1] : null; },
-        fim: b => fimMes(curvas[b]),
+        real: b => { const x = doFato(b, 'real'); if (x != null) return x; const r = (curvas[b] && curvas[b].real) || []; return r.length ? r[r.length - 1] : null; },
+        fim: b => { const x = doFato(b, 'proj'); return x != null ? x : fimMes(curvas[b]); },
         ant: b => fimMes(curvasAnt[b]),
         realAnt: b => cmp[b].ant,
         realMesmoDia: b => cmp[b].atual

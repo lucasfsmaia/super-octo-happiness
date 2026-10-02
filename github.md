@@ -10,7 +10,7 @@ date: 2026-10-02T12:00:00Z
 - Datas lidas em aaaammdd (texto ou número), além de dd/mm/aaaa, aaaa-mm-dd e serial do Excel; corte, referência e dias úteis saem do último dia do VENDAS.
 - Realizado: VD/VI fecham com o Total s/ Cobertura, MTD do ano anterior aberto por canal e cortado no mesmo dia um ano antes.
 - Cabeçalho corrigido à mão é republicado para apresentação, simulador e validação; card "Apresentação gerada" na etapa Publicar.
-- Validação da base com botão "Voltar ao Atualizador"; portal sem os cards de Gestão Orçamentária.
+- Projeção atual e inicial somam todas as linhas do mesmo grão (antes a última linha sobrescrevia as demais); fechamento do resumo usa os mesmos números do quadro por BU.
 
 ## Screen map
 
