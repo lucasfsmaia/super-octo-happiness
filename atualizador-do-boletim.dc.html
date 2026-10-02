@@ -66,6 +66,17 @@
 
     
 
+    <div id="secApres" style="background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:20px clamp(16px,3vw,28px); margin-bottom:24px;"><div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <div style="min-width:0; flex:1 1 320px;">
+        <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:4px;">Apresentação gerada</div>
+        <div style="font-size:14px; line-height:1.5; color:#5D5F61;">Abre com a base carregada neste navegador. Para a equipe ver os mesmos números, publique o base-boletim.js no repositório.</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Abrir apresentação</a>
+        <a id="lnkSimul" href="simulador-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:8.5px 20px; text-decoration:none;">Abrir simulador</a>
+      </div>
+    </div></div>
+
     <div id="secResumo" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
         <div style="font-size:18px; font-weight:700; color:#292A2B;">Resumo para o Teams</div>
@@ -217,15 +228,15 @@ class Component extends DCLogic {
         + '<span style="display:block; font-size:12.5px; margin-top:1px; color:' + (on ? '#D6E9F7' : '#5D5F61') + ';">' + d[2] + '</span></span></button>';
     }).join('');
     box.querySelectorAll('button[data-etapa]').forEach(b => b.onclick = () => this._irEtapa(Number(b.dataset.etapa)));
-    const visiveis = { 1: ['dropZone', 'secCab'], 2: ['secAlertas'], 3: ['secResumo', 'secEnvio'] }[this._etapa] || [];
-    ['dropZone', 'secCab', 'secResumo', 'secAlertas', 'secEnvio'].forEach(id => {
+    const visiveis = { 1: ['dropZone', 'secCab'], 2: ['secAlertas'], 3: ['secApres', 'secResumo', 'secEnvio'] }[this._etapa] || [];
+    ['dropZone', 'secCab', 'secApres', 'secResumo', 'secAlertas', 'secEnvio'].forEach(id => {
       const el = this.$(id);
       if (el) el.style.display = visiveis.indexOf(id) >= 0 ? '' : 'none';
     });
     const pb = this.$('prevBox');
     if (pb && this._etapa !== 3) pb.style.display = 'none';
   }
-  _irEtapa(n) { this._etapa = n; this._pintarEtapas(); }
+  _irEtapa(n) { this._etapa = n; this._pintarEtapas(); if (n === 3) this._republicar(); }
 
   _init() {
     const B = JSON.parse(JSON.stringify(window.BASE_BOLETIM));
@@ -254,6 +265,23 @@ class Component extends DCLogic {
       const a = $('inpAssunto');
       if (a && !a.dataset.editado) a.value = this._assunto();
     }));
+    // correção manual do cabeçalho vale para as outras páginas (validação, apresentação, e-mail)
+    // corte corrigido à mão: referência e dias úteis acompanham (podem ser ajustados depois)
+    on('inpCorte', 'change', () => {
+      const s = this._serial($('inpCorte').value); if (!s) return;
+      const dc = this._dataDe(s), y = dc.getUTCFullYear(), m = dc.getUTCMonth(), d = dc.getUTCDate();
+      const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const dd = n => String(n).padStart(2, '0');
+      $('inpCorte').value = dd(d) + '/' + dd(m + 1) + '/' + String(y).slice(-2);
+      if ($('inpRef')) $('inpRef').value = MESES[m] + '/' + String(y).slice(-2);
+      const n = this._diasUteisCal(y, m, d); if (n && $('inpDias')) $('inpDias').value = n;
+      const ult = new Date(Date.UTC(y - 1, m + 1, 0)).getUTCDate();
+      const nAA = this._diasUteisCal(y - 1, m, Math.min(d, ult)); if (nAA && $('inpDiasAA')) $('inpDiasAA').value = nAA;
+      const a = $('inpAssunto'); if (a && !a.dataset.editado) a.value = this._assunto();
+      this._republicar();
+    });
+    ['inpRef', 'inpDias', 'inpDiasAA'].forEach(id => on(id, 'change', () => this._republicar()));
+    ['lnkApres', 'lnkSimul'].forEach(id => on(id, 'click', () => this._republicar()));
     on('inpAssunto', 'input', e => { e.target.dataset.editado = '1'; });
     on('btnGerarCons', 'click', () => this._gerarCons(true));
     on('chkCons', 'change', () => this._consEstado());
@@ -376,9 +404,24 @@ class Component extends DCLogic {
 
   /** dd/mm/aa|aaaa -> serial do Excel */
   _serial(txt) {
-    const p = String(txt || '').split('/'); if (p.length < 3) return 0;
-    let y = Number(p[2]); if (y < 100) y += 2000;
-    return Math.round((Date.UTC(y, Number(p[1]) - 1, Number(p[0])) - Date.UTC(1899, 11, 30)) / 86400000);
+    const ser = (y, m, d) => { if (y < 100) y += 2000; if (!(y > 1900 && m >= 1 && m <= 12 && d >= 1 && d <= 31)) return 0;
+      return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000); };
+    // número: 20260911 (aaaammdd lido como número), serial do Excel ou só o dia
+    if (typeof txt === 'number') return (txt > 31 && txt < 1e6) ? Math.floor(txt) : this._serial(String(Math.floor(txt)));
+    const t = String(txt == null ? '' : txt).trim().replace(/^"|"$/g, ''); if (!t) return 0;
+    let m = t.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);           // 2026-09-30, 2026-09-30T00:00:00
+    if (m) return ser(+m[1], +m[2], +m[3]);
+    m = t.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);            // 30/09/2026, 30-09-26 00:00
+    if (m) return ser(+m[3], +m[2], +m[1]);
+    m = t.match(/^(\d{4})(\d{2})(\d{2})$/);                               // 20260930
+    if (m) return ser(+m[1], +m[2], +m[3]);
+    if (/^\d{5}(\.\d+)?$/.test(t)) return Math.floor(Number(t));           // serial do Excel
+    if (/^\d{1,2}$/.test(t)) {                                              // só o dia: mês corrente se já passou, senão o anterior
+      const d = +t, h = new Date(); let y = h.getFullYear(), mm = h.getMonth() + 1;
+      if (d > h.getDate()) { mm--; if (!mm) { mm = 12; y--; } }
+      return ser(y, mm, d);
+    }
+    return 0;
   }
 
   /** serial do Excel -> Date (UTC) */
@@ -536,7 +579,8 @@ class Component extends DCLogic {
       if (!v.data) return;
       const dt = this._dataDe(v.data); if (!dt) return;
       const d = dt.getUTCDate();
-      const bu = this._buCanon(v.bu), can = (v.canal || 'VD').toUpperCase();
+      const c0 = String(v.canal || 'VD').toUpperCase();
+      const bu = this._buCanon(v.bu), can = c0.indexOf('VD') === 0 ? 'VD' : c0.indexOf('VI') === 0 ? 'VI' : c0;
       // as quatro combinações de BU e CANAL, que na curva são colunas opcionais
       [bu + '|' + can + '|' + d, bu + '||' + d, '|' + can + '|' + d, '||' + d]
         .forEach(k => { m[k] = (m[k] || 0) + (v.real || 0); });
@@ -562,7 +606,7 @@ class Component extends DCLogic {
     g.slice(1).forEach(r => {
       const bu = iBU < 0 ? '' : dim(r[iBU]); if (!bu) return;
       out.push({
-        data: iData < 0 ? 0 : (typeof r[iData] === 'number' ? r[iData] : this._serial(r[iData])), bu,
+        data: iData < 0 ? 0 : this._serial(r[iData]), bu,
         marca: dim(iMar < 0 ? '' : r[iMar]) || 'NÃO INFORMADA',
         sku: iSku < 0 ? '' : String(r[iSku] || '').trim(),
         canal: dim(iCan < 0 ? '' : r[iCan]) || 'VD',
@@ -631,10 +675,17 @@ class Component extends DCLogic {
         return m[k] == null ? null : m[k];
       };
       const cr = bruto.slice(1);
+      // DIA pode vir como dia do mês (1..31) ou como data completa (2026-09-01, 01/09/2026, serial do Excel)
+      const diaDe = x => {
+        const t = String(x == null ? '' : x).trim();
+        if (/^\d{1,2}$/.test(t)) return Number(t);
+        const s = this._serial(x); return s ? this._dataDe(s).getUTCDate() : 0;
+      };
       const linhas = cr.map(r => {
-        const d = this._num(r[iD]);
+        const d = diaDe(r[iD]);
         const bu = iBU < 0 ? null : (buCv(r[iBU]) || null);
-        const canal = iCanal < 0 ? null : (dimCv(r[iCanal]) || null);
+        const cv0 = iCanal < 0 ? '' : dimCv(r[iCanal]);
+        const canal = iCanal < 0 ? null : ((cv0.indexOf('VD') === 0 ? 'VD' : cv0.indexOf('VI') === 0 ? 'VI' : cv0) || null);
         return {
           d, bu, canal,
           aa: iAA >= 0 ? q(r[iAA]) : doMapa(mAA, bu, canal, d),
@@ -755,7 +806,12 @@ class Component extends DCLogic {
 
   /** Base transacional -> grade bu × marca × rede que o e-mail e a apresentação consomem. */
   _agregar(vendas, vendasAA, plano, M, topN, cota) {
-    const corteAA = this._serial(M.dataCorteAA);
+    // MTD do ano anterior: até o mesmo dia/mês do corte, um ano antes (quando a Meta não traz dataCorteAA)
+    let corteAA = this._serial(M.dataCorteAA);
+    if (!corteAA) {
+      const p = String(M.dataCorte || '').split('/');
+      if (p.length >= 3) { let y = Number(p[2]); if (y < 100) y += 2000; corteAA = this._serial(p[0] + '/' + p[1] + '/' + (y - 1)); }
+    }
     // SG chega na planilha quebrada em três BUs; aqui ela é consolidada e as sublinhas viram linhas derivadas
     // Cada extração escreve as sublinhas com um código próprio: a planilha usa nome longo,
     // os CSVs de orçamento e projeção usam S, G e VIT NQ. Os três apontam para a mesma sub-BU.
@@ -765,10 +821,12 @@ class Component extends DCLogic {
     vendas = norm(vendas); vendasAA = norm(vendasAA); plano = norm(plano || []); cota = norm(cota || []);
     const z = () => ({ realAA: 0, realAAmtd: 0, real: 0, proj: 0, projIni: 0, orc: 0, forecast: 0, projVD: 0, projVI: 0 });
     const mapa = {}, pega = k => (mapa[k] = mapa[k] || z());
-    const chaves = v => ['T', 'BU|' + v.bu, 'SUB|' + v.sub, 'MARCA|' + v.bu + '|' + v.marca, 'CANAL|' + v.canal,
-      'CANAL|' + v.bu + '|' + v.canal, 'CLI|' + v.cliente, 'CLI|' + v.bu + '|' + v.cliente,
+    // canal normalizado: "VD - DISTRIBUIDOR" e "VD" caem no mesmo VD
+    const cn = c => { const t = String(c || ''); return t.indexOf('VD') === 0 ? 'VD' : t.indexOf('VI') === 0 ? 'VI' : t; };
+    const chaves = v => { const c = cn(v.canal); return ['T', 'BU|' + v.bu, 'SUB|' + v.sub, 'MARCA|' + v.bu + '|' + v.marca, 'CANAL|' + c,
+      'CANAL|' + v.bu + '|' + c, 'CLI|' + v.cliente, 'CLI|' + v.bu + '|' + v.cliente,
       // grãos de abertura das tabelas: marca × cliente e marca × canal
-      'MC|' + v.bu + '|' + v.marca + '|' + v.cliente, 'MC|' + v.bu + '|' + v.marca + '|' + v.canal];
+      'MC|' + v.bu + '|' + v.marca + '|' + v.cliente, 'MC|' + v.bu + '|' + v.marca + '|' + c]; };
     vendas.forEach(v => chaves(v).forEach(k => { pega(k).real += v.real; }));
     plano.forEach(v => chaves(v).forEach(k => {
       const a = pega(k); a.proj += v.proj; a.projIni += v.projIni; if (!cota.length) a.orc += v.orc;
@@ -829,7 +887,10 @@ class Component extends DCLogic {
     fatos.push(linha('Total s/ Cobertura', 'TOTAL', 'TOTAL', totSC));
     fatos.push(linha('TOTAL', 'TOTAL', 'TOTAL', totSC));
     ['VD', 'VI'].forEach(c => {
-      if (mapa['CANAL|' + c]) fatos.push(linha('TOTAL', 'TOTAL', c, mapa['CANAL|' + c]));
+      // total do canal = só as BUs comerciais, para fechar com o Total s/ Cobertura
+      const tc = z(); let temC = false;
+      BUS.forEach(b => { const a = mapa['CANAL|' + b + '|' + c]; if (a) { soma(tc, a); temC = true; } });
+      if (temC) fatos.push(linha('TOTAL', 'TOTAL', c, tc));
       BUS.forEach(b => { if (mapa['CANAL|' + b + '|' + c]) fatos.push(linha(b, 'TOTAL', c, mapa['CANAL|' + b + '|' + c])); });
     });
     const clientes = [...new Set(linhas.map(v => v.cliente))]
@@ -864,7 +925,10 @@ class Component extends DCLogic {
     destaques.sort((a, b) => b[1] - a[1]);
     return {
       fatos, destaques: destaques.slice(0, this._num(M.destaqueQtd) || 8),
-      mtdAA: { vd: null, vi: null, total: arred(totSC.realAAmtd) },
+      mtdAA: (() => {
+        const sc = c => BUS.reduce((s, b) => s + ((mapa['CANAL|' + b + '|' + c] || {}).realAAmtd || 0), 0);
+        return { vd: arred(sc('VD')), vi: arred(sc('VI')), total: arred(totSC.realAAmtd) };
+      })(),
       resumo: { marcas: [...new Set(linhas.map(v => v.bu + '|' + v.marca))].length, skus: [...new Set(linhas.map(v => v.sku))].length }
     };
   }
@@ -1953,6 +2017,9 @@ class Component extends DCLogic {
    * então a apresentação e o simulador passam a mostrar os números do dia sem
    * precisar substituir o arquivo no repositório e dar push.
    */
+  /** grava o cabeçalho atual da tela na base que a apresentação, o simulador e a validação leem */
+  _republicar() { if (this.fatos && this.fatos.length) this._publicarBase(this._meta()); }
+
   _publicarBase(M) {
     try {
       localStorage.setItem('boletim.base.v1', JSON.stringify({

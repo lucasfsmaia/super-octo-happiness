@@ -3,14 +3,14 @@ branch: main
 
 ## Last sync
 
-date: 2026-09-29T00:00:00Z
+date: 2026-10-02T12:00:00Z
 
 ### Updated in this project
 
-- Portal enxuto: "Boletim do dia" com apenas Apresentação e E-mail comercial; cards padronizados com borda superior ciano.
-- Páginas não utilizadas removidas (Formato da base, Agregação no Power Query, Arquitetura de dados) e links da área restrita corrigidos.
-- Atualizador com o novo esquema de seis arquivos (CURVA, ORCAMENTO, PROJECOES_ATUAL, PROJECOES_INICIAL_RATEADA, VENDAS, VENDAS_AA); REALAA e REAL calculados por dia × BU × canal.
-- Colunas numéricas lidas em reais com separador decimal "." e exibidas em milhões.
+- Datas lidas em aaaammdd (texto ou número), além de dd/mm/aaaa, aaaa-mm-dd e serial do Excel; corte, referência e dias úteis saem do último dia do VENDAS.
+- Realizado: VD/VI fecham com o Total s/ Cobertura, MTD do ano anterior aberto por canal e cortado no mesmo dia um ano antes.
+- Cabeçalho corrigido à mão é republicado para apresentação, simulador e validação; card "Apresentação gerada" na etapa Publicar.
+- Validação da base com botão "Voltar ao Atualizador"; portal sem os cards de Gestão Orçamentária.
 
 ## Screen map
 
@@ -29,4 +29,5 @@ date: 2026-09-29T00:00:00Z
 
 ## Sync history
 
+- 2026-09-29 — páginas não utilizadas removidas, esquema de seis arquivos no Atualizador, portal padronizado.
 - 2026-09-24 — primeiro push do projeto (repo estava vazio).
