@@ -2491,9 +2491,7 @@ class Component extends DCLogic {
       const bd = (k === 'PP' || k === 'SG' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
       const cinza = muted ? '#5D5F61' : '#292A2B';
       const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
-      const rot = COM_MARCA.indexOf(k) >= 0
-        ? '<label for="c-' + k + '" style="cursor:pointer;color:#0062AA;">' + k + ' <span style="font-size:10px;">&#9660;</span></label>'
-        : muted ? '<span style="padding-left:' + (NIV[k] * 12) + 'px;font-size:13px;">' + esc(NOME[k] || k) + '</span>' : esc(k);
+      const rot = muted ? '<span style="padding-left:' + (NIV[k] * 12) + 'px;font-size:13px;">' + esc(NOME[k] || k) + '</span>' : esc(k);
       let out = '<tr>' + td(rot, { it: false, b: true, c: isTot ? '#292A2B' : (muted ? '#5D5F61' : '#0062AA'), bd: bd, p: '5px 4px 5px 0' }) +
         [r.realAA, r.real, r.proj].map(v => td(this._fmt(v), { c: cinza, b: isTot, bd: bd })).join('') +
         td(this._pct(p1), { c: this._cor(p1), b: true, bd: bd }) +
@@ -2505,25 +2503,6 @@ class Component extends DCLogic {
           + td(this._pct(this._vsFcst(r)), { c: this._cor(this._vsFcst(r)), b: true, bd: bd }) : '') +
         td(this._pct(r.vd), { c: cinza, b: isTot, bd: bd }) +
         td(this._pct(r.vi), { c: cinza, b: isTot, bd: bd, p: '5px 0 5px 4px' }) + '</tr>';
-      if (COM_MARCA.indexOf(k) >= 0) {
-        const projBU = r.proj || 0;
-        const marcasBU = F.filter(o => o.bu === k && o.rede === 'TOTAL' && o.marca !== 'TOTAL' && o.marca !== 'TOTAL PB')
-          .sort((a, b) => (a.marca === 'DEMAIS' ? 1 : b.marca === 'DEMAIS' ? -1 : (b.proj || 0) - (a.proj || 0)));
-        out += marcasBU.map(o => {
-          const pp = this._cres(o, 'proj');
-          const rep = projBU > 0 && o.proj != null ? (o.proj / projBU) * 100 : null;
-          const nome = (o.marca === 'DEMAIS' ? 'Demais marcas' : esc(o.marca))
-            + (rep != null ? ' <span style="color:#8A8C8E;font-weight:normal;">' + this._pct(rep) + '</span>' : '');
-          return '<tr class="sub s-' + k + '">' +
-            tdSub('&#8226; ' + nome, { a: 'left', c: '#434445', pl: 'padding-left:14px;' }) +
-            [o.realAA, o.real, o.proj].map(v => tdSub(this._fmt(v))).join('') +
-            tdSub(this._pct(pp), { c: this._cor(pp), b: true }) +
-            tdSub(this._fmt(o.projIni)) + tdSub(this._pct(this._cres(o, 'projIni'))) +
-            tdSub(this._fmt(o.orcAbs)) + tdSub(this._pct(this._cres(o, 'orcAbs'))) +
-            (g2 ? tdSub(this._fmt(o.forecast)) + tdSub(this._pct(this._vsFcst(o)), { c: this._cor(this._vsFcst(o)), b: true }) : '') +
-            tdSub(this._pct(o.vd)) + tdSub(this._pct(o.vi)) + '</tr>';
-        }).join('');
-      }
       return out;
     }).join('');
 
@@ -2534,10 +2513,39 @@ class Component extends DCLogic {
 
     const logo = window.LOGO_EMAIL_HYPERA || '';
 
+    // ----- cards: principais marcas de cada BU -----
+    const TOPM = 5;
+    const cardsBU = COM_MARCA.map(k => {
+      const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
+      const pk = this._cres(r, 'proj');
+      const ms = F.filter(o => o.bu === k && o.rede === 'TOTAL' && ['TOTAL', 'TOTAL PB', 'DEMAIS'].indexOf(o.marca) < 0 && o.proj != null)
+        .sort((a, b) => (b.proj || 0) - (a.proj || 0)).slice(0, TOPM);
+      const lin = ms.map(o => {
+        const p = this._cres(o, 'proj');
+        return '<tr><td style="font-size:13px;line-height:18px;color:#292A2B;padding:6px 0;border-top:1px solid #D6E8F5;">' + esc(o.marca) + '</td>' +
+          '<td align="right" style="font-size:13px;line-height:18px;color:#5D5F61;padding:6px 0 6px 6px;border-top:1px solid #D6E8F5;white-space:nowrap;">' + this._fmt(o.proj) + '</td>' +
+          '<td align="right" style="font-size:13px;line-height:18px;font-weight:bold;color:' + this._cor(p) + ';padding:6px 0 6px 8px;border-top:1px solid #D6E8F5;white-space:nowrap;">' + this._pct(p) + '</td></tr>';
+      }).join('');
+      return '<td class="kpi" width="25%" valign="top" bgcolor="#EDF6FC" style="width:25%;background-color:#EDF6FC;border-radius:8px;padding:14px 14px 10px;border-left:5px solid #FFFFFF;border-right:5px solid #FFFFFF;font-family:Calibri,Arial,sans-serif;">' +
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">' +
+        '<tr><td colspan="3" style="padding-bottom:8px;"><span style="font-size:18px;line-height:24px;font-weight:bold;color:#0062AA;">' + k + '</span> ' +
+        '<span style="font-size:13px;line-height:18px;color:#5D5F61;">' + this._fmt(r.proj) + ' &#183; </span>' +
+        '<span style="font-size:13px;line-height:18px;font-weight:bold;color:' + this._cor(pk) + ';">' + this._pct(pk) + '</span></td></tr>' +
+        '<tr><td style="font-size:10px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:#5D5F61;padding-bottom:4px;">Marca</td>' +
+        '<td align="right" style="font-size:10px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:#5D5F61;padding-bottom:4px;">Proj.</td>' +
+        '<td align="right" style="font-size:10px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:#5D5F61;padding-bottom:4px;">vs AA</td></tr>' +
+        lin + '</table></td>';
+    }).join('');
+    const blocoMarcas = cardsBU ? '<tr><td class="pad" style="padding:26px 19px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<div style="font-size:18px;line-height:26px;font-weight:bold;color:#0062AA;padding:0 5px;">Principais marcas por BU <span style="font-weight:normal;font-size:14px;color:#5D5F61;">(projetado do mês, ' + esc(M.moeda) + ')</span></div>' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:10px;"><tr>' + cardsBU + '</tr></table></td></tr>\n' : '';
+
+    const LARG = g2
+      ? ['17%', '8%', '7.5%', '7.5%', '6%', '8%', '6%', '7.5%', '7%', '7.5%', '6.5%', '6%', '5.5%']
+      : ['19%', '9%', '8.5%', '8.5%', '6.5%', '9%', '6.5%', '8%', '8%', '8.5%', '8.5%'];
     return '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="color-scheme" content="light dark">\n<title>Boletim Sell Out - ' + esc(M.dataCorte) + '</title>\n' +
       '<!--[if mso]>\n<style>table,td,div,p,a{font-family:Calibri,Arial,sans-serif !important;}</style>\n<![endif]-->\n' +
-      '<style>\n.tgl{display:none !important;}\n' +
-      '#c-CH:checked ~ table tr.s-CH,#c-PP:checked ~ table tr.s-PP,#c-SC:checked ~ table tr.s-SC,#c-SG:checked ~ table tr.s-SG{display:none;}\n' +
+      '<style>\n' +
       '@media only screen and (max-width:620px){\n' +
       '.wrap{width:100% !important}\n.pad{padding-left:12px !important;padding-right:12px !important}\n' +
       '.hdrcta{display:none !important}\n.hdrlogo{display:block !important;width:auto !important;padding:0 0 10px !important;border-right:0 !important}\n' +
@@ -2559,7 +2567,6 @@ class Component extends DCLogic {
       '<body style="margin:0;padding:0;background-color:#FFFFFF;">\n' +
       '<span style="display:none;font-size:1px;color:#FFF;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Boletim Sell Out de ' + esc(M.referencia) + ' atualizado com dados até ' + esc(M.dataCorte) + ', disponível no HUB na área Corp.</span>\n' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="left">\n' +
-      '<input class="tgl" type="checkbox" id="c-CH" checked><input class="tgl" type="checkbox" id="c-PP" checked><input class="tgl" type="checkbox" id="c-SC" checked><input class="tgl" type="checkbox" id="c-SG" checked>\n' +
       '<table role="presentation" class="wrap" cellpadding="0" cellspacing="0" border="0" width="980" style="width:980px;max-width:980px;">\n' +
       // cabeçalho
       '<tr><td style="background-color:#0A3D80;background-image:linear-gradient(90deg,#0A3D80 0%,#0B4C97 35%,#0062AA 60%,#08356E 100%);border-bottom:2px solid #00BFDF;padding:18px 24px 20px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
@@ -2582,15 +2589,12 @@ class Component extends DCLogic {
       '<tr><td class="pad" style="padding:26px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<div style="font-size:18px;line-height:26px;font-weight:bold;color:#0062AA;">Crescimento BUs <span style="font-weight:normal;font-size:14px;color:#5D5F61;">(' + esc(M.moeda) + ')</span></div>' +
       '<table role="presentation" class="tbl" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;table-layout:fixed;border-collapse:collapse;font-family:Calibri,Arial,Helvetica,sans-serif;margin-top:12px;">' +
-      '<colgroup>' + (g2
-        ? ['17%', '8%', '7.5%', '7.5%', '6%', '8%', '6%', '7.5%', '7%', '7.5%', '6.5%', '6%', '5.5%']
-        : ['19%', '9%', '8.5%', '8.5%', '6.5%', '9%', '6.5%', '8%', '8%', '8.5%', '8.5%']).map(w => '<col style="width:' + w + '">').join('') + '</colgroup><tr>' +
+      '<colgroup>' + LARG.map(w => '<col style="width:' + w + '">').join('') + '</colgroup><tr>' +
       ['BU', 'REAL AA', 'REAL', 'PROJ.', '% PROJ', 'PROJ. INICIAL', '% PROJ', 'ORÇ. ABS', '% CRES ORÇ']
-        .concat(g2 ? ['FORECAST', '% FCST'] : []).concat(['VD', 'VI']).map(th).join('') + '</tr>' + linhas + '</table>' +
+        .concat(g2 ? ['FORECAST', '% FCST'] : []).concat(['VD', 'VI']).map((t, i) => th(t).replace('<th ', '<th width="' + LARG[i] + '" ').replace('style="', 'style="width:' + LARG[i] + ';')).join('') + '</tr>' + linhas + '</table>' +
       '<div style="font-size:13px;line-height:19px;font-weight:bold;color:#0062AA;padding-top:6px;">*A cobertura não está incluída no Power BI do Boletim Sell Out.</div>' +
-      '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:2px;">Clique em CH, PP, SC ou SG para ver as marcas da BU.</div>' +
       '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:4px;">Fonte: ' + esc(M.fonte) + '. Realizado atual: ' + M.diasUteis + ' dias úteis. MTD ano anterior: ' + M.diasUteisAA + ' dias úteis.</div>' +
-      '</td></tr>\n' +
+      '</td></tr>\n' + blocoMarcas +
       // botões
       '<tr><td class="pad" style="padding:26px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
