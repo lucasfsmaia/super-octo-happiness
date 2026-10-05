@@ -11,6 +11,7 @@ date: 2026-10-05T12:00:00Z
 - Cards dos e-mails com colunas comparativas Ex-Semavy.
 - Simulador com botão "Voltar ao portal" e eixo diário pelo calendário do mês.
 - Botão "Baixar" do atualizador exporta o card como PNG.
+- Tabela de BUs padronizada: sublinhas em caixa mista, recuo por nível e cor única.
 - Bloco PP (Ex-Semavy) / Semavy logo abaixo de PP; cards do e-mail alinhados com crescimento com e sem Semavy.
 - Atualizador com botão "Voltar ao portal"; Semavy reconhecida em qualquer marca de PP com "SEMAVY" no nome.
 

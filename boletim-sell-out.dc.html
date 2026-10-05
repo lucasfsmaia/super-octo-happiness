@@ -760,14 +760,15 @@ class Component extends DCLogic {
 
   _tblBU(el, F) {
     const ord = ['CH', 'PP', 'PP (Ex-Semavy)', 'Semavy', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)'];
-    const rule = { PP: 1, SG: 1, 'SG - SIMILARES': 1, 'Vitaminas': 1, 'Semavy': 1, 'Total s/ Cobertura': 1 };
-    const muted = { COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - COBERTURA': 1, 'SG - SIMILARES': 1 };
+    const rule = { PP: 1, SG: 1, 'Vitaminas': 1, 'Semavy': 1, 'Total s/ Cobertura': 1 };
+    const nivel = { 'PP (Ex-Semavy)': 1, 'Semavy': 1, COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - COBERTURA': 1, 'SG - SIMILARES': 1, 'Similares (Ex-Vit)': 2, 'Vitaminas': 2 };
+    const nome = { COBERTURA: 'Cobertura*', 'SG - GENÉRICOS': 'SG - Genéricos', 'SG - COBERTURA': 'SG - Cobertura', 'SG - SIMILARES': 'SG - Similares' };
     const rows = ord.map(k => {
       const r = F.find(x => x.bu === k && x.marca === 'TOTAL' && x.rede === 'TOTAL'); if (!r) return null;
       const tot = k.indexOf('Total') === 0;
       return {
-        style: { rule: rule[k], muted: muted[k], small: muted[k] || k === 'Similares (Ex-Vit)' || k === 'Vitaminas' || k === 'PP (Ex-Semavy)' || k === 'Semavy', bold: tot },
-        cells: [{ t: k + (k === 'COBERTURA' ? '*' : ''), cor: tot ? '#292A2B' : (muted[k] ? '#5D5F61' : '#0062AA') },
+        style: { rule: rule[k], muted: !!nivel[k], small: !!nivel[k], bold: tot },
+        cells: [{ t: nivel[k] ? '<span style="display:inline-block; padding-left:' + (nivel[k] * 14) + 'px; font-weight:600;">' + (nome[k] || k) + '</span>' : k, cor: tot ? '#292A2B' : (nivel[k] ? '#5D5F61' : '#0062AA') },
           this._cell(r.realAA), this._cell(r.real), this._cell(r.proj), this._cellP(this._cres(r, 'proj')),
           this._cell(r.projIni), this._cellP(this._cres(r, 'projIni')),
           this._cell(r.orcAbs), this._cellP(this._cres(r, 'orcAbs')),

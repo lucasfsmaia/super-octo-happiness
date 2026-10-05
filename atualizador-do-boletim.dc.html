@@ -2485,13 +2485,15 @@ class Component extends DCLogic {
     const ordBU = ['CH', 'PP', 'PP (Ex-Semavy)', 'Semavy', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)'];
     const linhas = ordBU.map(k => {
       const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
-      const isTot = k.indexOf('Total') === 0, muted = /COBERTURA|GENÉRICOS|SIMILARES/.test(k);
-      const bd = (k === 'PP' || k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
+      const NIV = { 'PP (Ex-Semavy)': 1, 'Semavy': 1, COBERTURA: 1, 'SG - GENÉRICOS': 1, 'SG - COBERTURA': 1, 'SG - SIMILARES': 1, 'Similares (Ex-Vit)': 2, 'Vitaminas': 2 };
+      const NOME = { COBERTURA: 'Cobertura*', 'SG - GENÉRICOS': 'SG - Genéricos', 'SG - COBERTURA': 'SG - Cobertura', 'SG - SIMILARES': 'SG - Similares' };
+      const isTot = k.indexOf('Total') === 0, muted = !!NIV[k];
+      const bd = (k === 'PP' || k === 'SG' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
       const cinza = muted ? '#5D5F61' : '#292A2B';
       const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
       const rot = COM_MARCA.indexOf(k) >= 0
         ? '<label for="c-' + k + '" style="cursor:pointer;color:#0062AA;">' + k + ' <span style="font-size:10px;">&#9660;</span></label>'
-        : esc(k) + (k === 'COBERTURA' ? '*' : '');
+        : muted ? '<span style="padding-left:' + (NIV[k] * 12) + 'px;font-size:13px;">' + esc(NOME[k] || k) + '</span>' : esc(k);
       let out = '<tr>' + td(rot, { it: false, b: true, c: isTot ? '#292A2B' : (muted ? '#5D5F61' : '#0062AA'), bd: bd, p: '5px 4px 5px 0' }) +
         [r.realAA, r.real, r.proj].map(v => td(this._fmt(v), { c: cinza, b: isTot, bd: bd })).join('') +
         td(this._pct(p1), { c: this._cor(p1), b: true, bd: bd }) +
