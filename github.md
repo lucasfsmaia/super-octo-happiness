@@ -11,6 +11,7 @@ date: 2026-10-05T12:00:00Z
 - Cards dos e-mails com colunas comparativas Ex-Semavy.
 - Simulador com botão "Voltar ao portal" e eixo diário pelo calendário do mês.
 - Botão "Baixar" do atualizador exporta o card como PNG.
+- Atualizador com botão "Voltar ao portal"; Semavy reconhecida em qualquer marca de PP com "SEMAVY" no nome.
 
 ## Screen map
 

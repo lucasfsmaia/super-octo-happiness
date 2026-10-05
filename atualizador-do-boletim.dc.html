@@ -29,9 +29,11 @@
       <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:34px;">
     </div>
 
-    
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <a href="portal-boletim-sell-out.dc.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px 6px 10px; border:1px solid #0062AA; border-radius:8px; background:#FFFFFF; color:#0062AA; font-size:14px; text-decoration:none;" style-hover="background:#EDF6FC; color:#074878; border-color:#074878;"><span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>Voltar ao portal</a>
+    </div>
 
-    <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:24px 0 26px;"></div>
+    <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:14px 0 26px;"></div>
 
     <div id="dropZone" style="background:#fff; border:2px dashed #0062AA; border-radius:12px; padding:32px clamp(16px,3vw,28px); margin-bottom:24px; text-align:center;">
       <div style="font-size:19px; font-weight:700; color:#292A2B; margin-bottom:6px;">Solte os arquivos da base aqui</div>
@@ -920,9 +922,9 @@ class Component extends DCLogic {
     this._semavy = null;
     if (mapa['BU|PP']) {
       const sem = z();
-      Object.keys(mapa).filter(k => /^MARCA\|PP\|SEMAVY/i.test(k)).forEach(k => soma(sem, mapa[k]));
+      Object.keys(mapa).filter(k => /^MARCA\|PP\|.*SEMAVY/i.test(k)).forEach(k => soma(sem, mapa[k]));
       const ex = soma(z(), mapa['BU|PP']); Object.keys(ex).forEach(k => ex[k] -= sem[k]);
-      if (sem.realAA || sem.proj || sem.real) {
+      if (sem.realAA || sem.proj || sem.real || sem.orc) {
         fatos.push(linha('PP (Ex-Semavy)', 'TOTAL', 'TOTAL', ex));
         fatos.push(linha('Semavy', 'TOTAL', 'TOTAL', sem));
         this._semavy = sem;
