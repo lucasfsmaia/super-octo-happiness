@@ -2132,8 +2132,8 @@ class Component extends DCLogic {
     const naBase = [...new Set(this.fatos.map(r => r[2]))];
     const REDES = ORD_REDE.filter(r => naBase.indexOf(r) >= 0)
       .concat(naBase.filter(r => ORD_REDE.indexOf(r) < 0));
-    const ORD_BU = ['CH', 'PP', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES',
-      'Similares (Ex-Vit)', 'Vitaminas', 'PP (Ex-Semavy)', 'Semavy', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)', 'VITNQ'];
+    const ORD_BU = ['CH', 'PP', 'PP (Ex-Semavy)', 'Semavy', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES',
+      'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)', 'VITNQ'];
     const idx = {};
     this.fatos.forEach(r => { idx[r[0] + '|' + r[1] + '|' + r[2]] = r; });
     const bus = ORD_BU.filter(b => this.fatos.some(r => r[0] === b))
@@ -2411,7 +2411,7 @@ class Component extends DCLogic {
         '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="56" style="width:56px;">' +
         '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:19px;font-weight:bold;color:#074878;padding-bottom:4px;">' + this._fmt(t) + '</td></tr>' +
         seg(vi, '#074878', '#FFFFFF') + seg(vd, '#A9D0EE', '#074878') +
-        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:17px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
+        '<tr><td align="center" valign="top" height="38" style="height:38px;font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:15px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
         '</table></td>';
     };
 
@@ -2422,23 +2422,24 @@ class Component extends DCLogic {
         '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="56" style="width:56px;">' +
         '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:19px;font-weight:bold;color:#0062AA;padding-bottom:4px;">' + this._fmt(v) + '</td></tr>' +
         '<tr><td height="' + hh + '" bgcolor="#00BFDF" style="height:' + hh + 'px;font-size:1px;line-height:1px;">&nbsp;</td></tr>' +
-        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:17px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
+        '<tr><td align="center" valign="top" height="38" style="height:38px;font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:15px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
         '</table></td>';
     };
     const sepX = '<td width="1" valign="bottom" style="width:1px;padding:0 4px;"><div style="width:1px;height:120px;background-color:#A9D0EE;font-size:1px;line-height:1px;">&nbsp;</div></td>';
     const sem = g('Semavy', 'TOTAL', 'TOTAL');
-    const semMtdAA = sem && sem.real != null && sem.cresc != null ? sem.real / (1 + sem.cresc / 100) : null;
-    const ex = (a, b) => (sem && typeof a === 'number' && typeof b === 'number') ? a - b : null;
+    const semMtdAA = !sem ? null : (sem.real != null && sem.cresc != null) ? sem.real / (1 + sem.cresc / 100) : (sem.realAA ? null : 0);
+    const ex = (a, b) => (sem && typeof a === 'number') ? a - (typeof b === 'number' ? b : 0) : null;
     const pctX = (a, b) => (a != null && b) ? (a / b - 1) * 100 : null;
-    const notaX = (a, b) => sem ? ' &#183; Ex-Semavy <strong style="color:' + this._cor(pctX(a, b)) + ';">' + this._pct(pctX(a, b)) + '</strong>' : '';
+    const notaX = () => '';
     const parX = (r1, v1, r2, v2, e) => sem ? sepX + barraX(r1, v1, e) + barraX(r2, v2, e) : '';
 
-    const cartao = (eyebrow, valor, sub, delta, barras, nota) =>
+    const cartao = (eyebrow, valor, sub, delta, barras, nota, deltaX) =>
       '<td class="kpi" width="33%" valign="top" bgcolor="#EDF6FC" style="width:33%;background-color:#EDF6FC;border-radius:8px;padding:16px 16px 14px;border-left:6px solid #FFFFFF;border-right:6px solid #FFFFFF;font-family:Calibri,Arial,sans-serif;">' +
       '<div style="font-size:13px;line-height:18px;letter-spacing:1px;text-transform:uppercase;color:#5D5F61;font-weight:bold;">' + esc(eyebrow) + '</div>' +
       '<div style="font-size:36px;line-height:42px;mso-line-height-rule:exactly;font-weight:bold;color:#074878;padding-top:4px;">' + this._fmt(valor) + '</div>' +
       '<div style="font-size:14px;line-height:19px;color:#5D5F61;">' + esc(sub) + '</div>' +
-      '<div style="font-size:16px;line-height:22px;font-weight:bold;color:' + this._cor(delta) + ';padding:6px 0 12px;">' + this._pct(delta) + ' vs AA</div>' +
+      '<div style="font-size:16px;line-height:22px;font-weight:bold;color:' + this._cor(delta) + ';padding:6px 0 12px;">' + this._pct(delta) + ' vs AA'
+        + (sem ? ' <span style="color:#5D5F61;font-weight:normal;">&#183; ex-Semavy</span> <span style="color:' + this._cor(deltaX) + ';">' + this._pct(deltaX) + '</span>' : '') + '</div>' +
       '<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>' + barras + '</tr></table>' +
       '<div style="font-size:13px;line-height:19px;color:#5D5F61;padding-top:8px;">' + nota + '</div></td>';
 
@@ -2448,7 +2449,7 @@ class Component extends DCLogic {
       barra('AA', M.mes.aa.vd, M.mes.aa.vi, e1) + barra('Projetado', M.mes.proj.vd, M.mes.proj.vi, e1)
         + parX('AA ex-Sem.', ex(M.mes.aa.total, sem && sem.realAA), 'Proj. ex-Sem.', ex(tot.proj, sem && sem.proj), e1),
       'VD ' + this._pct(num(M.mes.cresVD)) + ' &#183; VI ' + this._pct(num(M.mes.cresVI))
-        + notaX(ex(tot.proj, sem && sem.proj), ex(M.mes.aa.total, sem && sem.realAA)));
+, pctX(ex(tot.proj, sem && sem.proj), ex(M.mes.aa.total, sem && sem.realAA)));
 
     const mtdAAt = (mtdAA.vd || 0) + (mtdAA.vi || 0), mtdAtt = (mtdAt.vd || 0) + (mtdAt.vi || 0);
     const e2 = esc114(Math.max(mtdAAt, mtdAtt));
@@ -2457,7 +2458,7 @@ class Component extends DCLogic {
       barra('Realizado', mtdAt.vd, mtdAt.vi, e2)
         + parX('MTD ex-Sem.', ex(mtdAAt, semMtdAA), 'Real. ex-Sem.', ex(mtdAtt, sem && sem.real), e2),
       'VD ' + this._pct(num(cVD.cresc)) + ' &#183; VI ' + this._pct(num(cVI.cresc))
-        + notaX(ex(mtdAtt, sem && sem.real), ex(mtdAAt, semMtdAA)) + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis');
+        + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis', pctX(ex(mtdAtt, sem && sem.real), ex(mtdAAt, semMtdAA)));
 
     const mtgVD = menos(M.mes.proj.vd, mtdAt.vd), mtgVI = menos(M.mes.proj.vi, mtdAt.vi);
     const mtgAAvd = menos(M.mes.aa.vd, mtdAA.vd), mtgAAvi = menos(M.mes.aa.vi, mtdAA.vi);
@@ -2465,16 +2466,15 @@ class Component extends DCLogic {
     const e3 = esc114(Math.max(mtg, mtgAA));
     const c3 = cartao('MTG', mtg, M.moeda + ', Projetado − Realizado', mtgAA ? (mtg / mtgAA - 1) * 100 : null,
       barra('MTG AA', mtgAAvd, mtgAAvi, e3) + barra('MTG', mtgVD, mtgVI, e3)
-        + parX('MTG AA ex-Sem.', ex(mtgAA, sem && semMtdAA != null ? sem.realAA - semMtdAA : null), 'MTG ex-Sem.', ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), e3),
+        + parX('MTG AA ex-Sem.', ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null), 'MTG ex-Sem.', ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), e3),
       (() => {
         const at = tot.orcAbs ? tot.proj / tot.orcAbs * 100 : null;
         const gap = tot.orcAbs != null ? tot.proj - tot.orcAbs : null;
         const rev = tot.projIni != null ? tot.proj - tot.projIni : null;
         const sn = v => v == null ? '-' : (v > 0 ? '+' : '') + this._fmt(v);
         return 'Orçamento: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
-          + ' &#183; revisão ' + sn(rev) + ' vs. inicial'
-          + notaX(ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), ex(mtgAA, sem && semMtdAA != null ? sem.realAA - semMtdAA : null));
-      })());
+          + ' &#183; revisão ' + sn(rev) + ' vs. inicial';
+      })(), pctX(ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null)));
 
     // ----- tabela de BUs com marcas retráteis -----
     const th = t => '<th align="center" style="font-size:11px;line-height:17px;mso-line-height-rule:exactly;font-weight:bold;color:#0062AA;padding:4px 4px 6px;border-bottom:1.5px solid #00BFDF;">' + t + '</th>';
@@ -2482,11 +2482,11 @@ class Component extends DCLogic {
     const tdSub = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'center') + '" style="font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:' + (o.c || '#5D5F61') + ';font-weight:' + (o.b ? 'bold' : 'normal') + ';padding:4px 4px;' + (o.pl || '') + 'border-bottom:1px solid #F2F7FB;background-color:#F7FBFE;">' + t + '</td>'; };
 
     const COM_MARCA = ['CH', 'PP', 'SC', 'SG'];
-    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'PP (Ex-Semavy)', 'Semavy', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)'];
+    const ordBU = ['CH', 'PP', 'PP (Ex-Semavy)', 'Semavy', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)'];
     const linhas = ordBU.map(k => {
       const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
       const isTot = k.indexOf('Total') === 0, muted = /COBERTURA|GENÉRICOS|SIMILARES/.test(k);
-      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
+      const bd = (k === 'PP' || k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
       const cinza = muted ? '#5D5F61' : '#292A2B';
       const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
       const rot = COM_MARCA.indexOf(k) >= 0
