@@ -69,7 +69,7 @@
     <div id="secApres" style="background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:20px clamp(16px,3vw,28px); margin-bottom:24px;"><div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
       <div style="min-width:0; flex:1 1 320px;">
         <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:4px;">Apresentação gerada</div>
-        <div style="font-size:14px; line-height:1.5; color:#5D5F61;">Abre com a base carregada neste navegador. Para a equipe ver os mesmos números, publique o base-boletim.js no repositório.</div>
+        
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Abrir apresentação</a>
@@ -82,16 +82,15 @@
         <div style="font-size:18px; font-weight:700; color:#292A2B;">Resumo para o Teams</div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <button id="btnGerarResumo" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Gerar de novo</button>
-          <button id="btnCopiarResumo" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Copiar resumo completo</button>
+          <button id="btnCopiarResumo" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Gerar figura do resumo</button>
         </div>
       </div>
-      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 14px;">Mesmo texto de validação que vai no grupo do Teams. Superávit e gap saem da base (projetado − orçamento); os faltantes e a prévia são digitados aqui.</p>
+      
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;">
         <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Liberação<input id="inpLib" placeholder="04/09" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Prévia<select id="inpPrevia" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px; background:#fff;"><option value=""> </option><option>1ª Prévia</option><option>2ª Prévia</option><option>3ª Prévia</option><option>Fechamento</option></select></label>
         <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Faltantes (%)<input id="inpFaltPct" placeholder="0,8" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Faltantes (R$ mi)<input id="inpFaltVal" placeholder="4,7" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-        <label style="font-size:13.5px; font-weight:600; color:#5D5F61;">Projeção média (%)<input id="inpProjMedia" placeholder="7,3" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:9px 11px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
       </div>
       <div style="display:flex; gap:20px; flex-wrap:wrap; margin:14px 0 4px;">
         
@@ -103,7 +102,7 @@
         <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;">
           <div style="font-size:16px; font-weight:700; color:#292A2B;">Resumo montado</div>
         </div>
-        <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:6px 0 16px;">É isto que o botão <b>Copiar resumo completo</b> leva para o Teams: cada parágrafo seguido do seu quadro. Os marcadores <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[HIGHLIGHTS]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[BU]]</code>, <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[CANAIS]]</code> e <code style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#EDF6FC; padding:1px 5px; border-radius:4px;">[[RITMO]]</code> no texto acima dizem onde cada quadro entra — mova ou apague à vontade. O comparativo aparece a partir da segunda planilha carregada.</p>
+        <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:6px 0 16px;">Os marcadores <code style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; background: rgb(237, 246, 252); padding: 1px 5px; border-radius: 4px;">[[HIGHLIGHTS]]</code>, <code style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; background: rgb(237, 246, 252); padding: 1px 5px; border-radius: 4px;">[[BU]]</code>, <code style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; background: rgb(237, 246, 252); padding: 1px 5px; border-radius: 4px;">[[CANAIS]]</code> e <code style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13px; background: rgb(237, 246, 252); padding: 1px 5px; border-radius: 4px;">[[RITMO]]</code> no texto acima dizem onde cada quadro entra, mova ou apague à vontade.</p>
         <div id="resumoDoc" style="overflow-x:auto; background:#F7FBFE; border:1px solid #EFEFEF; border-radius:8px; padding:18px;"></div>
       </div>
     </div>
@@ -115,13 +114,13 @@
         <div style="font-size:18px; font-weight:700; color:#292A2B;">Validação da base e pontos de atenção</div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <a href="validacao-da-base.dc.html" style="font-size:14px; font-weight:600; color:#0062AA;">Ver validação completa</a>
-          <button id="btnCopiarAlertas" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#fff; background:#0062AA; border:1.5px solid #0062AA; border-radius:8px; padding:8px 16px; cursor:pointer;">Copiar pontos de atenção</button>
+          
         </div>
       </div>
       <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 16px;">Checagens estruturais e, na sequência, as principais variações por produto e por cliente lidas da base carregada. Esta etapa é obrigatória: o envio e o arquivamento só liberam depois que os pontos forem revisados.</p>
       <div id="valPanel" style="border:1px solid #E3EBF2; background:#F7FBFE; border-radius:10px; padding:16px 18px; margin-bottom:20px;"></div>
       <div id="alertaPanel"></div>
-      <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer; margin-top:18px;"><input id="chkAlertas" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pontos de atenção revisados</label><p style="font-size:16px; line-height:1.55; margin:18px 0 22px; max-width:760px;">Colunas e regras de cálculo estão em <a href="formato-da-base.dc.html" style="font-weight: 600;">Formato da Base</a>.</p>
+      <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer; margin-top:18px;"><input id="chkAlertas" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pontos de atenção revisados</label>
     </div>
 
     <div id="secEnvio" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
@@ -129,7 +128,7 @@
         <div style="font-size:18px; font-weight:700; color:#292A2B;">E-mails do dia</div>
         <label style="display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;"><input id="chkPronto" type="checkbox" style="width:17px; height:17px; accent-color:#0062AA;">Pronto para envio</label>
       </div>
-      <p style="font-size:14px; line-height:1.5; color:#5D5F61; margin:0 0 18px;"><b>Pronto para envio</b> marca que o fechamento do dia está conferido — só libera depois que as considerações forem validadas. Saem dois e-mails do mesmo fechamento: o <b>comercial</b> (orçamento) e o de <b>Gestão Orçamentária</b> (orçamento + forecast do ciclo). <b>Abrir no Outlook</b> baixa o e-mail já montado — destinatários, assunto e formatação prontos, basta revisar e enviar. Os botões <b>Copiar</b> continuam disponíveis para colar o corpo à mão.</p>
+      
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px;">
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Para<input id="inpPara" placeholder="lista@hypera.com.br" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Cc<input id="inpCc" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
@@ -142,11 +141,8 @@
         <button id="btnEml2" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Abrir no Outlook · Gestão Orçamentária</button>
         <span id="envInfo" style="font-size:14px; color:#5D5F61; align-self:center; flex-basis:100%;"></span>
       </div>
-      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:12px;">
-        <button id="btnCopiar" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#5D5F61; background:#fff; border:1.5px solid #EFEFEF; border-radius:8px; padding:9px 18px; cursor:pointer;">Copiar corpo · comercial</button>
-        <button id="btnCopiar2" type="button" style="font-family:inherit; font-size:13.5px; font-weight:600; color:#5D5F61; background:#fff; border:1.5px solid #EFEFEF; border-radius:8px; padding:9px 18px; cursor:pointer;">Copiar corpo · Gestão Orçamentária</button>
-      </div>
-      <div style="font-size:13.5px; line-height:1.5; color:#5D5F61; margin-top:16px; border-top:1px solid #F1F5F9; padding-top:14px;">A apresentação e o simulador já estão com esta base neste navegador. Para que a equipe veja o mesmo, <a id="lnkBase" href="#" style="font-weight:600;">baixe o base-boletim.js</a> e substitua o arquivo no repositório.</div>
+      
+      
     </div>
 
     <div id="prevBox" style="display:none; background:#fff; border:1px solid #EFEFEF; border-radius:12px; overflow:hidden; margin-top:8px;">
@@ -246,7 +242,9 @@ class Component extends DCLogic {
     const chk = (id, v) => { const el = $(id); if (el) el.checked = v; };
     this._binds = [];
     const on = (id, ev, fn) => { this._binds.push([id, ev, fn, id + '|' + ev + '|' + this._binds.length]); };
-    this._etapa = 1; this._pintarEtapas();
+    // ?etapa=2 abre direto numa etapa (volta da Validação da base)
+    const etQ = Number(new URLSearchParams(location.search).get('etapa'));
+    this._etapa = (etQ >= 1 && etQ <= 3) ? etQ : 1; this._pintarEtapas();
     set('inpRef', B.META.referencia || '');
     set('inpCorte', B.META.dataCorte || '');
     set('inpDias', B.META.diasUteis || '');
@@ -287,17 +285,16 @@ class Component extends DCLogic {
     on('chkCons', 'change', () => this._consEstado());
     on('inpCons', 'input', () => { chk('chkCons', false); this._consEstado(); });
     set('inpLib', new Date().toLocaleDateString('pt-BR').slice(0, 5));
-    // faltantes e projeção média: vêm da base quando existem, senão do último preenchimento
+    // faltantes: vêm da base quando existem, senão do último preenchimento
     const FA = Object.assign({}, this._faltSalvo(), B.META.faltantes || {});
     const nf = v => v == null || v === '' ? '' : String(v).replace('.', ',');
     if (FA.pct != null) set('inpFaltPct', nf(FA.pct));
     if (FA.val != null) set('inpFaltVal', nf(FA.val));
-    if (FA.media != null) set('inpProjMedia', nf(FA.media));
     if (FA.aloc != null) chk('chkFaltAloc', !!FA.aloc);
     on('btnGerarResumo', 'click', () => this._gerarResumo(true));
     on('btnCopiarResumo', 'click', () => this._copiarResumo());
     on('inpResumo', 'input', () => this._montarDoc());
-    ['inpLib', 'inpPrevia', 'inpFaltPct', 'inpFaltVal', 'inpProjMedia', 'chkFaltAloc']
+    ['inpLib', 'inpPrevia', 'inpFaltPct', 'inpFaltVal', 'chkFaltAloc']
       .forEach(id => ['input', 'change'].forEach(ev => on(id, ev, () => { this._faltSalvar(); this._gerarResumo(); })));
     on('btnCopiar', 'click', () => this._copiar(false));
     on('btnCopiar2', 'click', () => this._copiar(true));
@@ -678,10 +675,21 @@ class Component extends DCLogic {
       };
       const cr = bruto.slice(1);
       // DIA pode vir como dia do mês (1..31) ou como data completa (2026-09-01, 01/09/2026, serial do Excel)
+      // mês de referência: último dia de venda; sem venda, a data de corte digitada
+      let anoRef = 0, mesRef = 0;
+      const ultV = (vendas || []).reduce((m, v) => Math.max(m, v.data || 0), 0);
+      if (ultV) { const dt = this._dataDe(ultV); anoRef = dt.getUTCFullYear(); mesRef = dt.getUTCMonth() + 1; }
+      else { const pc = (this._v('inpCorte') || '').split('/'); if (pc.length >= 3) { anoRef = Number(pc[2]); if (anoRef < 100) anoRef += 2000; mesRef = Number(pc[1]); } }
+      const diasNoMes = (anoRef && mesRef) ? new Date(Date.UTC(anoRef, mesRef, 0)).getUTCDate() : 31;
       const diaDe = x => {
         const t = String(x == null ? '' : x).trim();
-        if (/^\d{1,2}$/.test(t)) return Number(t);
-        const s = this._serial(x); return s ? this._dataDe(s).getUTCDate() : 0;
+        const n = /^\d{1,2}$/.test(t) ? Number(t) : 0;
+        if (n) return n <= diasNoMes ? n : 0;
+        const s = this._serial(x); if (!s) return 0;
+        const dt = this._dataDe(s);
+        // data de outro mês não entra na quebra diária deste
+        if (mesRef && (dt.getUTCMonth() + 1 !== mesRef || dt.getUTCFullYear() !== anoRef)) return 0;
+        return dt.getUTCDate();
       };
       const linhas = cr.map(r => {
         const d = diaDe(r[iD]);
@@ -694,7 +702,27 @@ class Component extends DCLogic {
           real: iR >= 0 ? q(r[iR]) : doMapa(mReal, bu, canal, d),
           proj: q(r[cP])
         };
-      }).filter(x => x.d);
+      }).filter(x => x.d && x.d <= diasNoMes);
+      // A curva dá o formato dos dias; o total do mês é o da projeção. Os dias projetados de cada
+      // BU × canal são escalados para que o acumulado do último dia feche com o projetado do quadro.
+      const iProj = this.cols.indexOf('proj');
+      const alvo = (bu, canal) => {
+        const r = (this.fatos || []).find(f => f[0] === (bu || 'TOTAL') && f[1] === 'TOTAL' && f[2] === (canal || 'TOTAL'));
+        return r && r[iProj] != null ? r[iProj] : null;
+      };
+      const grupos = {};
+      linhas.forEach(x => { const k = (x.bu || '') + '|' + (x.canal || ''); (grupos[k] = grupos[k] || []).push(x); });
+      Object.keys(grupos).forEach(k => {
+        const g = grupos[k], [bu, canal] = k.split('|');
+        const meta = alvo(bu || null, canal || null); if (meta == null) return;
+        const ultR = g.reduce((m, x) => x.real != null ? Math.max(m, x.d) : m, 0);
+        const feito = g.filter(x => x.d <= ultR).reduce((a, x) => a + (x.real || 0), 0);
+        const resto = g.filter(x => x.d > ultR);
+        const somaP = resto.reduce((a, x) => a + (x.proj || 0), 0);
+        const falta = meta - feito;
+        if (somaP > 0) resto.forEach(x => { x.proj = (x.proj || 0) * falta / somaP; });
+        else if (resto.length) resto.forEach(x => { x.proj = falta / resto.length; });
+      });
       // com coluna CANAL, guarda também a curva de cada BU por canal
       this._curvaBUCanal = null;
       if (iBU >= 0 && iCanal >= 0 && linhas.some(x => x.bu && x.canal)) {
@@ -888,8 +916,21 @@ class Component extends DCLogic {
       const s = somaSub(rots);
       if (s.realAA || s.proj || s.real) fatos.push(linha(rot, 'TOTAL', 'TOTAL', s));
     });
+    // PP abre em Semavy (marcas SEMAVY*) e PP (Ex-Semavy) = PP menos Semavy
+    this._semavy = null;
+    if (mapa['BU|PP']) {
+      const sem = z();
+      Object.keys(mapa).filter(k => /^MARCA\|PP\|SEMAVY/i.test(k)).forEach(k => soma(sem, mapa[k]));
+      const ex = soma(z(), mapa['BU|PP']); Object.keys(ex).forEach(k => ex[k] -= sem[k]);
+      if (sem.realAA || sem.proj || sem.real) {
+        fatos.push(linha('PP (Ex-Semavy)', 'TOTAL', 'TOTAL', ex));
+        fatos.push(linha('Semavy', 'TOTAL', 'TOTAL', sem));
+        this._semavy = sem;
+      }
+    }
     fatos.push(linha('Total', 'TOTAL', 'TOTAL', totG));
     fatos.push(linha('Total s/ Cobertura', 'TOTAL', 'TOTAL', totSC));
+    if (this._semavy) { const te = soma(z(), totG); Object.keys(te).forEach(k => te[k] -= this._semavy[k]); fatos.push(linha('Total (Ex-Semavy)', 'TOTAL', 'TOTAL', te)); }
     fatos.push(linha('TOTAL', 'TOTAL', 'TOTAL', totSC));
     ['VD', 'VI'].forEach(c => {
       // total do canal = só as BUs comerciais, para fechar com o Total s/ Cobertura
@@ -1596,7 +1637,7 @@ class Component extends DCLogic {
     const v = id => { const el = this.$(id); return el ? el.value : ''; };
     const ck = this.$('chkFaltAloc');
     return { pct: this._num(v('inpFaltPct')), val: this._num(v('inpFaltVal')),
-      aloc: !!(ck && ck.checked), media: this._num(v('inpProjMedia')) };
+      aloc: !!(ck && ck.checked) };
   }
 
   _qh() {
@@ -1635,7 +1676,9 @@ class Component extends DCLogic {
           (F.pct == null ? '' : f(F.pct) + '%') + (F.pct != null && F.val != null ? ' · ' : '') + (F.val == null ? '' : 'R$ ' + f(F.val) + ' mi'),
           '', '#8A6A12'));
       }
-      if (F.media != null) extras.push(card('Projeção média', p(F.media), 'percentual consolidado do ciclo', '#074878'));
+      // projeção média: crescimento do projetado do mês sobre o ano anterior, calculado da base
+      const media = t ? this._cres(t, 'proj') : null;
+      if (media != null) extras.push(card('Projeção média', p(media), 'percentual consolidado do ciclo', '#074878'));
       const cards = [
         card('Projeção do mês', 'R$ ' + f(t.proj) + ' mi', p(this._cres(t, 'proj')) + ' vs. AA', '#074878'),
         card('Realizado até o corte', 'R$ ' + f(tt ? tt.real : t.real) + ' mi', tt && tt.cresc != null ? p(tt.cresc) + ' vs. MTD anterior' : 'acumulado do mês', '#074878'),
@@ -1944,7 +1987,37 @@ class Component extends DCLogic {
   }
 
   /** Copia texto e quadros juntos, na ordem montada. */
-  _copiarResumo() {
+  /** Figura (PNG) do resumo montado: copia para colar no Teams e baixa o arquivo. */
+  async _copiarResumo() {
+    const inf = this.$('resumoInfo'); this._montarDoc();
+    const el = this.$('resumoDoc');
+    const erro = m => { inf.style.color = '#B32B23'; inf.textContent = m; };
+    if (!el || !el.innerHTML.trim()) return erro('Gere o resumo antes de criar a figura.');
+    inf.style.color = '#5D5F61'; inf.textContent = 'Gerando a figura…';
+    try {
+      if (!window.htmlToImage) await new Promise((ok, nok) => {
+        const sc = document.createElement('script');
+        sc.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js';
+        sc.onload = ok; sc.onerror = () => nok(new Error('leitor de imagem não carregou')); document.head.appendChild(sc);
+      });
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const w = el.scrollWidth, h = el.scrollHeight;
+      const blob = await window.htmlToImage.toBlob(el, {
+        pixelRatio: 2, backgroundColor: '#FFFFFF', width: w, height: h,
+        style: { overflow: 'visible', width: w + 'px', height: h + 'px', borderRadius: '0', border: '0' }
+      });
+      if (!blob) throw new Error('figura vazia');
+      const nome = 'resumo-boletim-' + (this._corteTxt() || 'base').replace(/\//g, '-') + '.png';
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      let copiou = false;
+      try { if (navigator.clipboard && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); copiou = true; } } catch (e) { /* só o download */ }
+      inf.style.color = '#0a7d34';
+      inf.textContent = copiou ? '✓ Figura copiada e baixada (' + nome + ') — cole no Teams com Ctrl+V.' : '✓ Figura baixada (' + nome + ').';
+    } catch (e) { erro('Não foi possível gerar a figura: ' + e.message); }
+  }
+
+  _copiarResumoTexto() {
     const inf = this.$('resumoInfo'), html = this._montarDoc();
     const texto = (this._v('inpResumo') || '').replace(/^\s*\[\[[A-Z]+\]\]\s*$/gm, '').replace(/\n{3,}/g, '\n\n');
     const ok = () => { inf.style.color = '#0a7d34'; inf.textContent = '✓ Resumo copiado com os quadros — cole no grupo do Teams com Ctrl+V.'; };
@@ -2058,7 +2131,7 @@ class Component extends DCLogic {
     const REDES = ORD_REDE.filter(r => naBase.indexOf(r) >= 0)
       .concat(naBase.filter(r => ORD_REDE.indexOf(r) < 0));
     const ORD_BU = ['CH', 'PP', 'SC', 'SG', 'TOTAL', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES',
-      'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura', 'VITNQ'];
+      'Similares (Ex-Vit)', 'Vitaminas', 'PP (Ex-Semavy)', 'Semavy', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)', 'VITNQ'];
     const idx = {};
     this.fatos.forEach(r => { idx[r[0] + '|' + r[1] + '|' + r[2]] = r; });
     const bus = ORD_BU.filter(b => this.fatos.some(r => r[0] === b))
@@ -2340,6 +2413,24 @@ class Component extends DCLogic {
         '</table></td>';
     };
 
+    // ----- coluna única (Ex-Semavy): sem quebra VD/VI -----
+    const barraX = (rotulo, v, escala) => {
+      const hh = Math.max(14, Math.round((v || 0) * escala));
+      return '<td width="56" valign="bottom" style="width:56px;padding:0 4px 0 4px;">' +
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="56" style="width:56px;">' +
+        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:19px;font-weight:bold;color:#0062AA;padding-bottom:4px;">' + this._fmt(v) + '</td></tr>' +
+        '<tr><td height="' + hh + '" bgcolor="#00BFDF" style="height:' + hh + 'px;font-size:1px;line-height:1px;">&nbsp;</td></tr>' +
+        '<tr><td align="center" style="font-family:Calibri,Arial,sans-serif;font-size:11px;line-height:17px;color:#5D5F61;padding-top:4px;">' + esc(rotulo) + '</td></tr>' +
+        '</table></td>';
+    };
+    const sepX = '<td width="1" valign="bottom" style="width:1px;padding:0 4px;"><div style="width:1px;height:120px;background-color:#A9D0EE;font-size:1px;line-height:1px;">&nbsp;</div></td>';
+    const sem = g('Semavy', 'TOTAL', 'TOTAL');
+    const semMtdAA = sem && sem.real != null && sem.cresc != null ? sem.real / (1 + sem.cresc / 100) : null;
+    const ex = (a, b) => (sem && typeof a === 'number' && typeof b === 'number') ? a - b : null;
+    const pctX = (a, b) => (a != null && b) ? (a / b - 1) * 100 : null;
+    const notaX = (a, b) => sem ? ' &#183; Ex-Semavy <strong style="color:' + this._cor(pctX(a, b)) + ';">' + this._pct(pctX(a, b)) + '</strong>' : '';
+    const parX = (r1, v1, r2, v2, e) => sem ? sepX + barraX(r1, v1, e) + barraX(r2, v2, e) : '';
+
     const cartao = (eyebrow, valor, sub, delta, barras, nota) =>
       '<td class="kpi" width="33%" valign="top" bgcolor="#EDF6FC" style="width:33%;background-color:#EDF6FC;border-radius:8px;padding:16px 16px 14px;border-left:6px solid #FFFFFF;border-right:6px solid #FFFFFF;font-family:Calibri,Arial,sans-serif;">' +
       '<div style="font-size:13px;line-height:18px;letter-spacing:1px;text-transform:uppercase;color:#5D5F61;font-weight:bold;">' + esc(eyebrow) + '</div>' +
@@ -2352,29 +2443,35 @@ class Component extends DCLogic {
     const esc114 = t => t ? 114 / t : 0;
     const e1 = esc114(Math.max((M.mes.aa.total || 0), (M.mes.proj.total || 0)));
     const c1 = cartao('Projeção do mês', tot.proj, M.moeda + ', s/ cobertura', this._cres(tot, 'proj'),
-      barra('AA', M.mes.aa.vd, M.mes.aa.vi, e1) + barra('Projetado', M.mes.proj.vd, M.mes.proj.vi, e1),
-      'VD ' + this._pct(num(M.mes.cresVD)) + ' &#183; VI ' + this._pct(num(M.mes.cresVI)));
+      barra('AA', M.mes.aa.vd, M.mes.aa.vi, e1) + barra('Projetado', M.mes.proj.vd, M.mes.proj.vi, e1)
+        + parX('AA ex-Sem.', ex(M.mes.aa.total, sem && sem.realAA), 'Proj. ex-Sem.', ex(tot.proj, sem && sem.proj), e1),
+      'VD ' + this._pct(num(M.mes.cresVD)) + ' &#183; VI ' + this._pct(num(M.mes.cresVI))
+        + notaX(ex(tot.proj, sem && sem.proj), ex(M.mes.aa.total, sem && sem.realAA)));
 
     const mtdAAt = (mtdAA.vd || 0) + (mtdAA.vi || 0), mtdAtt = (mtdAt.vd || 0) + (mtdAt.vi || 0);
     const e2 = esc114(Math.max(mtdAAt, mtdAtt));
     const c2 = cartao('Realizado', tot.real, M.moeda + ', ' + M.diasUteis + ' dias úteis', num(M.mtd.cresc),
       barra('MTD ' + (String(M.referencia).match(/\d{2}$/) ? String(Number(String(M.referencia).slice(-2)) - 1) : 'AA'), mtdAA.vd, mtdAA.vi, e2) +
-      barra('Realizado', mtdAt.vd, mtdAt.vi, e2),
-      'VD ' + this._pct(num(cVD.cresc)) + ' &#183; VI ' + this._pct(num(cVI.cresc)) + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis');
+      barra('Realizado', mtdAt.vd, mtdAt.vi, e2)
+        + parX('MTD ex-Sem.', ex(mtdAAt, semMtdAA), 'Real. ex-Sem.', ex(mtdAtt, sem && sem.real), e2),
+      'VD ' + this._pct(num(cVD.cresc)) + ' &#183; VI ' + this._pct(num(cVI.cresc))
+        + notaX(ex(mtdAtt, sem && sem.real), ex(mtdAAt, semMtdAA)) + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis');
 
     const mtgVD = menos(M.mes.proj.vd, mtdAt.vd), mtgVI = menos(M.mes.proj.vi, mtdAt.vi);
     const mtgAAvd = menos(M.mes.aa.vd, mtdAA.vd), mtgAAvi = menos(M.mes.aa.vi, mtdAA.vi);
     const mtg = (mtgVD || 0) + (mtgVI || 0), mtgAA = (mtgAAvd || 0) + (mtgAAvi || 0);
     const e3 = esc114(Math.max(mtg, mtgAA));
     const c3 = cartao('MTG', mtg, M.moeda + ', Projetado − Realizado', mtgAA ? (mtg / mtgAA - 1) * 100 : null,
-      barra('MTG AA', mtgAAvd, mtgAAvi, e3) + barra('MTG', mtgVD, mtgVI, e3),
+      barra('MTG AA', mtgAAvd, mtgAAvi, e3) + barra('MTG', mtgVD, mtgVI, e3)
+        + parX('MTG AA ex-Sem.', ex(mtgAA, sem && semMtdAA != null ? sem.realAA - semMtdAA : null), 'MTG ex-Sem.', ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), e3),
       (() => {
         const at = tot.orcAbs ? tot.proj / tot.orcAbs * 100 : null;
         const gap = tot.orcAbs != null ? tot.proj - tot.orcAbs : null;
         const rev = tot.projIni != null ? tot.proj - tot.projIni : null;
         const sn = v => v == null ? '-' : (v > 0 ? '+' : '') + this._fmt(v);
         return 'Orçamento: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
-          + ' &#183; revisão ' + sn(rev) + ' vs. inicial';
+          + ' &#183; revisão ' + sn(rev) + ' vs. inicial'
+          + notaX(ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), ex(mtgAA, sem && semMtdAA != null ? sem.realAA - semMtdAA : null));
       })());
 
     // ----- tabela de BUs com marcas retráteis -----
@@ -2383,11 +2480,11 @@ class Component extends DCLogic {
     const tdSub = (t, o) => { o = o || {}; return '<td align="' + (o.a || 'center') + '" style="font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:' + (o.c || '#5D5F61') + ';font-weight:' + (o.b ? 'bold' : 'normal') + ';padding:4px 4px;' + (o.pl || '') + 'border-bottom:1px solid #F2F7FB;background-color:#F7FBFE;">' + t + '</td>'; };
 
     const COM_MARCA = ['CH', 'PP', 'SC', 'SG'];
-    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'Total', 'Total s/ Cobertura'];
+    const ordBU = ['CH', 'PP', 'SC', 'SG', 'COBERTURA', 'SG - GENÉRICOS', 'SG - COBERTURA', 'SG - SIMILARES', 'Similares (Ex-Vit)', 'Vitaminas', 'PP (Ex-Semavy)', 'Semavy', 'Total', 'Total s/ Cobertura', 'Total (Ex-Semavy)'];
     const linhas = ordBU.map(k => {
       const r = g(k, 'TOTAL', 'TOTAL'); if (!r) return '';
       const isTot = k.indexOf('Total') === 0, muted = /COBERTURA|GENÉRICOS|SIMILARES/.test(k);
-      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
+      const bd = (k === 'SG' || k === 'SG - SIMILARES' || k === 'Vitaminas' || k === 'Semavy' || k === 'Total s/ Cobertura') ? 'border-bottom:1.5px solid #00BFDF;' : null;
       const cinza = muted ? '#5D5F61' : '#292A2B';
       const p1 = this._cres(r, 'proj'), p2 = this._cres(r, 'projIni'), p3 = this._cres(r, 'orcAbs');
       const rot = COM_MARCA.indexOf(k) >= 0

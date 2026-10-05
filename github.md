@@ -3,14 +3,14 @@ branch: main
 
 ## Last sync
 
-date: 2026-10-02T15:30:00Z
+date: 2026-10-05T12:00:00Z
 
 ### Updated in this project
 
-- SG reorganizada: SG - Genéricos (G), SG - Cobertura (C) e SG - Similares = Similares (Ex-Vit) (S) + Vitaminas (V).
-- SG - Cobertura nova sub-BU, sempre no canal VI e no cliente Independente.
-- "SMART (EX-VIT)" renomeado para "Similares (Ex-Vit)" e "VIT NEO QUÍMICA" para "Vitaminas" em apresentações e e-mails.
-- Simulador sem o seletor "Exibir": gráficos e tabela sempre visíveis.
+- PP aberta em PP (Ex-Semavy) e Semavy, mais a linha Total (Ex-Semavy).
+- Cards dos e-mails com colunas comparativas Ex-Semavy.
+- Simulador com botão "Voltar ao portal" e eixo diário pelo calendário do mês.
+- Botão "Baixar" do atualizador exporta o card como PNG.
 
 ## Screen map
 
@@ -29,6 +29,7 @@ date: 2026-10-02T15:30:00Z
 
 ## Sync history
 
+- 2026-10-02 — SG reorganizada (Genéricos, Cobertura, Similares = Ex-Vit + Vitaminas), renomeações, simulador sem seletor "Exibir".
 - 2026-10-02 — datas aaaammdd, realizado VD/VI fechando com Total s/ Cobertura, cabeçalho republicado, projeções somadas por grão.
 - 2026-09-29 — páginas não utilizadas removidas, esquema de seis arquivos no Atualizador, portal padronizado.
 - 2026-09-24 — primeiro push do projeto (repo estava vazio).
