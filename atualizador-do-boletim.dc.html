@@ -71,11 +71,12 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
 
     <div id="secApres" style="background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:20px clamp(16px,3vw,28px); margin-bottom:24px;"><div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
       <div style="min-width:0; flex:1 1 320px;">
-        <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:4px;">Apresentação gerada</div>
+        <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:4px;">Apresentações geradas</div>
         
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Abrir apresentação</a>
+        <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Apresentação comercial</a>
+        <a id="lnkApres2" href="boletim-sell-out-gestao-orcamentaria.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Apresentação Gestão Orçamentária</a>
         <a id="lnkSimul" href="simulador-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:8.5px 20px; text-decoration:none;">Abrir simulador</a>
       </div>
     </div></div>
@@ -302,7 +303,7 @@ class Component extends DCLogic {
       this._republicar();
     });
     ['inpRef', 'inpDias', 'inpDiasAA'].forEach(id => on(id, 'change', () => this._republicar()));
-    ['lnkApres', 'lnkSimul'].forEach(id => on(id, 'click', () => this._republicar()));
+    ['lnkApres', 'lnkApres2', 'lnkSimul'].forEach(id => on(id, 'click', () => this._republicar()));
     on('inpAssunto', 'input', e => { e.target.dataset.editado = '1'; });
     on('btnGerarCons', 'click', () => this._gerarCons(true));
     on('chkCons', 'change', () => this._consEstado());
@@ -2445,29 +2446,98 @@ class Component extends DCLogic {
     return btoa(bin);
   }
 
-  /** Gera um .eml pronto para abrir como rascunho no Outlook. */
-  _eml(g2) {
+  _script(win, src) {
+    return new Promise((ok, err) => {
+      const s = win.document.createElement('script');
+      s.src = src; s.onload = ok; s.onerror = () => err(new Error('falha ao carregar ' + src));
+      win.document.head.appendChild(s);
+    });
+  }
+
+  /** Renderiza a apresentação num iframe oculto e devolve o PDF em base64 (uma página por slide). */
+  async _pdfDeck(g2, progresso) {
+    const url = g2 ? 'boletim-sell-out-gestao-orcamentaria.dc.html' : 'boletim-sell-out.dc.html';
+    const espera = ms => new Promise(r => setTimeout(r, ms));
+    const fr = document.createElement('iframe');
+    fr.setAttribute('aria-hidden', 'true');
+    fr.style.cssText = 'position:fixed; left:-30000px; top:0; width:1920px; height:1400px; border:0; opacity:0; pointer-events:none;';
+    fr.src = url + '?pdf=' + Date.now();
+    document.body.appendChild(fr);
+    try {
+      await new Promise((ok, err) => { fr.onload = ok; setTimeout(() => err(new Error('tempo esgotado')), 30000); });
+      const w = fr.contentWindow, d = w.document;
+      let st = null;
+      for (let i = 0; i < 100 && !(st && typeof st.goTo === 'function' && st.length); i++) { await espera(150); st = d.querySelector('deck-stage'); }
+      if (!st || !st.length) throw new Error('apresentação não carregou');
+      const W = +st.getAttribute('width') || 1920, H = +st.getAttribute('height') || 1080;
+      fr.style.width = W + 'px'; fr.style.height = H + 'px';
+      st.setAttribute('noscale', '');
+      const fz = d.createElement('style');
+      fz.textContent = '*,*::before,*::after{transition-duration:0s !important; animation-delay:-99s !important; animation-duration:.001s !important; animation-iteration-count:1 !important; animation-fill-mode:both !important;}';
+      d.head.appendChild(fz);
+      try { await d.fonts.ready; } catch (e) { /* segue */ }
+      await espera(1200);
+      if (!w.html2canvas) await this._script(w, 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+      if (!window.jspdf) await this._script(window, 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+      const slides = Array.from(st.children).filter(s => s.tagName === 'SECTION' && !s.hasAttribute('data-deck-skip'));
+      const pdf = new window.jspdf.jsPDF({ orientation: W >= H ? 'landscape' : 'portrait', unit: 'px', format: [W, H], hotfixes: ['px_scaling'], compress: true });
+      for (let i = 0; i < slides.length; i++) {
+        progresso(i + 1, slides.length);
+        st.goTo(Array.from(st.children).filter(s => s.tagName === 'SECTION').indexOf(slides[i]));
+        await espera(350);
+        const cv = await w.html2canvas(slides[i], { width: W, height: H, windowWidth: W, windowHeight: H, scale: 1.25, useCORS: true, backgroundColor: '#FFFFFF', logging: false });
+        if (i) pdf.addPage([W, H], W >= H ? 'landscape' : 'portrait');
+        pdf.addImage(cv.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, W, H);
+      }
+      return pdf.output('datauristring').split(',')[1];
+    } finally { fr.remove(); }
+  }
+
+  /** Gera um .eml pronto para abrir como rascunho no Outlook, com o PDF da apresentação anexado. */
+  async _eml(g2) {
     const info = this.$('envInfo');
+    const btns = ['btnEml', 'btnEml2'].map(id => this.$(id)).filter(Boolean);
+    const dia = (this._v('inpCorte') || '').replace(/\D/g, '') || 'atual';
+    const base = 'boletim-sell-out' + (g2 ? '-gestao-orcamentaria' : '') + '-' + dia;
+    let pdf = null;
+    btns.forEach(b => { b.dataset.wasDisabled = b.disabled ? '1' : ''; b.disabled = true; });
+    try {
+      if (typeof this._republicar === 'function') { try { this._republicar(); } catch (e) { /* segue */ } }
+      info.style.color = '#5D5F61';
+      info.textContent = 'Gerando o PDF da apresentação…';
+      try {
+        pdf = await this._pdfDeck(g2, (i, n) => { info.textContent = 'Gerando o PDF da apresentação… slide ' + i + ' de ' + n; });
+      } catch (e) { pdf = null; }
+    } finally {
+      btns.forEach(b => { b.disabled = b.dataset.wasDisabled === '1'; });
+    }
     try {
       const html = this._emailFile(g2);
       const para = (this._v(g2 ? 'inpPara2' : 'inpPara') || '').trim();
       const cc = g2 ? '' : (this._v('inpCc') || '').trim();
       const assunto = this._assunto(g2);
-      const corpo = this._b64(html).replace(/(.{76})/g, '$1\r\n');
+      const quebra = s => s.replace(/(.{76})/g, '$1\r\n');
+      const corpo = quebra(this._b64(html));
+      const bnd = '----=_Boletim_' + Date.now().toString(36);
       const h = [
         'To: ' + para,
         cc ? 'Cc: ' + cc : null,
         'Subject: ' + this._mimeWord(assunto),
         'X-Unsent: 1',
         'MIME-Version: 1.0',
-        'Content-Type: text/html; charset=utf-8',
-        'Content-Transfer-Encoding: base64'
+        pdf ? 'Content-Type: multipart/mixed; boundary="' + bnd + '"' : 'Content-Type: text/html; charset=utf-8',
+        pdf ? null : 'Content-Transfer-Encoding: base64'
       ].filter(Boolean).join('\r\n');
-      const dia = (this._v('inpCorte') || '').replace(/\D/g, '') || 'atual';
-      const nome = 'boletim-sell-out' + (g2 ? '-gestao-orcamentaria' : '') + '-' + dia + '.eml';
-      this._dl(nome, h + '\r\n\r\n' + corpo + '\r\n', 'message/rfc822');
-      info.style.color = '#0a7d34';
-      info.textContent = '✓ ' + nome + ' baixado. Abra o arquivo: o Outlook cria o rascunho com destinatários, assunto e formatação prontos.'
+      const msg = pdf
+        ? h + '\r\n\r\n--' + bnd + '\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n' + corpo +
+          '\r\n--' + bnd + '\r\nContent-Type: application/pdf; name="' + base + '.pdf"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="' + base + '.pdf"\r\n\r\n' + quebra(pdf) +
+          '\r\n--' + bnd + '--\r\n'
+        : h + '\r\n\r\n' + corpo + '\r\n';
+      const nome = base + '.eml';
+      this._dl(nome, msg, 'message/rfc822');
+      info.style.color = pdf ? '#0a7d34' : '#9A6700';
+      info.textContent = '✓ ' + nome + ' baixado' + (pdf ? ' com ' + base + '.pdf anexado' : ' sem o PDF (não foi possível gerar — anexe manualmente)') +
+        '. Abra o arquivo: o Outlook cria o rascunho com destinatários, assunto e formatação prontos.'
         + (para ? '' : ' O campo "Para" está vazio — preencha no Outlook antes de enviar.');
     } catch (e) {
       info.style.color = '#B32B23';
