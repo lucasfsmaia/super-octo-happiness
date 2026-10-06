@@ -239,6 +239,8 @@ class Component extends DCLogic {
   _init() {
     const B = JSON.parse(JSON.stringify(window.BASE_BOLETIM));
     this.base = B; this.cols = B.COLUNAS; this.fatos = B.FATOS.map(r => r.slice());
+    { const C = this.cols, iR = C.indexOf('real'), iP = C.indexOf('proj'), iA = C.indexOf('realAA'), iV = C.indexOf('pProj');
+      this.fatos.forEach(r => { if (r[iR] != null && r[iP] != null && r[iR] > r[iP]) { r[iP] = r[iR]; if (iV >= 0 && r[iA] > 0) r[iV] = Math.round((r[iR] / r[iA] - 1) * 1000) / 10; } }); }
     const $ = id => document.getElementById(id); this.$ = $;
     const set = (id, v) => { const el = $(id); if (el) el.value = v; };
     const chk = (id, v) => { const el = $(id); if (el) el.checked = v; };
@@ -924,7 +926,9 @@ class Component extends DCLogic {
     const chaves = v => { const c = cn(v.canal); return ['T', 'BU|' + v.bu, 'SUB|' + v.sub, 'MARCA|' + v.bu + '|' + v.marca, 'CANAL|' + c,
       'CANAL|' + v.bu + '|' + c, 'CLI|' + v.cliente, 'CLI|' + v.bu + '|' + v.cliente,
       // grãos de abertura das tabelas: marca × cliente e marca × canal
-      'MC|' + v.bu + '|' + v.marca + '|' + v.cliente, 'MC|' + v.bu + '|' + v.marca + '|' + c]; };
+      'MC|' + v.bu + '|' + v.marca + '|' + v.cliente, 'MC|' + v.bu + '|' + v.marca + '|' + c,
+      // grão fino para os filtros do simulador: marca × cliente × canal
+      'G|' + v.bu + '\u0001' + v.marca + '\u0001' + v.cliente + '\u0001' + c]; };
     vendas.forEach(v => chaves(v).forEach(k => { pega(k).real += v.real; }));
     plano.forEach(v => chaves(v).forEach(k => {
       const a = pega(k); a.proj += v.proj; a.projIni += v.projIni; if (!cota.length) a.orc += v.orc;
@@ -961,6 +965,8 @@ class Component extends DCLogic {
       const r = new Array(this.cols.length).fill(null);
       const set = (c, v) => r[this.cols.indexOf(c)] = v;
       set('bu', bu); set('marca', marca); set('rede', rede);
+      // realizado acima do projetado: projeção passa a ser o realizado
+      if (a.real > a.proj) a = Object.assign({}, a, { proj: a.real });
       set('realAA', arred(a.realAA)); set('real', arred(a.real)); set('proj', arred(a.proj));
       set('projIni', a.projIni ? arred(a.projIni) : null); set('orcAbs', a.orc ? arred(a.orc) : null);
       set('forecast', a.forecast ? arred(a.forecast) : null);
@@ -1011,7 +1017,7 @@ class Component extends DCLogic {
       fatos.push(linha('TOTAL', 'TOTAL', c, mapa['CLI|' + c]));
       BUS.forEach(b => { if (mapa['CLI|' + b + '|' + c]) fatos.push(linha(b, 'TOTAL', c, mapa['CLI|' + b + '|' + c])); });
     });
-    const destaques = [];
+    const destaques = [], grao = {};
     BUS.forEach(bu => {
       const nomes = [...new Set(linhas.filter(v => v.bu === bu).map(v => v.marca))];
       const lista = nomes.map(n => ({ n, a: mapa['MARCA|' + bu + '|' + n] })).sort((x, y) => y.a.proj - x.a.proj);
@@ -1031,12 +1037,22 @@ class Component extends DCLogic {
           if (tem) fatos.push(linha(bu, 'DEMAIS', c, s));
         });
       }
+      // grão do simulador com as mesmas marcas da tabela (top N + DEMAIS): [AA, realizado, projeção]
+      const top = new Set(lista.slice(0, topN).map(m => m.n)), r3 = v => Math.round(v * 1000) / 1000;
+      Object.keys(mapa).forEach(k => {
+        if (k.indexOf('G|' + bu + '\u0001') !== 0) return;
+        const pp = k.slice(2).split('\u0001'), a = mapa[k];
+        if (!a.realAA && !a.real && !a.proj) return;
+        const kk = bu + '|' + (top.has(pp[1]) ? pp[1] : 'DEMAIS') + '|' + pp[2] + '|' + pp[3];
+        const g = grao[kk] || (grao[kk] = [0, 0, 0]);
+        g[0] = r3(g[0] + a.realAA); g[1] = r3(g[1] + a.real); g[2] = r3(g[2] + a.proj);
+      });
       const min = this._num(M.destaqueMinimo) == null ? 2 : this._num(M.destaqueMinimo);
       lista.forEach(m => { if (m.a.proj >= min && m.a.realAA > 0) destaques.push([m.n, varia(m.a.proj, m.a.realAA)]); });
     });
     destaques.sort((a, b) => b[1] - a[1]);
     return {
-      fatos, destaques: destaques.slice(0, this._num(M.destaqueQtd) || 8),
+      fatos, grao, destaques: destaques.slice(0, this._num(M.destaqueQtd) || 8),
       mtdAA: (() => {
         const sc = c => BUS.reduce((s, b) => s + ((mapa['CANAL|' + b + '|' + c] || {}).realAAmtd || 0), 0);
         return { vd: arred(sc('VD')), vi: arred(sc('VI')), total: arred(totSC.realAAmtd) };
@@ -1356,7 +1372,7 @@ class Component extends DCLogic {
           vendasAAm = vendasAA.filter(v => !v.data || (v.data >= iniAA && v.data <= fimAA));
         }
         const ag = this._agregar(vendasCorte, vendasAAm, plano, M, topN, cota);
-        this.fatos = ag.fatos; this._idx = null;
+        this.fatos = ag.fatos; this._idx = null; this._grao = ag.grao;
         this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
         this._lerCurva(X, wb, divisor, vendasCorte, vendasAAm);
       this._lerExtras(X, wb);
@@ -2160,7 +2176,9 @@ class Component extends DCLogic {
       M.historicoMensal = this._historicoMensal || null;
       M.resumoProjecao = this._resumoProj || null;
       M.clientes = this._clientes || null;
+      M.grao = this._grao || null;
     } else {
+      if (this._grao) M.grao = this._grao;
       if (this._curva) M.curva = JSON.parse(JSON.stringify(this._curva));
       if (this._curvaBU) M.curvaBU = this._curvaBU;
       if (this._curvaBUCanal) M.curvaBUCanal = this._curvaBUCanal;
@@ -2664,7 +2682,7 @@ class Component extends DCLogic {
       '</tr></table></td></tr>\n' +
       // cartões
       '<tr><td class="pad" style="padding:22px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
-      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + c1 + c2 + c3 + '</tr></table>' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + (completo ? (c1 + c2).replace(/width="33%"/g, 'width="50%"').replace(/width:33%/g, 'width:50%') : c1 + c2 + c3) + '</tr></table>' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding:8px 0 0;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:19px;color:#5D5F61;">' +
       '<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#A9D0EE;">&nbsp;</span> VD &#160;&#160;<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#074878;">&nbsp;</span> VI</td></tr></table></td></tr>\n' +
       // tabela

@@ -280,6 +280,9 @@ class Component extends DCLogic {
 
   _render() {
     const B = window.BASE_BOLETIM, M = B.META, C = B.COLUNAS;
+    // realizado acima do projetado: projeção passa a ser o realizado
+    { const iR = C.indexOf('real'), iP = C.indexOf('proj'), iA = C.indexOf('realAA'), iV = C.indexOf('pProj');
+      B.FATOS.forEach(r => { if (r[iR] != null && r[iP] != null && r[iR] > r[iP]) { r[iP] = r[iR]; if (iV >= 0 && r[iA] > 0) r[iV] = Math.round((r[iR] / r[iA] - 1) * 1000) / 10; } }); }
     this._idx = {};
     B.FATOS.forEach(f => { const o = {}; C.forEach((c, i) => o[c] = f[i]); this._idx[o.bu + '|' + o.marca + '|' + o.rede] = o; });
     const F = B.FATOS.map(f => { const o = {}; C.forEach((c, i) => o[c] = f[i]); return o; });
