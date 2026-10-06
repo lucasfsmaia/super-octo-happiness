@@ -316,15 +316,25 @@ class Component extends DCLogic {
     const G = this.M && this.M.grao;
     if (G) {
       if (!this._gr) { this._gr = {}; Object.keys(G).forEach(k => { const p = k.split('|'); (this._gr[p[0]] = this._gr[p[0]] || []).push({ m: p[1], c: p[2], k: p[3], v: G[k] }); }); }
-      const L = this._gr[b] || [], SM = this.state.marcas, SC = this.state.clientes;
+      // índices da base fina: total por BU×canal, linhas por BU×cliente e soma por BU×marca×canal
+      if (!this._gi) {
+        const tot = {}, porC = {}, porM = {}, add = (o, k, v) => { const t = o[k] || (o[k] = [0, 0, 0]); t[0] += v[0]; t[1] += v[1]; t[2] += v[2]; };
+        Object.keys(this._gr).forEach(bb => this._gr[bb].forEach(e => {
+          add(tot, bb + '|' + e.k, e.v); add(tot, bb + '|TOTAL', e.v);
+          add(porM, bb + '|' + e.m + '|' + e.k, e.v); add(porM, bb + '|' + e.m + '|TOTAL', e.v);
+          (porC[bb + '|' + e.c] = porC[bb + '|' + e.c] || []).push(e);
+        }));
+        this._gi = { tot, porC, porM };
+      }
+      const GI = this._gi, SM = this.state.marcas, SC = this.state.clientes;
+      const cliSel = fc ? Object.keys(SC).filter(c => SC[c]) : null;
+      const marSel = fm ? this._marcas(b).filter(m => SM[b + '|' + m]) : null;
       const razaoG = k => {
-        const n = [0, 0, 0], d = [0, 0, 0];
-        for (let j = 0; j < L.length; j++) {
-          const e = L[j];
-          if (k !== 'TOTAL' && e.k !== k) continue;
-          for (let i = 0; i < 3; i++) d[i] += e.v[i];
-          if ((!fm || SM[b + '|' + e.m]) && (!fc || SC[e.c])) for (let i = 0; i < 3; i++) n[i] += e.v[i];
-        }
+        const d = GI.tot[b + '|' + k] || [0, 0, 0], n = [0, 0, 0];
+        if (fc) cliSel.forEach(c => (GI.porC[b + '|' + c] || []).forEach(e => {
+          if ((k === 'TOTAL' || e.k === k) && (!fm || SM[b + '|' + e.m])) { n[0] += e.v[0]; n[1] += e.v[1]; n[2] += e.v[2]; }
+        }));
+        else marSel.forEach(m => { const v = GI.porM[b + '|' + m + '|' + k]; if (v) { n[0] += v[0]; n[1] += v[1]; n[2] += v[2]; } });
         const r = i => d[i] ? n[i] / d[i] : null, fb = r(2) != null ? r(2) : 0;
         return { aa: r(0) != null ? r(0) : fb, real: r(1) != null ? r(1) : fb, proj: fb };
       };
