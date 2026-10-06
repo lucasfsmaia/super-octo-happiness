@@ -48,8 +48,8 @@
     <div id="secCab" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
       <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:16px;">Cabeçalho do boletim</div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px;">
-        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Mês de referência<input id="inpRef" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Data de corte<input id="inpCorte" placeholder="15/08/26" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Mês de referência<select id="selMes" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px; background:#fff; color:#292A2B;"></select><input id="inpRef" type="hidden"></label>
+        <label style="font-size:14px; font-weight:600; color:#5D5F61;">Data de corte<select id="selCorte" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px; background:#fff; color:#292A2B;"></select><input id="inpCorte" type="hidden"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis realizados<input id="inpDias" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis MTD ano anterior<input id="inpDiasAA" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
       </div>
@@ -248,7 +248,7 @@ class Component extends DCLogic {
     const etQ = Number(new URLSearchParams(location.search).get('etapa'));
     this._etapa = (etQ >= 1 && etQ <= 3) ? etQ : 1; this._pintarEtapas();
     set('inpRef', B.META.referencia || '');
-    set('inpCorte', B.META.dataCorte || '');
+    set('inpCorte', B.META.dataCorte || ''); this._pintarCorte();
     set('inpDias', B.META.diasUteis || '');
     set('inpDiasAA', B.META.diasUteisAA || '');
     set('inpHub', (B.META.links || {}).hub || '');
@@ -267,9 +267,26 @@ class Component extends DCLogic {
     }));
     // correção manual do cabeçalho vale para as outras páginas (validação, apresentação, e-mail)
     // corte corrigido à mão: referência e dias úteis acompanham (podem ser ajustados depois)
+    const setCorte = v => { const c = $('inpCorte'); if (!c || !v) return; c.value = v; c.dispatchEvent(new Event('change')); };
+    on('selCorte', 'change', e => setCorte(e.target.value));
+    // mês escolhido: corte no último dia com venda desse mês
+    on('selMes', 'change', e => {
+      const m = Number(e.target.value), dd = n => String(n).padStart(2, '0');
+      const ds = (this._datasVendas || []).filter(x => { const d = this._dataDe(x); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1 === m; });
+      if (!ds.length) return;
+      const d = this._dataDe(ds[ds.length - 1]);
+      setCorte(dd(d.getUTCDate()) + '/' + dd(d.getUTCMonth() + 1) + '/' + String(d.getUTCFullYear()).slice(-2));
+    });
     on('inpCorte', 'change', () => {
       const s = this._serial($('inpCorte').value); if (!s) return;
       const dc = this._dataDe(s), y = dc.getUTCFullYear(), m = dc.getUTCMonth(), d = dc.getUTCDate();
+      // com a base carregada, o corte novo refiltra as vendas e refaz curva, quadros e e-mails
+      if (this._ultArqs && this._ultArqs.length) {
+        const dd0 = n => String(n).padStart(2, '0');
+        this._corteForcado = dd0(d) + '/' + dd0(m + 1) + '/' + String(y).slice(-2);
+        this._import(this._ultArqs);
+        return;
+      }
       const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
       const dd = n => String(n).padStart(2, '0');
       $('inpCorte').value = dd(d) + '/' + dd(m + 1) + '/' + String(y).slice(-2);
@@ -278,6 +295,7 @@ class Component extends DCLogic {
       const ult = new Date(Date.UTC(y - 1, m + 1, 0)).getUTCDate();
       const nAA = this._diasUteisCal(y - 1, m, Math.min(d, ult)); if (nAA && $('inpDiasAA')) $('inpDiasAA').value = nAA;
       const a = $('inpAssunto'); if (a && !a.dataset.editado) a.value = this._assunto();
+      this._pintarCorte();
       this._republicar();
     });
     ['inpRef', 'inpDias', 'inpDiasAA'].forEach(id => on(id, 'change', () => this._republicar()));
@@ -431,6 +449,49 @@ class Component extends DCLogic {
    * dias úteis (realizados e MTD do ano anterior). Só preenche o que veio vazio — valor
    * digitado na Meta sempre ganha. Assim a aba Meta vira opcional.
    */
+  /** Mês da aba CURVA -> último dia com venda nesse mês (dd/mm/aa). Null se a curva só traz o dia. */
+  _corteDaCurva(X, wb, vendas) {
+    const nome = wb.SheetNames.find(n => /curva|ritmo/i.test(n)); if (!nome) return null;
+    const aoa = this._aoa(X, wb.Sheets[nome]);
+    const cab = (aoa[0] || []).map(c => String(c == null ? '' : c).trim().toUpperCase());
+    const iD = Math.max(0, cab.indexOf('DIA') >= 0 ? cab.indexOf('DIA') : cab.indexOf('DATA'));
+    let ano = 0, mes = 0;
+    for (let i = 1; i < aoa.length && !mes; i++) {
+      const t = String(aoa[i][iD] == null ? '' : aoa[i][iD]).trim();
+      if (!t || /^\d{1,2}$/.test(t)) continue;
+      const s = this._serial(aoa[i][iD]); if (!s) continue;
+      const dt = this._dataDe(s); ano = dt.getUTCFullYear(); mes = dt.getUTCMonth() + 1;
+    }
+    if (!mes) return null;
+    const ini = this._serial('01/' + mes + '/' + ano), fim = this._serial(new Date(Date.UTC(ano, mes, 0)).getUTCDate() + '/' + mes + '/' + ano);
+    let ult = 0; (vendas || []).forEach(v => { if (v.data >= ini && v.data <= fim && v.data > ult) ult = v.data; });
+    if (!ult) return null;
+    const dc = this._dataDe(ult), dd = n => String(n).padStart(2, '0');
+    return dd(dc.getUTCDate()) + '/' + dd(dc.getUTCMonth() + 1) + '/' + String(dc.getUTCFullYear()).slice(-2);
+  }
+
+  /** Menus de mês e data de corte a partir dos dias com venda na base carregada. */
+  _pintarCorte() {
+    const sm = this.$('selMes'), sc = this.$('selCorte'); if (!sm || !sc) return;
+    const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    const dd = n => String(n).padStart(2, '0');
+    const fmt = x => { const d = this._dataDe(x); return dd(d.getUTCDate()) + '/' + dd(d.getUTCMonth() + 1) + '/' + String(d.getUTCFullYear()).slice(-2); };
+    const chMes = x => { const d = this._dataDe(x); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1; };
+    const atual = this._serial(this._v('inpCorte'));
+    const datas = (this._datasVendas || []).slice();
+    if (atual && datas.indexOf(atual) < 0) datas.push(atual);
+    datas.sort((a, b) => a - b);
+    const meses = [...new Set(datas.map(chMes))];
+    const mAt = atual ? chMes(atual) : meses[meses.length - 1];
+    sm.innerHTML = meses.map(m => '<option value="' + m + '"' + (m === mAt ? ' selected' : '') + '>'
+      + MESES[m % 100 - 1] + '/' + String(Math.floor(m / 100)).slice(-2) + '</option>').join('');
+    const dm = datas.filter(x => chMes(x) === mAt);
+    sc.innerHTML = dm.map(x => '<option value="' + fmt(x) + '"' + (x === atual ? ' selected' : '') + '>'
+      + fmt(x) + ' · ' + SEM[this._dataDe(x).getUTCDay()] + '</option>').join('');
+    sm.disabled = meses.length < 2; sc.disabled = dm.length < 2;
+  }
+
   _derivarMeta(M, vendas, vendasAA) {
     const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const derivado = [];
@@ -668,8 +729,11 @@ class Component extends DCLogic {
         iAA = ci('REALAA', 'REAL_AA', 'REAL AA', 'AA'), iR = ci('REAL', 'REALIZADO'), iP = ci('PROJ', 'PROJEÇÃO', 'PROJECAO');
       const cP = iP < 0 ? 3 : iP;
       // CURVA traz só DIA;BU;CANAL;PROJ — realizado e ano anterior saem das vendas por dia
-      const mReal = iR < 0 ? this._porDia(vendas) : null;
-      const mAA = iAA < 0 ? this._porDia(vendasAA) : null;
+      // coluna presente mas toda vazia ("null") conta como ausente
+      const vazia = i => i < 0 || bruto.slice(1).every(r => q(r[i]) == null);
+      const semR = vazia(iR), semAA = vazia(iAA);
+      const mReal = semR ? this._porDia(vendas) : null;
+      const mAA = semAA ? this._porDia(vendasAA) : null;
       const doMapa = (m, bu, canal, d) => {
         if (!m) return null;
         const k = (iBU >= 0 ? bu || '' : '') + '|' + (iCanal >= 0 ? canal || '' : '') + '|' + d;
@@ -700,8 +764,8 @@ class Component extends DCLogic {
         const canal = iCanal < 0 ? null : ((cv0.indexOf('VD') === 0 ? 'VD' : cv0.indexOf('VI') === 0 ? 'VI' : cv0) || null);
         return {
           d, bu, canal,
-          aa: iAA >= 0 ? q(r[iAA]) : doMapa(mAA, bu, canal, d),
-          real: iR >= 0 ? q(r[iR]) : doMapa(mReal, bu, canal, d),
+          aa: !semAA ? q(r[iAA]) : doMapa(mAA, bu, canal, d),
+          real: !semR ? q(r[iR]) : doMapa(mReal, bu, canal, d),
           proj: q(r[cP])
         };
       }).filter(x => x.d && x.d <= diasNoMes);
@@ -792,8 +856,8 @@ class Component extends DCLogic {
         const diaAtual = comReal[comReal.length - 1].d;
         const p = (this._v('inpCorte') || '').split('/');
         this._curva = {
-          ano: p[2] ? (String(p[2]).length === 2 ? 2000 + Number(p[2]) : Number(p[2])) : new Date().getFullYear(),
-          mes: p[1] ? Number(p[1]) : new Date().getMonth() + 1,
+          ano: anoRef || (p[2] ? (String(p[2]).length === 2 ? 2000 + Number(p[2]) : Number(p[2])) : new Date().getFullYear()),
+          mes: mesRef || (p[1] ? Number(p[1]) : new Date().getMonth() + 1),
           diasMes: dias.length,
           diaAtual,
           real: acum(dias.filter(x => x.d <= diaAtual).map(x => x.real || 0)),
@@ -1219,6 +1283,9 @@ class Component extends DCLogic {
     if (!window.XLSX) { info.style.color = '#B32B23'; info.textContent = 'Leitor da base não carregou.'; return; }
     const X = window.XLSX;
     const arqs = Array.isArray(entrada) ? entrada : [entrada];
+    // arquivos novos: corte volta a ser derivado; reprocessamento pelo campo Data de corte mantém o digitado
+    if (arqs !== this._ultArqs) this._corteForcado = null;
+    this._ultArqs = arqs;
     const csvs = arqs.filter(a => /\.(csv|txt)$/i.test(a.name));
     const rotulo = arqs.length === 1 ? arqs[0].name : arqs.length + ' arquivos';
     const totalMB = arqs.reduce((t, a) => t + (a.size || 0), 0) / 1048576;
@@ -1269,21 +1336,33 @@ class Component extends DCLogic {
         if (!vendas.length) throw new Error('vendas sem linhas');
         if (!vendasAA.length) throw new Error('"vendas-aa" ausente ou vazio — sem ano anterior não há variação');
         const diasDe = nome => { const d = this._datasBase && nome ? this._datasBase[nome] : null; return d && d.length ? d.map(x => ({ data: x })) : null; };
+        this._datasVendas = [...new Set((diasDe(nomeVendas) || vendas).map(v => v.data).filter(d => d > 0))].sort((a, b) => a - b);
         // o cabeçalho da base anterior não vale para a base nova; sem meta.csv, tudo é derivado
         if (!nomeMetaT) { M.dataCorte = ''; M.referencia = ''; M.diasUteis = null; M.diasUteisAA = null; }
+        // VENDAS com mais de um mês: o corte digitado manda; sem ele, o mês da CURVA define o corte
+        if (this._corteForcado) { M.dataCorte = this._corteForcado; M.referencia = ''; M.diasUteis = null; M.diasUteisAA = null; }
+        else if (!M.dataCorte) { const cc = this._corteDaCurva(X, wb, vendas); if (cc) M.dataCorte = cc; }
         this._derivarMeta(M, diasDe(nomeVendas) || vendas, diasDe(nomeAA) || vendasAA);
         if (!plano.length) throw new Error('"projecao-inicial" e "projecao-atual" ausentes ou vazios — sem projeção não há % proj');
         if (nomeProj && !cota.length) throw new Error('"orcamento" ausente ou vazio — sem orçamento não há % do orçamento');
         const corte = this._serial(M.dataCorte);
-        const vendasCorte = vendas.filter(v => !corte || v.data <= corte);
-        const ag = this._agregar(vendasCorte, vendasAA, plano, M, topN, cota);
+        // base com vários meses: só o mês do corte entra no realizado, e só o mesmo mês do ano anterior no AA
+        let vendasCorte = vendas, vendasAAm = vendasAA;
+        if (corte) {
+          const dc = this._dataDe(corte), y = dc.getUTCFullYear(), m = dc.getUTCMonth();
+          const ser = dt => Math.round((dt - Date.UTC(1899, 11, 30)) / 86400000);
+          const ini = ser(Date.UTC(y, m, 1)), iniAA = ser(Date.UTC(y - 1, m, 1)), fimAA = ser(Date.UTC(y - 1, m + 1, 0));
+          vendasCorte = vendas.filter(v => !v.data || (v.data >= ini && v.data <= corte));
+          vendasAAm = vendasAA.filter(v => !v.data || (v.data >= iniAA && v.data <= fimAA));
+        }
+        const ag = this._agregar(vendasCorte, vendasAAm, plano, M, topN, cota);
         this.fatos = ag.fatos; this._idx = null;
         this._destaques = ag.destaques; this._mtdAA = ag.mtdAA;
-        this._lerCurva(X, wb, divisor, vendasCorte, vendasAA);
+        this._lerCurva(X, wb, divisor, vendasCorte, vendasAAm);
       this._lerExtras(X, wb);
         // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
         const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
-        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
+        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); setTimeout(() => this._pintarCorte(), 0); put('inpDias', 'diasUteis');
         put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
         info.style.color = '#0a7d34';
         info.innerHTML = '✓ <b>' + f.name + '</b>: ' + vendas.length.toLocaleString('pt-BR') + ' linhas de venda + '
@@ -1321,7 +1400,7 @@ class Component extends DCLogic {
         const M = {}; mr.forEach(r => { const k = String(r[0] || '').trim(); if (k) M[k] = r[1]; });
         // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
         const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
-        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); put('inpDias', 'diasUteis');
+        put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); setTimeout(() => this._pintarCorte(), 0); put('inpDias', 'diasUteis');
         put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
         const n = k => this._num(M[k]);
         if (n('mtdAaTotal') != null) this._mtdAA = { vd: n('mtdAaVD'), vi: n('mtdAaVI'), total: n('mtdAaTotal') };
@@ -2460,13 +2539,16 @@ class Component extends DCLogic {
       'VD ' + this._pct(num(cVD.cresc)) + ' &#183; VI ' + this._pct(num(cVI.cresc))
         + ' &#183; MTD anterior: ' + M.diasUteisAA + ' dias úteis', pctX(ex(mtdAtt, sem && sem.real), ex(mtdAAt, semMtdAA)));
 
-    const mtgVD = menos(M.mes.proj.vd, mtdAt.vd), mtgVI = menos(M.mes.proj.vi, mtdAt.vi);
-    const mtgAAvd = menos(M.mes.aa.vd, mtdAA.vd), mtgAAvi = menos(M.mes.aa.vi, mtdAA.vi);
+    // mês fechado (corte no último dia): não falta nada a vender, MTG zera
+    const completo = (() => { const s0 = this._serial(M.dataCorte); if (!s0) return false;
+      const d = this._dataDe(s0); return d.getUTCDate() === new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate(); })();
+    const mtgVD = completo ? 0 : menos(M.mes.proj.vd, mtdAt.vd), mtgVI = completo ? 0 : menos(M.mes.proj.vi, mtdAt.vi);
+    const mtgAAvd = completo ? 0 : menos(M.mes.aa.vd, mtdAA.vd), mtgAAvi = completo ? 0 : menos(M.mes.aa.vi, mtdAA.vi);
     const mtg = (mtgVD || 0) + (mtgVI || 0), mtgAA = (mtgAAvd || 0) + (mtgAAvi || 0);
     const e3 = esc114(Math.max(mtg, mtgAA));
     const c3 = cartao('MTG', mtg, M.moeda + ', Projetado − Realizado', mtgAA ? (mtg / mtgAA - 1) * 100 : null,
       barra('MTG AA', mtgAAvd, mtgAAvi, e3) + barra('MTG', mtgVD, mtgVI, e3)
-        + parX('MTG AA ex-Sem.', ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null), 'MTG ex-Sem.', ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), e3),
+        + parX('MTG AA ex-Sem.', (completo ? 0 : ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null)), 'MTG ex-Sem.', (completo ? 0 : ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null)), e3),
       (() => {
         const at = tot.orcAbs ? tot.proj / tot.orcAbs * 100 : null;
         const gap = tot.orcAbs != null ? tot.proj - tot.orcAbs : null;
@@ -2474,7 +2556,7 @@ class Component extends DCLogic {
         const sn = v => v == null ? '-' : (v > 0 ? '+' : '') + this._fmt(v);
         return 'Orçamento: <strong>' + (at == null ? '-' : this._fmt(at) + '%') + '</strong> &#183; gap ' + sn(gap)
           + ' &#183; revisão ' + sn(rev) + ' vs. inicial';
-      })(), pctX(ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null), ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null)));
+      })(), pctX((completo ? 0 : ex(mtg, sem && sem.real != null ? sem.proj - sem.real : null)), (completo ? 0 : ex(mtgAA, sem && semMtdAA != null ? (sem.realAA || 0) - semMtdAA : null))));
 
     // ----- tabela de BUs com marcas retráteis -----
     const th = t => '<th align="center" style="font-size:11px;line-height:17px;mso-line-height-rule:exactly;font-weight:bold;color:#0062AA;padding:4px 4px 6px;border-bottom:1.5px solid #00BFDF;">' + t + '</th>';
