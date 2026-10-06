@@ -16,7 +16,8 @@
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
-  <script src="base-boletim.js?v=20260918d"></script>
+  <script>(function(){var t=Date.now();var s=document.createElement('script');s.src='base-boletim.js?v='+t;document.head.appendChild(s);
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!/^(\.\/)?[\w.-]+\.html(\?[^#]*)?(#.*)?$/.test(h)||/[?&]t=\d/.test(h))return;a.setAttribute('href',h.replace(/^([^?#]*)(\?[^#]*)?/,function(m,p,q){return p+(q?q+'&':'?')+'t='+t;}));},true);})();</script>
   <style>
     body { margin:0; background:#F5F9FC; font-family:'Asap',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
     a { color:#0062AA; text-decoration:none; }
@@ -238,16 +239,19 @@ class Component extends DCLogic {
   _corte() { return CORTES.find(c => c[0] === this.state.corte) || CORTES[0]; }
   _busEscopo() { return this._corte()[2].filter(b => this._fato(b).bu); }
   _redes() {
-    const s = [];
+    if (this._redesC) return this._redesC;
+    const s = this._redesC = [];
     this.F.forEach(o => {
       if (o.bu === 'TOTAL' && o.marca === 'TOTAL' && o.rede !== 'TOTAL' && CANAIS.indexOf(o.rede) < 0 && s.indexOf(o.rede) < 0) s.push(o.rede);
     });
     return s;
   }
   _marcas(bu) {
+    this._marcasC = this._marcasC || {};
+    if (this._marcasC[bu]) return this._marcasC[bu];
     const s = [];
     this.F.forEach(o => { if (o.bu === bu && o.marca !== 'TOTAL' && o.marca !== 'TOTAL PB' && s.indexOf(o.marca) < 0) s.push(o.marca); });
-    return s.sort((a, b) => (this._o(bu, b, 'TOTAL').proj || 0) - (this._o(bu, a, 'TOTAL').proj || 0));
+    return this._marcasC[bu] = s.sort((a, b) => (this._o(bu, b, 'TOTAL').proj || 0) - (this._o(bu, a, 'TOTAL').proj || 0));
   }
   _marcasEscopo() {
     const escopo = this._busEscopo();
@@ -281,29 +285,46 @@ class Component extends DCLogic {
   _passaMarca(m, bu) { return !this._filMarca() || !!this.state.marcas[bu + '|' + m]; }
   /** Filtro ligado só quando escolhe parte da lista: tudo marcado equivale a nenhum. */
   _filMarca() {
+    const sig = this.state.corte + JSON.stringify(this.state.marcas);
+    if (this._fmC && this._fmC[0] === sig) return this._fmC[1];
+    const r = this._filMarcaCalc(); this._fmC = [sig, r]; return r;
+  }
+  _filMarcaCalc() {
     const s = this.state.marcas; if (!Object.keys(s).some(k => s[k] && k.indexOf('|') > 0)) return false;
     const todas = []; this._busEscopo().forEach(b => this._marcas(b).forEach(m => todas.push(b + '|' + m)));
     return !todas.every(k => s[k]);
   }
-  _filCli() { const s = this.state.clientes; return !this._selVazia(s) && !this._redes().every(c => s[c]); }
+  _filCli() {
+    const s = this.state.clientes, sig = JSON.stringify(s);
+    if (this._fcC && this._fcC[0] === sig) return this._fcC[1];
+    const r = !this._selVazia(s) && !this._redes().every(c => s[c]); this._fcC = [sig, r]; return r;
+  }
   _filtroAtivo() { return this._filMarca() || this._filCli(); }
   /** Curvas da BU reduzidas à fatia dos filtros de marca e cliente, na proporção de AA, realizado e projeção. */
   _busF(b) {
     const o = this.bus[b];
     if (!o || !this._filtroAtivo()) return o;
+    // mesmo filtro, mesmo resultado: a base fina tem dezenas de milhares de linhas
+    const sig = this.state.corte + JSON.stringify(this.state.marcas) + JSON.stringify(this.state.clientes);
+    if (!this._bfC || this._bfC.sig !== sig) this._bfC = { sig, m: {} };
+    if (this._bfC.m[b] && this._bfC.m[b].o === o) return this._bfC.m[b].r;
+    const r = this._busFCalc(b, o); this._bfC.m[b] = { o, r }; return r;
+  }
+  _busFCalc(b, o) {
     const fm = this._filMarca(), fc = this._filCli();
     // base nova: grão marca × cliente × canal saído do VENDAS — proporção exata por canal
     const G = this.M && this.M.grao;
     if (G) {
       if (!this._gr) { this._gr = {}; Object.keys(G).forEach(k => { const p = k.split('|'); (this._gr[p[0]] = this._gr[p[0]] || []).push({ m: p[1], c: p[2], k: p[3], v: G[k] }); }); }
-      const L = this._gr[b] || [];
+      const L = this._gr[b] || [], SM = this.state.marcas, SC = this.state.clientes;
       const razaoG = k => {
         const n = [0, 0, 0], d = [0, 0, 0];
-        L.forEach(e => {
-          if (k !== 'TOTAL' && e.k !== k) return;
+        for (let j = 0; j < L.length; j++) {
+          const e = L[j];
+          if (k !== 'TOTAL' && e.k !== k) continue;
           for (let i = 0; i < 3; i++) d[i] += e.v[i];
-          if ((!fm || this._passaMarca(e.m, b)) && (!fc || this._passaCliente(e.c))) for (let i = 0; i < 3; i++) n[i] += e.v[i];
-        });
+          if ((!fm || SM[b + '|' + e.m]) && (!fc || SC[e.c])) for (let i = 0; i < 3; i++) n[i] += e.v[i];
+        }
         const r = i => d[i] ? n[i] / d[i] : null, fb = r(2) != null ? r(2) : 0;
         return { aa: r(0) != null ? r(0) : fb, real: r(1) != null ? r(1) : fb, proj: fb };
       };

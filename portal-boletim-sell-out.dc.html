@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/shadows.css">
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
   <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
-  <script src="./base-boletim.js"></script>
+  <script>(function(){var t=Date.now();var s=document.createElement('script');s.src='base-boletim.js?v='+t;document.head.appendChild(s);
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!/^(\.\/)?[\w.-]+\.html(\?[^#]*)?(#.*)?$/.test(h)||/[?&]t=\d/.test(h))return;a.setAttribute('href',h.replace(/^([^?#]*)(\?[^#]*)?/,function(m,p,q){return p+(q?q+'&':'?')+'t='+t;}));},true);})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block">
@@ -99,6 +100,8 @@ class Component extends DCLogic {
   componentDidMount() {
     this.$ = id => document.getElementById(id);
     this._faixa();
+    // base carregada depois do portal: redesenha a faixa quando chegar
+    if (!window.BASE_BOLETIM) { let n = 0; const t = setInterval(() => { if (window.BASE_BOLETIM || ++n > 150) { clearInterval(t); this._faixa(); } }, 60); }
     const on = (id, ev, fn) => { const el = this.$(id); if (el) el.addEventListener(ev, fn); };
     on('btnFerr', 'click', () => this._abrir());
     on('btnFerrFechar', 'click', () => { this.$('modalFerr').style.display = 'none'; });
