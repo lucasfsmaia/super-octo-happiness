@@ -625,24 +625,29 @@ class Component extends DCLogic {
     if (s.dias[dia] != null) return s.dias[dia];
     return Math.round(base * (1 + s.ajuste / 100) * 100) / 100;
   }
+  /** Dias que a simulação mexe: os não realizados; com o mês fechado, os realizados (cenário "e se"). */
+  _jan(d) { return (!d.proj.length && d.corte >= d.diasMes) ? ['real', 0] : ['proj', d.corte]; }
   _aplicaSim(d, chave) {
     if (!d || !this._simAtivaEm(chave)) return d;
-    return Object.assign({}, d, { proj: d.proj.map((v, i) => this._simDia(chave, d.corte + i + 1, v)) });
+    const j = this._jan(d), o = {}; o[j[0]] = d[j[0]].map((v, i) => this._simDia(chave, j[1] + i + 1, v));
+    return Object.assign({}, d, o);
   }
   /** Fator de cada dia futuro no cenário (simulado ÷ base), para VD e VI seguirem o total. */
   _fatoresSim(total, chave) {
     const f = {};
     if (!total || !this._simAtivaEm(chave)) return f;
     const s = this._sim(chave);
-    total.proj.forEach((v, i) => {
-      const dia = total.corte + i + 1;
+    const j = this._jan(total);
+    total[j[0]].forEach((v, i) => {
+      const dia = j[1] + i + 1;
       f[dia] = v ? this._simDia(chave, dia, v) / v : (1 + s.ajuste / 100);
     });
     return f;
   }
   _aplicaFat(d, f) {
     if (!d || !Object.keys(f).length) return d;
-    return Object.assign({}, d, { proj: d.proj.map((v, i) => { const k = f[d.corte + i + 1]; return Math.round(v * (k == null ? 1 : k) * 100) / 100; }) });
+    const j = this._jan(d), o = {}; o[j[0]] = d[j[0]].map((v, i) => { const k = f[j[1] + i + 1]; return Math.round(v * (k == null ? 1 : k) * 100) / 100; });
+    return Object.assign({}, d, o);
   }
   // ---- simulação de linhas: marca, cliente e canal ----
   _kLinha(o) { return o.bu + '|' + o.marca + '|' + o.rede; }
@@ -695,7 +700,7 @@ class Component extends DCLogic {
     const soma = this._soma1(total.proj);
     if (!soma) return f;
     const k = (soma + delta) / soma;
-    total.proj.forEach((v, i) => f[total.corte + i + 1] = k);
+    const j = this._jan(total); total[j[0]].forEach((v, i) => f[j[1] + i + 1] = k);
     return f;
   }
 
@@ -707,6 +712,16 @@ class Component extends DCLogic {
     return { total: this._aplicaSim(o.total, b), VD: this._aplicaFat(o.VD, fat), VI: this._aplicaFat(o.VI, fat) };
   }
   _orcEscopo() {
+    const k = this.state.canal, fm = this._filMarca(), fc = this._filCli();
+    if (fm || fc || k !== 'TOTAL') {
+      if (fc && k !== 'TOTAL') return null;
+      const redes = fc ? this._redes().filter(c => this._passaCliente(c)) : [k];
+      let t = 0, tem = false;
+      this._busEscopo().forEach(b => (fm ? this._marcas(b).filter(m => this._passaMarca(m, b)) : ['TOTAL']).forEach(m => redes.forEach(r => {
+        const v = this._o(b, m, r).orcAbs; if (v != null) { t += v; tem = true; }
+      })));
+      return tem ? Math.round(t * 10) / 10 : null;
+    }
     if (this.state.corte === 'TT') {
       const t = this._fato('Total s/ Cobertura').bu ? this._fato('Total s/ Cobertura') : this._fato('Total');
       return t.orcAbs != null ? t.orcAbs : (this.M.curva || {}).orcTotal;
@@ -725,17 +740,18 @@ class Component extends DCLogic {
     const cab = ['Dia', '', 'AA', 'VD', 'VI', 'Realizado', 'Projeção', 'Simulado', 'Acum.', 'Acum. AA', 'vs AA'];
     const th = cab.map((t, i) => '<th style="text-align:' + (i < 2 ? 'left' : 'right') + '; font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:' + NAVY + '; padding:8px 10px; white-space:nowrap; position:sticky; top:0;">' + t + '</th>').join('');
     let linhas = '';
+    const fechado = !d.proj.length && d.corte >= d.diasMes;
     for (let i = 0; i < d.diasMes; i++) {
-      const dia = i + 1, futuro = i >= d.corte;
+      const dia = i + 1, futuro = i >= d.corte, editavel = futuro || fechado;
       const aa = d.aa[i] == null ? null : d.aa[i];
-      const real = futuro ? null : d.real[i];
+      const real = futuro ? null : (fechado && base ? base.real[i] : d.real[i]);
       const proj = futuro ? (base ? base.proj[i - base.corte] : null) : null;
-      const cen = futuro ? d.proj[i - d.corte] : real;
+      const cen = futuro ? d.proj[i - d.corte] : d.real[i];
       accSim += cen || 0; accAA += aa || 0; if (!futuro) accReal += real || 0;
       const fds = this._fds(dia);
       const fundo = fds ? '#EDF6FC' : (futuro ? SUAVE : '#fff');
       const td = (h, extra) => '<td style="text-align:right; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; white-space:nowrap;' + (extra || '') + '">' + h + '</td>';
-      const inp = futuro
+      const inp = editavel
         ? '<input type="number" step="0.1" data-dia="' + dia + '" value="' + (cen == null ? '' : cen) + '" style="font-family:inherit; font-size:12.5px; width:74px; text-align:right; padding:4px 7px; border:1px solid ' + (sim.dias[dia] != null ? BLUE : '#D7E3EE') + '; border-radius:6px; color:' + INK + '; background:#fff;">'
         : '<span style="color:#C3CDD6;">—</span>';
       linhas += '<tr>'
@@ -769,9 +785,11 @@ class Component extends DCLogic {
       + '<div style="display:flex; align-items:center; gap:12px;">'
       + '<input id="uSlider" type="range" min="-30" max="30" step="1" value="' + sim.ajuste + '" style="width:220px; accent-color:' + BLUE + ';">'
       + '<b style="font-size:15px; color:' + (sim.ajuste < 0 ? NEG : (sim.ajuste > 0 ? POS : INK)) + '; min-width:52px;">' + (sim.ajuste > 0 ? '+' : '') + sim.ajuste + '%</b></div></div>'
-      + '<div style="font-size:12.5px; line-height:1.5; color:' + MUTED + '; max-width:330px;">O ajuste vale para todos os dias não realizados de <b>' + this._corte()[1] + '</b>. Digite em <b>Simulado</b> para fixar um dia.'
+      + '<div style="font-size:12.5px; line-height:1.5; color:' + MUTED + '; max-width:330px;">' + (fechado
+        ? 'Mês fechado: o ajuste vale como cenário sobre todos os dias realizados de <b>' + this._corte()[1] + '</b>. Digite em <b>Simulado</b> para alterar um dia.'
+        : 'O ajuste vale para todos os dias não realizados de <b>' + this._corte()[1] + '</b>. Digite em <b>Simulado</b> para fixar um dia.')
       + (herdadas.length ? ' Já inclui a simulação de <b>' + herdadas.join(', ') + '</b>.' : '')
-      + ' Na tabela abaixo, digite em <b>Venda simulada</b> o valor previsto do mês de uma marca, cliente ou canal — a diferença soma nos dias futuros.'
+      + ' Na tabela abaixo, digite em <b>Venda simulada</b> o valor previsto do mês de uma marca, cliente ou canal — a diferença soma nos dias ' + (fechado ? 'do mês.' : 'futuros.')
       + (aj.ignoradas.length ? '<div style="color:#8A6A12; margin-top:6px;">Ignorado na soma por sobreposição: <b>'
         + aj.ignoradas.map(k => k.split('|').filter(p => p !== 'TOTAL').join(' · ')).join('; ') + '</b>.</div>' : '') + '</div>'
       + '<button id="uSimZero" style="margin-left:auto; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:' + BLUE + '; background:#fff; border:1px solid #CFE4F5; border-radius:8px; padding:8px 15px;">Voltar à projeção</button></div>'
@@ -779,7 +797,7 @@ class Component extends DCLogic {
       + cartao('Projeção da base', this._nn(projOrig), 'vs AA ' + (aaT ? this._nn((projOrig / aaT - 1) * 100) + '%' : '—'))
       + cartao('Cenário simulado', this._nn(fimT), 'vs AA ' + (aaT ? this._nn((fimT / aaT - 1) * 100) + '%' : '—'))
       + cartao('Diferença', (fimT - projOrig > 0 ? '+' : '') + this._nn(fimT - projOrig), 'em relação à projeção')
-      + cartao('Orçamento', orc == null ? '—' : this._nn(orc), orc == null ? 'sem orçamento no recorte' : 'gap ' + (fimT - orc > 0 ? '+' : '') + this._nn(fimT - orc))
+      + cartao('Orçamento', orc == null ? '—' : this._nn(orc), orc == null ? (this._filtroAtivo() ? 'sem orçamento no filtro' : 'sem orçamento no recorte') : 'gap ' + (fimT - orc > 0 ? '+' : '') + this._nn(fimT - orc))
       + cartao('Ajustes de linha', (dLin > 0 ? '+' : '') + this._nn(dLin), nLin ? nLin + (nLin > 1 ? ' linhas ajustadas' : ' linha ajustada') : 'marca, cliente ou canal na tabela')
       + '</div>';
 
