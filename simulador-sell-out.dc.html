@@ -315,7 +315,7 @@ class Component extends DCLogic {
     // base nova: grão marca × cliente × canal saído do VENDAS — proporção exata por canal
     const G = this.M && this.M.grao;
     if (G) {
-      if (!this._gr) { this._gr = {}; Object.keys(G).forEach(k => { const p = k.split('|'); (this._gr[p[0]] = this._gr[p[0]] || []).push({ m: p[1], c: p[2], k: p[3], v: G[k] }); }); }
+      this._grInit();
       // índices da base fina: total por BU×canal, linhas por BU×cliente e soma por BU×marca×canal
       if (!this._gi) {
         const tot = {}, porC = {}, porM = {}, add = (o, k, v) => { const t = o[k] || (o[k] = [0, 0, 0]); t[0] += v[0]; t[1] += v[1]; t[2] += v[2]; };
@@ -385,6 +385,41 @@ class Component extends DCLogic {
     return { total: esc(o.total, 'TOTAL'), VD: esc(o.VD, 'VD'), VI: esc(o.VI, 'VI'), semCanal: o.semCanal };
   }
   _passaCliente(c) { return !this._filCli() || !!this.state.clientes[c]; }
+  _grInit() {
+    const G = this.M && this.M.grao; if (!G) return null;
+    if (!this._gr) { this._gr = {}; Object.keys(G).forEach(k => { const p = k.split('|'); (this._gr[p[0]] = this._gr[p[0]] || []).push({ m: p[1], c: p[2], k: p[3], v: G[k] }); }); }
+    return this._gr;
+  }
+  /** Soma da base fina com os filtros de marca e cliente, por BU × marca × cliente × canal ('*' = todos do filtro). */
+  _gAgg() {
+    const sig = this.state.corte + JSON.stringify(this.state.marcas) + JSON.stringify(this.state.clientes);
+    if (this._gaC && this._gaC.sig === sig) return this._gaC.r;
+    const gr = this._grInit(), r = {};
+    const add = (key, v) => { const t = r[key] || (r[key] = [0, 0, 0]); t[0] += v[0]; t[1] += v[1]; t[2] += v[2]; };
+    this._busEscopo().forEach(b => (gr[b] || []).forEach(e => {
+      if (!this._passaMarca(e.m, b) || !this._passaCliente(e.c)) return;
+      [b, '*'].forEach(bb => [e.m, '*'].forEach(mm => [e.c, '*'].forEach(cc => { add(bb + '|' + mm + '|' + cc + '|' + e.k, e.v); add(bb + '|' + mm + '|' + cc + '|TOTAL', e.v); })));
+    }));
+    this._gaC = { sig, r }; return r;
+  }
+  /** Linha da tabela já com os filtros: bu/marca/cli nulos = todos do filtro; canal nulo = canal escolhido. */
+  _q(bu, marca, cli, canal) {
+    const k = canal || this.state.canal, G = this.M && this.M.grao;
+    const precisa = G && ((!marca && this._filMarca()) || (!cli && this._filCli()) || (cli && k !== 'TOTAL'));
+    if (!precisa) {
+      const rede = cli || k;
+      if (bu) return this._o(bu, marca || 'TOTAL', rede);
+      if (this.state.corte === 'TT') {
+        if (rede !== 'TOTAL') return this._o('TOTAL', 'TOTAL', rede);
+        return this._o(this._fato('Total s/ Cobertura').bu ? 'Total s/ Cobertura' : 'Total', 'TOTAL', 'TOTAL');
+      }
+      return this._agg(this._busEscopo().map(b => this._o(b, 'TOTAL', rede)));
+    }
+    const v = this._gAgg()[(bu || '*') + '|' + (marca || '*') + '|' + (cli || '*') + '|' + k];
+    if (!v) return {};
+    const r1 = x => Math.round(x * 10) / 10, real = r1(v[1]), proj = r1(Math.max(v[2], v[1])), aa = r1(v[0]);
+    return { bu: 'ESCOPO', realAA: aa, real, proj, pProj: aa ? Math.round((proj / aa - 1) * 1000) / 10 : null };
+  }
 
   // ---------- curvas ----------
   _diaria(c) {
@@ -800,53 +835,52 @@ class Component extends DCLogic {
     let h = '';
     // totalizador no topo de toda visão e recorte; com filtro, soma só o que a tabela mostra
     const rotTot = this.state.corte === 'TT' ? 'Total Hypera' : 'Total ' + this._corte()[1];
-    const totOficial = c => this.state.corte === 'TT'
-      ? (c === 'TOTAL' ? this._o(totNome, 'TOTAL', 'TOTAL') : this._o('TOTAL', 'TOTAL', c))
-      : this._agg(escopo.map(bu => this._o(bu, 'TOTAL', c)));
     const linTot = o => (o && this._temValor(o)) ? this._linha(o, rotTot, 0, 'tot', false).replace(/background:#EDF6FC;/g, 'background:#DCEBF7;') : '';
+    const tem = o => this._temValor(o) || o.cresc != null;
+    const sufixo = this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1];
+    const busVis = (cli, k) => escopo.filter(bu => (!this._filMarca() || this._marcas(bu).some(m => this._passaMarca(m, bu))) && tem(this._q(bu, null, cli, k)));
     if (this.state.visao === 'bu') {
-      h += linTot(this._filMarca()
-        ? this._agg([].concat.apply([], escopo.map(bu => this._marcas(bu).filter(m => this._passaMarca(m, bu)).map(m => this._o(bu, m, canal)))))
-        : totOficial(canal));
-      escopo.forEach(bu => {
-        const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu));
-        h += this._linha(this._o(bu, 'TOTAL', canal), bu, 0, 'bu:' + bu, marcas.length > 0);
+      h += linTot(this._q(null, null, null, null));
+      busVis(null, null).forEach(bu => {
+        const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, null, null)));
+        h += this._linha(this._q(bu, null, null, null), bu, 0, 'bu:' + bu, marcas.length > 0);
         if (!this.state.abertos['bu:' + bu]) return;
         marcas.forEach(m => {
           const k = 'm:' + bu + '|' + m;
-          const filhos = redes.filter(r => this._temValor(this._o(bu, m, r)) || this._o(bu, m, r).cresc != null);
-          h += this._linha(this._o(bu, m, canal === 'TOTAL' ? 'TOTAL' : canal), m, 1, k, canal === 'TOTAL' && filhos.length > 0);
+          const filhos = redes.filter(r => tem(this._q(bu, m, r, 'TOTAL')));
+          h += this._linha(this._q(bu, m, null, null), m, 1, k, canal === 'TOTAL' && filhos.length > 0);
           if (canal === 'TOTAL' && this.state.abertos[k]) {
-            filhos.forEach(r => h += this._linha(this._o(bu, m, r), r, 2, k + '|' + r, false));
-            CANAIS.forEach(c => { const o = this._o(bu, m, c); if (this._temValor(o) || o.cresc != null) h += this._linha(o, c === 'VD' ? 'Venda direta' : 'Venda indireta', 2, k + '|' + c, false); });
+            filhos.forEach(r => h += this._linha(this._q(bu, m, r, 'TOTAL'), r, 2, k + '|' + r, false));
+            CANAIS.forEach(c => { const o = this._q(bu, m, null, c); if (tem(o)) h += this._linha(o, c === 'VD' ? 'Venda direta' : 'Venda indireta', 2, k + '|' + c, false); });
           }
         });
       });
     } else if (this.state.visao === 'cliente') {
-      h += linTot(this._filCli() ? this._agg(redes.map(r => this._topo(r))) : totOficial('TOTAL'));
+      h += linTot(this._q(null, null, null, null));
       redes.forEach(r => {
+        const o = this._q(null, null, r, null); if (!tem(o)) return;
         const k = 'c:' + r;
-        h += this._linha(this._topo(r), r + (this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1]), 0, k, true);
+        h += this._linha(o, r + sufixo, 0, k, true);
         if (!this.state.abertos[k]) return;
-        escopo.forEach(bu => {
-          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && (this._temValor(this._o(bu, m, r)) || this._o(bu, m, r).cresc != null));
+        busVis(r, null).forEach(bu => {
+          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, r, null)));
           const kb = k + '|' + bu;
-          h += this._linha(this._o(bu, 'TOTAL', r), bu, 1, kb, marcas.length > 0);
-          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._o(bu, m, r), m, 2, kb + '|' + m, false));
+          h += this._linha(this._q(bu, null, r, null), bu, 1, kb, marcas.length > 0);
+          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._q(bu, m, r, null), m, 2, kb + '|' + m, false));
         });
       });
     } else {
-      h += linTot(totOficial('TOTAL'));
-      CANAIS.forEach(c => {
+      h += linTot(this._q(null, null, null, null));
+      (canal === 'TOTAL' ? CANAIS : [canal]).forEach(c => {
+        const o = this._q(null, null, null, c); if (!tem(o)) return;
         const k = 'n:' + c;
-        h += this._linha(this._topo(c), (c === 'VD' ? 'Venda direta (VD)' : 'Venda indireta (VI)')
-          + (this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1]), 0, k, true);
+        h += this._linha(o, (c === 'VD' ? 'Venda direta (VD)' : 'Venda indireta (VI)') + sufixo, 0, k, true);
         if (!this.state.abertos[k]) return;
-        escopo.forEach(bu => {
-          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && (this._temValor(this._o(bu, m, c)) || this._o(bu, m, c).cresc != null));
+        busVis(null, c).forEach(bu => {
+          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, null, c)));
           const kb = k + '|' + bu;
-          h += this._linha(this._o(bu, 'TOTAL', c), bu, 1, kb, marcas.length > 0);
-          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._o(bu, m, c), m, 2, kb + '|' + m, false));
+          h += this._linha(this._q(bu, null, null, c), bu, 1, kb, marcas.length > 0);
+          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._q(bu, m, null, c), m, 2, kb + '|' + m, false));
         });
       });
     }
