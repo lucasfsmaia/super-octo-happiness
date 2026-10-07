@@ -281,7 +281,10 @@ class Component extends DCLogic {
   }
 
   _init() {
-    this._LINKS = { hub: "https://app.powerbi.com/groups/ddd0da03-c7aa-4718-a584-f15ad9913600/reports/534124f0-a9c2-4444-88c0-1cca50d91f2c/ReportSection?experience=power-bi", executivos: "https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi", deck: '', pdf: '' };
+    this._LINKS = { hub: "https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi", executivos: "https://mercadoglp1-dev.hypera.com.br/", deck: '', pdf: '' };
+    // endereços antigos gravados em bases anteriores dão lugar aos padrões atuais
+    this._LINKS_ANTIGOS = { hub: ["https://app.powerbi.com/groups/ddd0da03-c7aa-4718-a584-f15ad9913600/reports/534124f0-a9c2-4444-88c0-1cca50d91f2c/ReportSection?experience=power-bi"], executivos: ["https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi"] };
+    this._link = (k, v) => { v = String(v || '').trim(); return !v || (this._LINKS_ANTIGOS[k] || []).indexOf(v) >= 0 ? this._LINKS[k] : v; };
     try {
       const pub = JSON.parse(localStorage.getItem('boletim.base.v1') || 'null');
       if (pub && pub.sig) this._sigAtual = pub.sig;
@@ -304,8 +307,8 @@ class Component extends DCLogic {
     set('inpCorte', B.META.dataCorte || ''); this._pintarCorte();
     set('inpDias', B.META.diasUteis || '');
     set('inpDiasAA', B.META.diasUteisAA || '');
-    set('inpHub', (B.META.links || {}).hub || this._LINKS.hub);
-    set('inpExec', (B.META.links || {}).executivos || this._LINKS.executivos);
+    set('inpHub', this._link('hub', (B.META.links || {}).hub));
+    set('inpExec', this._link('executivos', (B.META.links || {}).executivos));
     [['inpHub', 'hub'], ['inpExec', 'executivos']].forEach(([id, k]) => {
       const el = $(id); if (!el) return;
       el.placeholder = this._LINKS[k];
@@ -1438,7 +1441,7 @@ class Component extends DCLogic {
         // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
         const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); setTimeout(() => this._pintarCorte(), 0); put('inpDias', 'diasUteis');
-        put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
+        put('inpDiasAA', 'diasUteisAA'); if (M.hub) M.hub = this._link('hub', M.hub); if (M.executivos) M.executivos = this._link('executivos', M.executivos); put('inpHub', 'hub'); put('inpExec', 'executivos');
         info.style.color = '#0a7d34';
         info.innerHTML = '✓ <b>' + f.name + '</b>: ' + vendas.length.toLocaleString('pt-BR') + ' linhas de venda + '
           + vendasAA.length.toLocaleString('pt-BR') + ' do ano anterior · ' + ag.resumo.marcas + ' marcas · '
@@ -1476,7 +1479,7 @@ class Component extends DCLogic {
         // o cabeçalho reflete a base que acabou de entrar, não a anterior nem a de demonstração
         const put = (id, k) => { const el = this.$(id); if (el && M[k] != null && M[k] !== '') el.value = M[k]; };
         put('inpRef', 'referencia'); put('inpCorte', 'dataCorte'); setTimeout(() => this._pintarCorte(), 0); put('inpDias', 'diasUteis');
-        put('inpDiasAA', 'diasUteisAA'); put('inpHub', 'hub'); put('inpExec', 'executivos');
+        put('inpDiasAA', 'diasUteisAA'); if (M.hub) M.hub = this._link('hub', M.hub); if (M.executivos) M.executivos = this._link('executivos', M.executivos); put('inpHub', 'hub'); put('inpExec', 'executivos');
         const n = k => this._num(M[k]);
         if (n('mtdAaTotal') != null) this._mtdAA = { vd: n('mtdAaVD'), vi: n('mtdAaVI'), total: n('mtdAaTotal') };
       }
@@ -2223,7 +2226,7 @@ class Component extends DCLogic {
     M.diasUteisAA = parseInt(v('inpDiasAA'), 10) || M.diasUteisAA;
     M.consideracoes = this.$('inpCons') ? v('inpCons') : (M.consideracoes || '');
     const L = M.links || {};
-    const lk = (id, k) => (this.$(id) ? String(v(id) || '').trim() : (L[k] || '')) || (this._LINKS[k] || '');
+    const lk = (id, k) => this._link(k, this.$(id) ? v(id) : L[k]);
     M.links = { hub: lk('inpHub', 'hub'), executivos: lk('inpExec', 'executivos'), deck: lk('inpDeck', 'deck'), pdf: lk('inpPdf', 'pdf') };
     const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
     const vd = this._row('TOTAL', 'TOTAL', 'VD'), vi = this._row('TOTAL', 'TOTAL', 'VI'), tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
