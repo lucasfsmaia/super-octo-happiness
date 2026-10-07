@@ -31,7 +31,7 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
     </div>
 
     <div style="display:flex; justify-content:flex-end; margin-top:14px;">
-      <a href="portal-boletim-sell-out.dc.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px 6px 10px; border:1px solid #0062AA; border-radius:8px; background:#FFFFFF; color:#0062AA; font-size:14px; text-decoration:none;" style-hover="background:#EDF6FC; color:#074878; border-color:#074878;"><span aria-hidden="true" style="font-size:16px; line-height:1;">&#8592;</span>Voltar ao portal</a>
+      <a href="portal-boletim-sell-out.dc.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px 6px 10px; border:1px solid #0062AA; border-radius:8px; background:#FFFFFF; color:#0062AA; font-size:14px; text-decoration:none;" style-hover="background:#EDF6FC; color:#074878; border-color:#074878;"><span aria-hidden="true" style="font-size:16px; line-height:1;">←</span>Voltar ao portal</a>
     </div>
 
     <div id="etapas" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:14px 0 26px;"></div>
@@ -54,32 +54,29 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis realizados<input id="inpDias" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61;">Dias úteis MTD ano anterior<input id="inpDiasAA" type="number" min="1" max="31" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
       </div>
-      <details style="margin-top:18px; border-top:1px solid #EFEFEF; padding-top:14px;">
-        <summary style="font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;">Links do e-mail</summary>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin-top:14px;">
-          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">HUB (Power BI)<input id="inpHub" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Relatórios executivos<input id="inpExec" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-          <label style="font-size:14px; font-weight:600; color:#5D5F61;">Apresentação<input id="inpDeck" placeholder="boletim-sell-out.dc.html" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-          <label style="font-size:14px; font-weight:600; color:#5D5F61;">PDF<input id="inpPdf" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
-        </div>
-      </details>
     </div>
 
     
 
     
 
-    <div id="secApres" style="background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:20px clamp(16px,3vw,28px); margin-bottom:24px;"><div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-      <div style="min-width:0; flex:1 1 320px;">
-        <div style="font-size:18px; font-weight:700; color:#292A2B; margin-bottom:4px;">Apresentações geradas</div>
-        
+    <div id="secApres" style="background:#fff; border:1px solid #CFE4F5; border-top:4px solid #00BFDF; border-radius:12px; padding:20px clamp(16px,3vw,28px); margin-bottom:24px;">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div style="min-width:0; flex:1 1 320px;">
+          <div style="font-size:18px; font-weight:700; color:#292A2B;">Apresentações e simulador</div>
+          <div id="libInfo" style="font-size:14px; line-height:1.5; color:#5D5F61; margin-top:4px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button id="btnRevogar" type="button" style="display:none; font-family:inherit; font-size:14px; font-weight:600; color:#B32B23; background:#fff; border:1.5px solid #E8C4C1; border-radius:8px; padding:9px 16px; cursor:pointer;">Despublicar</button>
+          <button id="btnLiberar" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:10px 22px; cursor:pointer;">OK, publicar materiais</button>
+        </div>
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Apresentação comercial</a>
-        <a id="lnkApres2" href="boletim-sell-out-gestao-orcamentaria.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:#0062AA; border-radius:8px; padding:10px 20px; text-decoration:none;">Apresentação Gestão Orçamentária</a>
-        <a id="lnkSimul" href="simulador-sell-out.dc.html" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:8.5px 20px; text-decoration:none;">Abrir simulador</a>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:18px;">
+        <a id="lnkApres" href="boletim-sell-out.dc.html" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:52px; box-sizing:border-box; padding:12px 16px; border:1.5px solid #CFE4F5; border-radius:10px; background:#F7FBFE; text-decoration:none; font-size:15px; font-weight:700; color:#0062AA; transition:opacity .15s;"><span>Apresentação comercial</span><span aria-hidden="true" style="font-size:16px; font-weight:400;">↗</span></a>
+        <a id="lnkApres2" href="boletim-sell-out-gestao-orcamentaria.dc.html" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:52px; box-sizing:border-box; padding:12px 16px; border:1.5px solid #CFE4F5; border-radius:10px; background:#F7FBFE; text-decoration:none; font-size:15px; font-weight:700; color:#0062AA; transition:opacity .15s;"><span>Apresentação Gestão Orçamentária</span><span aria-hidden="true" style="font-size:16px; font-weight:400;">↗</span></a>
+        <a id="lnkSimul" href="simulador-sell-out.dc.html" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:52px; box-sizing:border-box; padding:12px 16px; border:1.5px solid #CFE4F5; border-radius:10px; background:#F7FBFE; text-decoration:none; font-size:15px; font-weight:700; color:#0062AA; transition:opacity .15s;"><span>Simulador</span><span aria-hidden="true" style="font-size:16px; font-weight:400;">↗</span></a>
       </div>
-    </div></div>
+    </div>
 
     <div id="secResumo" style="background:#fff; border:1px solid #EFEFEF; border-radius:12px; padding:24px clamp(16px,3vw,28px); margin-bottom:24px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
@@ -139,6 +136,15 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
         <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Para · Gestão Orçamentária <span style="font-weight:400;">(com Forecast)</span><input id="inpPara2" placeholder="controladoria@hypera.com.br" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
         <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Assunto<input id="inpAssunto" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:15px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
       </div>
+      <details style="margin-top:18px; border-top:1px solid #EFEFEF; padding-top:14px;">
+        <summary style="font-size:14px; font-weight:600; color:#0062AA; cursor:pointer;">Links do e-mail</summary>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin-top:14px;">
+          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">HUB (Power BI)<input id="inpHub" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+          <label style="font-size:14px; font-weight:600; color:#5D5F61; grid-column:1 / -1;">Relatórios executivos<input id="inpExec" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:14px; padding:10px 12px; border:1.5px solid #EFEFEF; border-radius:8px;"></label>
+          
+          
+        </div>
+      </details>
       <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:24px;">
         <button id="btnPrev" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#0062AA; background:#fff; border:1.5px solid #0062AA; border-radius:8px; padding:11px 22px; cursor:pointer;">Pré-visualizar</button>
         <button id="btnEml" type="button" style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:#0a7d34; border:1.5px solid #0a7d34; border-radius:8px; padding:11px 22px; cursor:pointer;">Abrir no Outlook · comercial</button>
@@ -238,7 +244,50 @@ class Component extends DCLogic {
   }
   _irEtapa(n) { this._etapa = n; this._pintarEtapas(); if (n === 3) this._republicar(); }
 
+  /** Cartões recolhíveis: clique no título abre/fecha; o estado fica salvo. */
+  _recolhiveis() {
+    if (!this.$) this.$ = id => document.getElementById(id);
+    let est = {};
+    try { est = JSON.parse(localStorage.getItem('boletim.recolhidos.v1') || '{}'); } catch (e) { est = {}; }
+    ['secCab', 'secResumo', 'secAlertas', 'secEnvio'].forEach(id => {
+      const sec = this.$(id);
+      if (!sec || sec.dataset.recolhivel) return;
+      const head = sec.firstElementChild;
+      if (!head) return;
+      const tit = head.children.length && head.firstElementChild.tagName === 'DIV' && head.style.display === 'flex' ? head.firstElementChild : head;
+      sec.dataset.recolhivel = '1';
+      const seta = document.createElement('span');
+      seta.setAttribute('aria-hidden', 'true');
+      seta.style.cssText = 'display:inline-block; width:18px; margin-right:6px; color:#0062AA; font-size:14px; transition:transform .15s; transform-origin:45% 50%;';
+      seta.textContent = '▾';
+      tit.insertBefore(seta, tit.firstChild);
+      tit.style.cursor = 'pointer'; tit.style.userSelect = 'none';
+      tit.setAttribute('role', 'button'); tit.tabIndex = 0;
+      const aplicar = fechado => {
+        Array.from(sec.children).forEach(c => { if (c !== head) c.style.display = fechado ? 'none' : ''; });
+        if (head !== tit) Array.from(head.children).forEach(c => { if (c !== tit) c.style.visibility = fechado ? 'hidden' : ''; });
+        seta.style.transform = fechado ? 'rotate(-90deg)' : '';
+        head.style.marginBottom = fechado ? '0' : '';
+        tit.setAttribute('aria-expanded', fechado ? 'false' : 'true');
+      };
+      const alternar = () => {
+        est[id] = !est[id]; aplicar(est[id]);
+        try { localStorage.setItem('boletim.recolhidos.v1', JSON.stringify(est)); } catch (e) { /* sem persistência */ }
+      };
+      tit.addEventListener('click', alternar);
+      tit.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); } });
+      aplicar(!!est[id]);
+    });
+  }
+
   _init() {
+    this._LINKS = { hub: "https://app.powerbi.com/groups/ddd0da03-c7aa-4718-a584-f15ad9913600/reports/534124f0-a9c2-4444-88c0-1cca50d91f2c/ReportSection?experience=power-bi", executivos: "https://app.powerbi.com/groups/me/apps/1db230f5-dd67-4f96-aac1-10967036ac8b/reports/93571e31-2150-4eac-96c0-46c66e3d270b/2e9a45f7eae5ed53481a?ctid=3f7a3df4-f85b-4ca8-98d0-08b1034e6567&experience=power-bi", deck: '', pdf: '' };
+    try {
+      const pub = JSON.parse(localStorage.getItem('boletim.base.v1') || 'null');
+      if (pub && pub.sig) this._sigAtual = pub.sig;
+      if (pub && pub.liberado && pub.sig) { this._libSig = pub.sig; this._libEm = pub.liberadoEm || null; }
+    } catch (e) { /* sem publicação anterior */ }
+    setTimeout(() => { try { this._recolhiveis(); } catch (e) { console.warn('recolhíveis', e); } }, 0);
     const B = JSON.parse(JSON.stringify(window.BASE_BOLETIM));
     this.base = B; this.cols = B.COLUNAS; this.fatos = B.FATOS.map(r => r.slice());
     { const C = this.cols, iR = C.indexOf('real'), iP = C.indexOf('proj'), iA = C.indexOf('realAA'), iV = C.indexOf('pProj');
@@ -255,8 +304,13 @@ class Component extends DCLogic {
     set('inpCorte', B.META.dataCorte || ''); this._pintarCorte();
     set('inpDias', B.META.diasUteis || '');
     set('inpDiasAA', B.META.diasUteisAA || '');
-    set('inpHub', (B.META.links || {}).hub || '');
-    set('inpExec', (B.META.links || {}).executivos || '');
+    set('inpHub', (B.META.links || {}).hub || this._LINKS.hub);
+    set('inpExec', (B.META.links || {}).executivos || this._LINKS.executivos);
+    [['inpHub', 'hub'], ['inpExec', 'executivos']].forEach(([id, k]) => {
+      const el = $(id); if (!el) return;
+      el.placeholder = this._LINKS[k];
+      el.addEventListener('blur', () => { if (!el.value.trim()) { el.value = this._LINKS[k]; this._republicar(); } });
+    });
     set('inpDeck', (B.META.links || {}).deck || '');
     set('inpPdf', (B.META.links || {}).pdf || '');
     const E = B.META.envio || {};
@@ -302,7 +356,7 @@ class Component extends DCLogic {
       this._pintarCorte();
       this._republicar();
     });
-    ['inpRef', 'inpDias', 'inpDiasAA'].forEach(id => on(id, 'change', () => this._republicar()));
+    ['inpRef', 'inpDias', 'inpDiasAA', 'inpHub', 'inpExec', 'inpDeck', 'inpPdf'].forEach(id => on(id, 'change', () => this._republicar()));
     ['lnkApres', 'lnkApres2', 'lnkSimul'].forEach(id => on(id, 'click', () => this._republicar()));
     on('inpAssunto', 'input', e => { e.target.dataset.editado = '1'; });
     on('btnGerarCons', 'click', () => this._gerarCons(true));
@@ -341,7 +395,10 @@ class Component extends DCLogic {
       dz.addEventListener('drop', e => { e.preventDefault(); const fs = Array.from(e.dataTransfer.files); if (fs.length) this._import(fs); });
     }
     // cada etapa é independente: um bloco removido da tela não pode derrubar os demais
-    on('chkAlertas', 'change', () => this._consEstado());
+    on('chkAlertas', 'change', () => { this._consEstado(); this._pintarLib(); });
+    on('btnLiberar', 'click', () => this._liberar());
+    on('btnRevogar', 'click', () => this._revogar());
+    setTimeout(() => { try { this._pintarLib(); this._consEstado(); } catch (e) { /* segue */ } }, 0);
     on('btnCopiarAlertas', 'click', () => {
       const txt = this._alertasTexto || '';
       if (navigator.clipboard && txt) navigator.clipboard.writeText(txt);
@@ -2100,11 +2157,20 @@ class Component extends DCLogic {
         sc.onload = ok; sc.onerror = () => nok(new Error('leitor de imagem não carregou')); document.head.appendChild(sc);
       });
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      // largura compacta (o Teams reduz a figura para caber na conversa): só o necessário para os quadros
+      const antes = el.getAttribute('style') || '';
+      const tabs = Array.from(el.querySelectorAll('table'));
+      const larg = Math.max(560, ...tabs.map(t => t.scrollWidth + 36));
+      el.style.width = larg + 'px'; el.style.maxWidth = 'none'; el.style.overflow = 'visible';
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       const w = el.scrollWidth, h = el.scrollHeight;
-      const blob = await window.htmlToImage.toBlob(el, {
-        pixelRatio: 2, backgroundColor: '#FFFFFF', width: w, height: h,
-        style: { overflow: 'visible', width: w + 'px', height: h + 'px', borderRadius: '0', border: '0' }
-      });
+      let blob;
+      try {
+        blob = await window.htmlToImage.toBlob(el, {
+          pixelRatio: 3, backgroundColor: '#FFFFFF', width: w, height: h,
+          style: { overflow: 'visible', width: w + 'px', height: h + 'px', borderRadius: '0', border: '0' }
+        });
+      } finally { el.setAttribute('style', antes); }
       if (!blob) throw new Error('figura vazia');
       const nome = 'resumo-boletim-' + (this._corteTxt() || 'base').replace(/\//g, '-') + '.png';
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
@@ -2134,12 +2200,14 @@ class Component extends DCLogic {
     // sem o bloco de considerações na tela não há o que validar — a trava sai do caminho
     const ok = (!this.$('inpCons') || (this._ck('chkCons') && !!this._v('inpCons').trim()))
       && (!this.$('chkAlertas') || this._ck('chkAlertas'));
+    const lib = this._libOk();
     ['btnCopiar', 'btnCopiar2', 'btnEml', 'btnEml2'].forEach(id => {
       const b = this.$(id); if (!b) return;
-      b.disabled = !ok;
-      b.style.opacity = ok ? '1' : '.45';
-      b.style.cursor = ok ? 'pointer' : 'not-allowed';
-      b.title = ok ? '' : 'Valide as considerações do dia antes de enviar ou arquivar.';
+      const pode = ok && (id.indexOf('btnEml') !== 0 || lib);
+      b.disabled = !pode;
+      b.style.opacity = pode ? '1' : '.45';
+      b.style.cursor = pode ? 'pointer' : 'not-allowed';
+      b.title = !ok ? 'Valide as considerações do dia antes de enviar ou arquivar.' : pode ? '' : 'Dê o OK em "Apresentações e simulador" para gerar o PDF do anexo.';
     });
     const cp = this.$('chkPronto');
     if (cp) { if (!ok && cp.checked) cp.checked = false; cp.disabled = !ok; }
@@ -2155,7 +2223,8 @@ class Component extends DCLogic {
     M.diasUteisAA = parseInt(v('inpDiasAA'), 10) || M.diasUteisAA;
     M.consideracoes = this.$('inpCons') ? v('inpCons') : (M.consideracoes || '');
     const L = M.links || {};
-    M.links = { hub: v('inpHub') || L.hub || '', executivos: v('inpExec') || L.executivos || '', deck: v('inpDeck') || L.deck || '', pdf: v('inpPdf') || L.pdf || '' };
+    const lk = (id, k) => (this.$(id) ? String(v(id) || '').trim() : (L[k] || '')) || (this._LINKS[k] || '');
+    M.links = { hub: lk('inpHub', 'hub'), executivos: lk('inpExec', 'executivos'), deck: lk('inpDeck', 'deck'), pdf: lk('inpPdf', 'pdf') };
     const t = this._row('Total s/ Cobertura', 'TOTAL', 'TOTAL');
     const vd = this._row('TOTAL', 'TOTAL', 'VD'), vi = this._row('TOTAL', 'TOTAL', 'VI'), tt = this._row('TOTAL', 'TOTAL', 'TOTAL');
     if (t) {
@@ -2205,11 +2274,56 @@ class Component extends DCLogic {
 
   _publicarBase(M) {
     try {
-      localStorage.setItem('boletim.base.v1', JSON.stringify({
-        META: M, COLUNAS: this.cols, FATOS: this.fatos, geradoEm: new Date().toISOString()
-      }));
+      const fj = JSON.stringify(this.fatos);
+      const sig = fj.length + '|' + (M.dataCorte || '');
+      if (this._libForcar) { this._libSig = sig; this._libEm = new Date().toISOString(); this._libForcar = false; }
+      const lib = !!this._libSig && this._libSig === sig;
+      if (!lib) this._libSig = null;
+      this._sigAtual = sig;
+      localStorage.setItem('boletim.base.v1', '{"META":' + JSON.stringify(M) + ',"COLUNAS":' + JSON.stringify(this.cols) + ',"FATOS":' + fj
+        + ',"geradoEm":"' + new Date().toISOString() + '","liberado":' + lib + ',"sig":' + JSON.stringify(sig) + ',"liberadoEm":' + JSON.stringify(lib ? this._libEm || null : null) + '}');
       return true;
     } catch (e) { return false; }
+    finally { try { this._pintarLib(); this._consEstado(); } catch (e) { /* tela parcial */ } }
+  }
+
+  _libOk() { return !!this._libSig && this._libSig === this._sigAtual; }
+
+  _liberar() {
+    if (this.$('chkAlertas') && !this._ck('chkAlertas')) return;
+    if (!this.fatos || !this.fatos.length) return;
+    this._libForcar = true; this._publicarBase(this._meta());
+  }
+
+  _revogar() { this._libSig = null; this._libEm = null; this._publicarBase(this._meta()); }
+
+  /** Apresentações e simulador só abrem com a base do dia depois do OK. */
+  _pintarLib() {
+    const ok = this._libOk(), rev = !this.$('chkAlertas') || this._ck('chkAlertas');
+    const bl = this.$('btnLiberar'), br = this.$('btnRevogar'), inf = this.$('libInfo');
+    if (bl) {
+      bl.disabled = ok || !rev;
+      bl.textContent = ok ? '✓ Publicado' : 'OK, publicar materiais';
+      bl.style.background = ok ? '#E7F4EC' : '#0a7d34'; bl.style.color = ok ? '#0a7d34' : '#fff';
+      bl.style.opacity = !ok && !rev ? '.45' : '1';
+      bl.style.cursor = ok ? 'default' : (rev ? 'pointer' : 'not-allowed');
+      bl.title = !ok && !rev ? 'Marque "Pontos de atenção revisados" na etapa 2 antes de publicar.' : '';
+    }
+    if (br) br.style.display = ok ? '' : 'none';
+    if (inf) {
+      const hora = this._libEm ? new Date(this._libEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+      inf.style.color = ok ? '#0a7d34' : '#5D5F61';
+      inf.textContent = ok ? 'Base de ' + (this._v('inpCorte') || '—') + ' publicada' + (hora ? ' em ' + hora : '') + '. Apresentações, simulador e PDF do e-mail usam estes números.'
+        : rev ? 'Confira os números e dê o OK para liberar as apresentações e o simulador com a base do dia.'
+        : 'Revise os pontos de atenção (etapa 2) para liberar a publicação.';
+    }
+    ['lnkApres', 'lnkApres2', 'lnkSimul'].forEach(id => {
+      const l = this.$(id); if (!l) return;
+      l.style.opacity = ok ? '1' : '.4';
+      l.style.pointerEvents = ok ? '' : 'none';
+      l.setAttribute('aria-disabled', ok ? 'false' : 'true');
+      l.tabIndex = ok ? 0 : -1;
+    });
   }
 
 
@@ -2680,7 +2794,7 @@ class Component extends DCLogic {
     const botao = (href, texto, primario) =>
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:' + (primario ? '#0062AA' : '#FFFFFF') +
       ';border:1px solid ' + (primario ? '#0062AA' : '#A9D0EE') + ';border-radius:8px;"><tr><td align="center" valign="middle" height="62" style="height:62px;padding:0 18px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
-      '<a href="' + esc(href) + '" style="display:block;font-size:18px;line-height:26px;mso-line-height-rule:exactly;font-weight:bold;color:' + (primario ? '#FFFFFF' : '#0062AA') + ';text-decoration:none;text-align:center;">' + texto + '</a></td></tr></table>';
+      '<a href="' + esc(String(href || '#').trim()).replace(/"/g, '&quot;') + '" style="display:block;font-size:18px;line-height:26px;mso-line-height-rule:exactly;font-weight:bold;color:' + (primario ? '#FFFFFF' : '#0062AA') + ';text-decoration:none;text-align:center;">' + texto + '</a></td></tr></table>';
 
     const logo = window.LOGO_EMAIL_HYPERA || '';
 
@@ -2748,14 +2862,14 @@ class Component extends DCLogic {
       '<div class="hdrh1" style="font-size:26px;line-height:32px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;">Boletim Sell Out'
       + (g2 ? ' &#183; Gestão Orçamentária' : '') + ' &#8211; ' + esc(M.referencia) + '</div>' +
       '<div style="font-size:14px;line-height:21px;mso-line-height-rule:exactly;color:#A9D0EE;padding-top:3px;">Dados até ' + esc(M.dataCorte) + ' &#183; ' + M.diasUteis + ' dias úteis realizados' + (M.atualizadoEm ? ' &#183; publicado em ' + esc(M.atualizadoEm) : '') + '</div></td>' +
-      '<td class="hdrcta" align="right" valign="middle" style="font-family:Calibri,Arial,Helvetica,sans-serif;">' +
-      '<a href="' + esc(M.links.deck || 'boletim-sell-out.dc.html') + '" style="display:inline-block;font-size:12px;line-height:16px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;text-decoration:none;border:1px solid #A9D0EE;border-radius:6px;padding:6px 11px;">Ver apresentação &#8594;</a></td>' +
+      ('' && '<td class="hdrcta" align="right" valign="middle" style="font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      '<a href="' + esc(M.links.deck || 'boletim-sell-out.dc.html') + '" style="display:inline-block;font-size:12px;line-height:16px;mso-line-height-rule:exactly;font-weight:bold;color:#FFFFFF;text-decoration:none;border:1px solid #A9D0EE;border-radius:6px;padding:6px 11px;">Ver apresentação &#8594;</a></td>') +
       '</tr></table></td></tr>\n' +
       // cartões
       '<tr><td class="pad" style="padding:22px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + (completo ? (c1 + c2).replace(/width="33%"/g, 'width="50%"').replace(/width:33%/g, 'width:50%') : c1 + c2 + c3) + '</tr></table>' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding:8px 0 0;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:19px;color:#5D5F61;">' +
-      '<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#A9D0EE;">&nbsp;</span> VD &#160;&#160;<span style="display:inline-block;width:10px;height:10px;line-height:10px;font-size:0;vertical-align:middle;background-color:#074878;">&nbsp;</span> VI</td></tr></table></td></tr>\n' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="10" height="10" bgcolor="#A9D0EE" style="width:10px;height:10px;line-height:10px;font-size:1px;mso-line-height-rule:exactly;background-color:#A9D0EE;">&nbsp;</td><td style="padding:0 16px 0 6px;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:#5D5F61;">VD</td><td width="10" height="10" bgcolor="#074878" style="width:10px;height:10px;line-height:10px;font-size:1px;mso-line-height-rule:exactly;background-color:#074878;">&nbsp;</td><td style="padding:0 0px 0 6px;font-family:Calibri,Arial,sans-serif;font-size:13px;line-height:19px;mso-line-height-rule:exactly;color:#5D5F61;">VI</td></tr></table></td></tr></table></td></tr>\n' +
       // tabela
       '<tr><td class="pad" style="padding:26px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<div style="font-size:18px;line-height:26px;font-weight:bold;color:#0062AA;">Crescimento BUs <span style="font-weight:normal;font-size:14px;color:#5D5F61;">(' + esc(M.moeda) + ')</span></div>' +
@@ -2769,14 +2883,14 @@ class Component extends DCLogic {
       // botões
       '<tr><td class="pad" style="padding:26px 18px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-      '<td class="cta2" width="50%" valign="top" style="width:50%;padding:0 6px;">' + botao(M.links.hub, 'Acesse o Boletim on-line', true) + '</td>' +
+      '<td class="cta2" width="50%" valign="top" style="width:50%;padding:0 6px;">' + botao(M.links.hub, 'Acesse o Boletim Sell Out', true) + '</td>' +
       '<td class="cta2" width="50%" valign="top" style="width:50%;padding:0 6px;">' + botao(M.links.executivos, 'Demais relatórios de IM&amp;P', false) + '</td>' +
       '</tr></table></td></tr>\n' +
-      '<tr><td class="pad" style="padding:12px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
+      ('' && '<tr><td class="pad" style="padding:12px 24px 0;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#FFFFFF;border:1px solid #0062AA;border-radius:8px;">' +
       '<tr><td align="center" valign="middle" height="56" style="height:56px;padding:0 18px;font-family:Calibri,Arial,Helvetica,sans-serif;">' +
       '<a href="' + esc(M.links.pdf || '#') + '" style="display:block;font-size:17px;line-height:24px;mso-line-height-rule:exactly;font-weight:bold;color:#0062AA;text-decoration:none;text-align:center;">Baixar apresentação completa (PDF) &#8594;</a>' +
-      '</td></tr></table></td></tr>\n' +
+      '</td></tr></table></td></tr>\n') +
       '<tr><td height="30" style="height:30px;line-height:30px;font-size:0;">&nbsp;</td></tr>\n' +
       '</table></td></tr></table>\n</body>\n</html>\n';
   }

@@ -545,7 +545,8 @@ window.BASE_BOLETIM = {
   };
   try {
     var b = JSON.parse(localStorage.getItem(CHAVE) || 'null');
-    if (b && b.META && b.COLUNAS && b.COLUNAS.length && b.FATOS && b.FATOS.length) {
+    var rascunhoOk = /atualizador|validacao/i.test(decodeURIComponent(location.pathname));
+    if (b && b.META && b.COLUNAS && b.COLUNAS.length && b.FATOS && b.FATOS.length && (b.liberado !== false || rascunhoOk)) {
       window.BASE_BOLETIM = b;
       window.BASE_BOLETIM_LOCAL = true;
     }
