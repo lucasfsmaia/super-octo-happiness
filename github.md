@@ -3,17 +3,13 @@ branch: main
 
 ## Last sync
 
-date: 2026-10-05T12:00:00Z
+date: 2026-10-22T12:00:00Z
 
 ### Updated in this project
 
-- PP aberta em PP (Ex-Semavy) e Semavy, mais a linha Total (Ex-Semavy).
-- Cards dos e-mails com colunas comparativas Ex-Semavy.
-- Simulador com botão "Voltar ao portal" e eixo diário pelo calendário do mês.
-- Botão "Baixar" do atualizador exporta o card como PNG.
-- Tabela de BUs padronizada: sublinhas em caixa mista, recuo por nível e cor única.
-- Bloco PP (Ex-Semavy) / Semavy logo abaixo de PP; cards do e-mail alinhados com crescimento com e sem Semavy.
-- Atualizador com botão "Voltar ao portal"; Semavy reconhecida em qualquer marca de PP com "SEMAVY" no nome.
+- Código comum das duas apresentações em boletim-comum.js.
+- Atualizador dividido: atualizador-leitura.js (base) e atualizador-email.js (envio/.eml); leitor XLSX sob demanda.
+- Simulador: cards de média dia útil × fim de semana e projetado inicial × projetado + realizado.
 
 ## Screen map
 
@@ -29,9 +25,11 @@ date: 2026-10-05T12:00:00Z
 | E-mail gestão orçamentária | boletim-sell-out-email-gestao-orcamentaria.html | boletim-sell-out-email-gestao-orcamentaria.html |
 | Simulador Sell Out | simulador-sell-out.dc.html | simulador-sell-out.dc.html |
 | Base publicada | base-boletim.js | base-boletim.js |
+| Módulos comuns | boletim-comum.js, atualizador-leitura.js, atualizador-email.js | idem |
 
 ## Sync history
 
+- 2026-10-05 — PP (Ex-Semavy)/Semavy, simulador com "Voltar ao portal", atualizador exporta PNG.
 - 2026-10-02 — SG reorganizada (Genéricos, Cobertura, Similares = Ex-Vit + Vitaminas), renomeações, simulador sem seletor "Exibir".
 - 2026-10-02 — datas aaaammdd, realizado VD/VI fechando com Total s/ Cobertura, cabeçalho republicado, projeções somadas por grão.
 - 2026-09-29 — páginas não utilizadas removidas, esquema de seis arquivos no Atualizador, portal padronizado.

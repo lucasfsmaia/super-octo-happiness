@@ -45,6 +45,7 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
     <div id="uAviso"></div>
     <div id="uCen" style="margin-bottom:16px;"></div>
     <div id="uKpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-bottom:20px;"></div>
+    <div id="uMedias" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:12px; margin-bottom:20px;"></div>
     <div id="uGraficos"></div>
     <div id="uTabela"></div>
     <div id="uRodape" style="font-size:12.5px; line-height:1.7; color:#5D5F61; border-top:1px solid #EFEFEF; margin-top:26px; padding-top:14px;"></div>
@@ -127,6 +128,7 @@ class Component extends DCLogic {
     if (!d) return;
     const s = this.state;
     ['corte', 'canal', 'visao', 'ver'].forEach(k => { if (d[k]) s[k] = d[k]; });
+    if (s.visao === 'cliente') s.visao = 'canal';
     s.marcas = d.marcas || {}; s.clientes = d.clientes || {};
     s.sim = d.sim || {}; s.simLinha = d.simLinha || {};
     s.filtro = null;
@@ -545,6 +547,67 @@ class Component extends DCLogic {
     const w = new Date(c.ano, c.mes - 1, dia).getDay();
     return w === 0 || w === 6;
   }
+  _fdsEm(ano, mes, dia) { const w = new Date(ano, mes - 1, dia).getDay(); return w === 0 || w === 6; }
+  /** Cards de média por dia útil × fim de semana e de projetado inicial × projetado + realizado, ambos contra o AA. */
+  _cardsMedias(c, canalSel) {
+    const k = canalSel || 'Total', d = c[k], b = c.base && c.base[k];
+    const cm = this.M.curva || {}, ano = cm.ano, mes = cm.mes;
+    const caixa = (tit, html) => '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; padding:14px 16px 15px; box-shadow:0 1px 2px rgba(7,72,120,.06);">'
+      + '<div style="font-size:11.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:' + MUTED + '; margin-bottom:10px;">' + tit + ' · ' + c.rotulo + (canalSel ? ' · ' + canalSel : '') + '</div>' + html + '</div>';
+    const vazio = '<div style="font-size:13.5px; color:' + MUTED + '; padding:6px 0;">Sem série diária para este recorte na base atual.</div>';
+    const thS = 'text-align:right; font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:' + MUTED + '; padding:0 0 6px 10px; border-bottom:1px solid ' + LINE + ';';
+    const tdL = 'text-align:left; font-size:13px; color:' + INK + '; padding:7px 0; border-bottom:1px solid ' + LINE + ';';
+    const tdR = 'text-align:right; font-size:14px; font-variant-numeric:tabular-nums; color:' + INK + '; padding:7px 0 7px 10px; border-bottom:1px solid ' + LINE + ';';
+    const sub = t => '<div style="font-size:11.5px; color:' + MUTED + '; font-weight:400;">' + t + '</div>';
+    const pv = (a, b2) => (a != null && b2) ? (a / b2 - 1) * 100 : null;
+
+    let c1 = vazio;
+    if (d && ano && mes) {
+      const atual = [], anterior = [];
+      for (let i = 0; i < d.diasMes; i++) atual.push(i < d.corte ? d.real[i] : d.proj[i - d.corte]);
+      const med = (arr, a, fds) => { let s = 0, n = 0; arr.forEach((v, i) => { if (v == null || i >= new Date(a, mes, 0).getDate()) return; if (this._fdsEm(a, mes, i + 1) === fds) { s += v; n++; } }); return { m: n ? s / n : null, n }; };
+      const u1 = med(atual, ano, false), f1 = med(atual, ano, true), u0 = med(d.aa, ano - 1, false), f0 = med(d.aa, ano - 1, true);
+      c1 = '<table style="width:100%; border-collapse:collapse;"><thead><tr><th style="' + thS + ' text-align:left; padding-left:0;"></th><th style="' + thS + '">Dia útil</th><th style="' + thS + '">Fim de semana</th></tr></thead><tbody>'
+        + '<tr><td style="' + tdL + '">' + ano + sub('realizado + projeção') + '</td><td style="' + tdR + ' font-weight:700;">' + this._n(u1.m) + sub(u1.n + ' dias') + '</td><td style="' + tdR + ' font-weight:700;">' + this._n(f1.m) + sub(f1.n + ' dias') + '</td></tr>'
+        + '<tr><td style="' + tdL + '">' + (ano - 1) + sub('ano anterior') + '</td><td style="' + tdR + '">' + this._n(u0.m) + sub(u0.n + ' dias') + '</td><td style="' + tdR + '">' + this._n(f0.m) + sub(f0.n + ' dias') + '</td></tr>'
+        + '<tr><td style="' + tdL + ' border-bottom:none;">vs AA</td><td style="' + tdR + ' border-bottom:none;">' + this._p(pv(u1.m, u0.m)) + '</td><td style="' + tdR + ' border-bottom:none;">' + this._p(pv(f1.m, f0.m)) + '</td></tr>'
+        + '</tbody></table><div style="font-size:11.5px; color:' + MUTED + '; margin-top:8px;">Dia útil = segunda a sexta; feriados não descontados. Cada ano segue o próprio calendário.</div>';
+    }
+
+    let c2 = vazio, c3 = '<div style="font-size:13.5px; color:' + MUTED + '; padding:6px 0;">Sem orçamento na base para este recorte.</div>';
+    if (d) {
+      const aaT = this._soma1(d.aa), aaAte = this._soma1(d.aa, d.corte), realT = this._soma1(d.real), fimT = realT + this._soma1(d.proj);
+      // projeção inicial (aba PROJECAO_INICIAL da base) na proporção do mês-base do recorte
+      const rede = canalSel || 'TOTAL', tt = this._fato('Total s/ Cobertura').bu ? 'Total s/ Cobertura' : 'Total';
+      const linhas = this.state.corte === 'TT' ? [rede !== 'TOTAL' ? this._o('TOTAL', 'TOTAL', rede) : this._o(tt, 'TOTAL', 'TOTAL')] : this._busEscopo().map(x => this._o(x, 'TOTAL', rede));
+      const sIni = linhas.reduce((a, o) => a + (o.projIni || 0), 0), sProj = linhas.reduce((a, o) => a + (o.proj || 0), 0);
+      const mesBase = b ? this._soma1(b.real) + this._soma1(b.proj) : null;
+      const ini = (sIni && sProj && mesBase != null) ? (this._filtroAtivo() ? mesBase * sIni / sProj : sIni) : null;
+      const linha = (rot, s, v, p, forte, ult) => '<tr><td style="' + tdL + (ult ? ' border-bottom:none;' : '') + '">' + rot + (s ? sub(s) : '') + '</td><td style="' + tdR + (forte ? ' font-weight:700;' : '') + (ult ? ' border-bottom:none;' : '') + '">' + this._n(v) + '</td><td style="' + tdR + (ult ? ' border-bottom:none;' : '') + '">' + (p === undefined ? '' : this._p(p)) + '</td></tr>';
+      c2 = '<table style="width:100%; border-collapse:collapse;"><thead><tr><th style="' + thS + ' text-align:left; padding-left:0;"></th><th style="' + thS + '">Mês</th><th style="' + thS + '">vs AA</th></tr></thead><tbody>'
+        + linha('Projetado inicial', 'projeção inicial da base' + (this._filtroAtivo() ? ', proporcional ao filtro' : ''), ini, pv(ini, aaT))
+        + linha('Projetado + realizado', 'realizado até o dia ' + d.corte + ' + projeção' + (this._simAtiva() ? ' simulada' : ''), fimT, pv(fimT, aaT), true)
+        + linha('Realizado até o corte', 'vs AA no mesmo período', realT, pv(realT, aaAte))
+        + linha('Ano anterior', 'mês fechado', aaT, undefined, false, true)
+        + '</tbody></table>'
+        + (ini != null && Math.abs(fimT - ini) > 0.05 ? '<div style="font-size:12.5px; color:' + MUTED + '; margin-top:8px;">Diferença para o projetado inicial: <b style="color:' + INK + ';">' + (fimT > ini ? '+' : '') + this._nn(fimT - ini) + '</b> · ' + this._p(pv(fimT, ini)) + '</div>' : '');
+
+      const sOrc = linhas.reduce((a, o) => a + (o.orcAbs || 0), 0), sAA = linhas.reduce((a, o) => a + (o.realAA || 0), 0);
+      const filt = this._filtroAtivo();
+      const orc = (sOrc && sProj && mesBase != null) ? (filt ? mesBase * sOrc / sProj : sOrc) : null;
+      const cOrc = orc == null ? null : (filt ? pv(orc, aaT) : pv(sOrc, sAA));
+      if (orc != null) {
+        c3 = '<div style="font-size:26px; font-weight:700; color:' + INK + '; font-variant-numeric:tabular-nums; line-height:1.15;">' + this._nn(orc) + '</div>'
+          + '<div style="font-size:13px; color:' + MUTED + '; margin:2px 0 12px;">crescimento esperado vs AA ' + this._p(cOrc) + (filt ? ' · proporcional ao filtro' : '') + '</div>'
+          + '<table style="width:100%; border-collapse:collapse;"><thead><tr><th style="' + thS + ' text-align:left; padding-left:0;"></th><th style="' + thS + '">Mês</th><th style="' + thS + '">vs orçamento</th></tr></thead><tbody>'
+          + linha('Projetado + realizado', 'gap ' + (fimT >= orc ? '+' : '') + this._nn(fimT - orc), fimT, pv(fimT, orc), true)
+          + linha('Projetado inicial', null, ini, pv(ini, orc))
+          + linha('Ano anterior', 'mês fechado', aaT, pv(aaT, orc), false, true)
+          + '</tbody></table>';
+      }
+    }
+    return caixa('Média por dia · útil × fim de semana', c1) + caixa('Projetado inicial × projetado + realizado', c2) + caixa('Orçamento', c3);
+  }
   _diaSemana(dia) {
     const c = this.M.curva || {};
     if (!c.ano || !c.mes) return '';
@@ -736,27 +799,45 @@ class Component extends DCLogic {
     const chave = this._corte()[0], sim = this._sim(chave);
     const vd = c.VD, vi = c.VI;
     const serie = (x, i) => x ? (i < x.corte ? x.real[i] : x.proj[i - x.corte]) : null;
-    let accSim = 0, accAA = 0, accReal = 0;
+    let accSim = 0, accAA = 0, accReal = 0, totSim = 0, nSimT = 0, totProj = 0, nProjT = 0;
     const cab = ['Dia', '', 'AA', 'VD', 'VI', 'Realizado', 'Projeção', 'Simulado', 'Acum.', 'Acum. AA', 'vs AA'];
-    const th = cab.map((t, i) => '<th style="text-align:' + (i < 2 ? 'left' : 'right') + '; font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:' + NAVY + '; padding:8px 10px; white-space:nowrap; position:sticky; top:0;">' + t + '</th>').join('');
+    const th = cab.map((t, i) => '<th style="text-align:' + (i < 2 ? 'left' : 'right') + '; font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:' + NAVY + '; padding:9px 11px; white-space:nowrap; position:sticky; top:0;">' + t + '</th>').join('');
     let linhas = '';
     const fechado = !d.proj.length && d.corte >= d.diasMes;
+    // semanas de domingo a sábado; subtotal ao fim de cada uma
+    const cm = this.M.curva || {}, dow = dia => (cm.ano && cm.mes) ? new Date(cm.ano, cm.mes - 1, dia).getDay() : (dia - 1) % 7;
+    let sem = null, nSem = 0;
+    const fechaSem = () => {
+      if (!sem) return;
+      const ts = (h, al) => '<td style="text-align:' + (al || 'right') + '; padding:7px 11px; background:#EDF6FC; border-bottom:1px solid ' + LINE + '; color:' + INK + '; font-weight:700; white-space:nowrap;">' + h + '</td>';
+      const fech = !(this.state.semAberta || {})[nSem];
+      const seta = '<span style="display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; margin-right:9px; border:1px solid #CFE4F5; border-radius:4px; background:#fff; color:' + BLUE + '; font-size:10px; line-height:1;">' + (fech ? '+' : '−') + '</span>';
+      linhas += '<tr data-sem="' + nSem + '" style="cursor:pointer;">' + ts(seta + 'Semana ' + nSem, 'left') + ts('<span style="font-weight:400; font-size:12px; color:' + MUTED + ';">' + sem.ini + (sem.fim > sem.ini ? '–' + sem.fim : '') + '</span>', 'left')
+        + ts(this._nn(sem.aa)) + ts(vd ? this._nn(sem.vd) : '—') + ts(vi ? this._nn(sem.vi) : '—')
+        + ts(sem.nReal ? this._nn(sem.real) : '—') + ts(sem.nProj ? this._nn(sem.proj) : '—') + ts(sem.nSim ? this._nn(sem.sim) : '—') + ts(this._nn(accSim)) + ts(this._nn(accAA))
+        + ts(this._p(accAA ? (accSim / accAA - 1) * 100 : null)) + '</tr>' + (fech ? '' : sem.rows);
+      sem = null;
+    };
     for (let i = 0; i < d.diasMes; i++) {
       const dia = i + 1, futuro = i >= d.corte, editavel = futuro || fechado;
+      if (!sem || dow(dia) === 0) { fechaSem(); nSem++; sem = { rows: '', ini: dia, fim: dia, aa: 0, vd: 0, vi: 0, real: 0, proj: 0, sim: 0, nReal: 0, nProj: 0, nSim: 0 }; }
       const aa = d.aa[i] == null ? null : d.aa[i];
       const real = futuro ? null : (fechado && base ? base.real[i] : d.real[i]);
       const proj = futuro ? (base ? base.proj[i - base.corte] : null) : null;
       const cen = futuro ? d.proj[i - d.corte] : d.real[i];
       accSim += cen || 0; accAA += aa || 0; if (!futuro) accReal += real || 0;
+      sem.fim = dia; sem.aa += aa || 0; sem.vd += serie(vd, i) || 0; sem.vi += serie(vi, i) || 0;
+      if (editavel && cen != null) { sem.sim += cen; sem.nSim++; totSim += cen; nSimT++; }
+      if (real != null) { sem.real += real; sem.nReal++; } if (proj != null) { sem.proj += proj; sem.nProj++; totProj += proj; nProjT++; }
       const fds = this._fds(dia);
-      const fundo = fds ? '#EDF6FC' : (futuro ? SUAVE : '#fff');
-      const td = (h, extra) => '<td style="text-align:right; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; white-space:nowrap;' + (extra || '') + '">' + h + '</td>';
+      const fundo = futuro ? SUAVE : '#fff';
+      const td = (h, extra) => '<td style="text-align:right; padding:7px 11px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; white-space:nowrap;' + (extra || '') + '">' + h + '</td>';
       const inp = editavel
         ? '<input type="number" step="0.1" data-dia="' + dia + '" value="' + (cen == null ? '' : cen) + '" style="font-family:inherit; font-size:12.5px; width:74px; text-align:right; padding:4px 7px; border:1px solid ' + (sim.dias[dia] != null ? BLUE : '#D7E3EE') + '; border-radius:6px; color:' + INK + '; background:#fff;">'
         : '<span style="color:#C3CDD6;">—</span>';
-      linhas += '<tr>'
-        + '<td style="text-align:left; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-weight:600; color:' + INK + ';">' + dia + '</td>'
-        + '<td style="text-align:left; padding:6px 10px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-size:12px; color:' + (fds ? BLUE : MUTED) + ';">' + this._diaSemana(dia) + '</td>'
+      sem.rows += '<tr>'
+        + '<td style="text-align:left; padding:7px 11px 7px 58px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-weight:400; color:' + INK + ';">' + dia + '</td>'
+        + '<td style="text-align:left; padding:7px 11px; border-bottom:1px solid ' + LINE + '; background:' + fundo + '; font-size:12px; color:' + (fds ? BLUE : MUTED) + ';">' + this._diaSemana(dia) + '</td>'
         + td(this._n(aa)) + td(this._n(serie(vd, i))) + td(this._n(serie(vi, i)))
         + td(real == null ? '<span style="color:#C3CDD6;">—</span>' : '<b>' + this._nn(real) + '</b>')
         + td(this._n(proj)) + td(inp)
@@ -764,15 +845,16 @@ class Component extends DCLogic {
         + td(this._p(accAA ? (accSim / accAA - 1) * 100 : null))
         + '</tr>';
     }
+    fechaSem();
     const aaT = this._soma1(d.aa), fimT = accSim;
     const projOrig = base ? this._soma1(base.real) + this._soma1(base.proj) : null;
     const orc = this._orcEscopo();
-    const tf = (h, al) => '<td style="text-align:' + (al || 'right') + '; padding:8px 10px; background:' + NAVY + '; color:#fff; font-weight:700; white-space:nowrap;">' + h + '</td>';
+    const tf = (h, al) => '<td style="text-align:' + (al || 'right') + '; padding:8px 11px; background:#DCEBF7; color:' + INK + '; font-weight:700; white-space:nowrap; position:sticky; bottom:0;">' + h + '</td>';
     const rodape = '<tr>' + tf('Mês', 'left') + tf('') + tf(this._nn(aaT))
       + tf(vd ? this._nn(this._soma1(vd.real) + this._soma1(vd.proj)) : '—')
       + tf(vi ? this._nn(this._soma1(vi.real) + this._soma1(vi.proj)) : '—')
-      + tf(this._nn(accReal)) + tf(this._nn(projOrig)) + tf(this._nn(fimT)) + tf(this._nn(fimT)) + tf(this._nn(aaT))
-      + tf('<span style="color:#fff;">' + (aaT ? (fimT / aaT - 1 > 0 ? '+' : '') + this._nn((fimT / aaT - 1) * 100) + '%' : '—') + '</span>') + '</tr>';
+      + tf(this._nn(accReal)) + tf(nProjT ? this._nn(totProj) : '—') + tf(nSimT ? this._nn(totSim) : '—') + tf(this._nn(fimT)) + tf(this._nn(aaT))
+      + tf(this._p(aaT ? (fimT / aaT - 1) * 100 : null)) + '</tr>';
 
     const cartao = (rot, valor, sub) => '<div style="border:1px solid ' + LINE + '; border-radius:8px; padding:11px 14px; background:' + SUAVE + ';">'
       + '<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:' + MUTED + ';">' + rot + '</div>'
@@ -802,8 +884,8 @@ class Component extends DCLogic {
       + '</div>';
 
     return painelSim
-      + '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; overflow:auto; max-height:60vh;">'
-      + '<table style="width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums;">'
+      + '<div style="background:#fff; border:1px solid ' + LINE + '; border-radius:8px; box-shadow:0 1px 3px rgba(7,72,120,.06); overflow:auto; max-height:70vh;">'
+      + '<table style="width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums;">'
       + '<thead><tr>' + th + '</tr></thead><tbody>' + linhas + '</tbody><tfoot>' + rodape + '</tfoot></table></div>';
   }
 
@@ -851,14 +933,13 @@ class Component extends DCLogic {
     const canal = this.state.canal, escopo = this._busEscopo(), redes = this._redes().filter(r => this._passaCliente(r));
     const totNome = this._fato('Total s/ Cobertura').bu ? 'Total s/ Cobertura' : 'Total';
     let h = '';
-    // totalizador no topo de toda visão e recorte; com filtro, soma só o que a tabela mostra
+    // totalizador no fim de toda visão e recorte, fixo no rodapé da rolagem; com filtro, soma só o que a tabela mostra
     const rotTot = this.state.corte === 'TT' ? 'Total Hypera' : 'Total ' + this._corte()[1];
-    const linTot = o => (o && this._temValor(o)) ? this._linha(o, rotTot, 0, 'tot', false).replace(/background:#EDF6FC;/g, 'background:#DCEBF7;') : '';
+    const linTot = o => (o && this._temValor(o)) ? this._linha(o, rotTot, 0, 'tot', false).replace(/background:#EDF6FC;/g, 'background:#DCEBF7; position:sticky; bottom:0;') : '';
     const tem = o => this._temValor(o) || o.cresc != null;
     const sufixo = this.state.corte === 'TT' ? '' : ' · ' + this._corte()[1];
     const busVis = (cli, k) => escopo.filter(bu => (!this._filMarca() || this._marcas(bu).some(m => this._passaMarca(m, bu))) && tem(this._q(bu, null, cli, k)));
     if (this.state.visao === 'bu') {
-      h += linTot(this._q(null, null, null, null));
       busVis(null, null).forEach(bu => {
         const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, null, null)));
         h += this._linha(this._q(bu, null, null, null), bu, 0, 'bu:' + bu, marcas.length > 0);
@@ -873,37 +954,35 @@ class Component extends DCLogic {
           }
         });
       });
-    } else if (this.state.visao === 'cliente') {
-      h += linTot(this._q(null, null, null, null));
-      redes.forEach(r => {
-        const o = this._q(null, null, r, null); if (!tem(o)) return;
-        const k = 'c:' + r;
-        h += this._linha(o, r + sufixo, 0, k, true);
-        if (!this.state.abertos[k]) return;
-        busVis(r, null).forEach(bu => {
-          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, r, null)));
-          const kb = k + '|' + bu;
-          h += this._linha(this._q(bu, null, r, null), bu, 1, kb, marcas.length > 0);
-          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._q(bu, m, r, null), m, 2, kb + '|' + m, false));
-        });
-      });
     } else {
-      h += linTot(this._q(null, null, null, null));
+      // canal → cliente → BU → marca; cliente × canal vem do grão da base
+      const temGrao = !!(this.M && this.M.grao);
+      const abreBus = (kb0, cli, c, nv) => busVis(cli, c).forEach(bu => {
+        const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, cli, c)));
+        const kb = kb0 + '|' + bu;
+        h += this._linha(this._q(bu, null, cli, c), bu, nv, kb, marcas.length > 0);
+        if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._q(bu, m, cli, c), m, nv + 1, kb + '|' + m, false));
+      });
       (canal === 'TOTAL' ? CANAIS : [canal]).forEach(c => {
         const o = this._q(null, null, null, c); if (!tem(o)) return;
         const k = 'n:' + c;
         h += this._linha(o, (c === 'VD' ? 'Venda direta (VD)' : 'Venda indireta (VI)') + sufixo, 0, k, true);
         if (!this.state.abertos[k]) return;
-        busVis(null, c).forEach(bu => {
-          const marcas = this._marcas(bu).filter(m => this._passaMarca(m, bu) && tem(this._q(bu, m, null, c)));
-          const kb = k + '|' + bu;
-          h += this._linha(this._q(bu, null, null, c), bu, 1, kb, marcas.length > 0);
-          if (this.state.abertos[kb]) marcas.forEach(m => h += this._linha(this._q(bu, m, null, c), m, 2, kb + '|' + m, false));
+        if (!temGrao) {
+          h += '<tr><td colspan="' + (COLS.length + 3) + '" style="padding:9px 11px 9px 52px; border-bottom:1px solid ' + LINE + '; background:' + SUAVE + '; font-size:12.5px; color:' + MUTED + ';">A base publicada foi gerada sem a abertura de cliente por canal. Gere a base de novo no atualizador, a partir do vendas.csv, para abrir os clientes aqui.</td></tr>';
+          return;
+        }
+        redes.forEach(r => {
+          const oc = this._q(null, null, r, c); if (!tem(oc)) return;
+          const kc = k + '|' + r;
+          h += this._linha(oc, r, 1, kc, busVis(r, c).length > 0);
+          if (this.state.abertos[kc]) abreBus(kc, r, c, 2);
         });
       });
     }
+    h += linTot(this._q(null, null, null, null));
     if (!h) h = '<tr><td colspan="' + (COLS.length + 3) + '" style="padding:28px; text-align:center; color:' + MUTED + ';">Nenhuma linha atende aos filtros.</td></tr>';
-    const visoes = [['bu', 'BU e marca'], ['cliente', 'Cliente'], ['canal', 'Canal']].map(v => {
+    const visoes = [['bu', 'BU e marca'], ['canal', 'Canal e cliente']].map(v => {
       const on = this.state.visao === v[0];
       return '<button data-visao="' + v[0] + '" style="font-family:inherit; font-size:13.5px; font-weight:600; padding:8px 16px; border:none; cursor:pointer; background:'
         + (on ? BLUE : '#fff') + '; color:' + (on ? '#fff' : MUTED) + ';">' + v[1] + '</button>';
@@ -993,6 +1072,8 @@ class Component extends DCLogic {
         + '<div style="font-size:12.5px; color:' + MUTED + ';">AA ' + (d ? this._nn(aaT) : '—') + ' · ' + this._p(d && aaT ? (fimT / aaT - 1) * 100 : null) + '</div></div>';
     }).join('');
 
+    this.$('uMedias').innerHTML = this._cardsMedias(c, canalSel);
+
     let teto = null;
     if (this.props.escalaComum) {
       const t = [c.Total, c.VD, c.VI].filter(Boolean).map(d => Math.max.apply(null, d.aa.concat(d.real, d.proj)));
@@ -1052,6 +1133,11 @@ class Component extends DCLogic {
         clearTimeout(this._tl);
         this._tl = setTimeout(() => this._repintar(), 260);
       };
+    });
+    this.$('uTabela').querySelectorAll('tr[data-sem]').forEach(tr => tr.onclick = () => {
+      const f = this.state.semAberta = this.state.semAberta || {};
+      f[tr.dataset.sem] = !f[tr.dataset.sem];
+      this._repintar();
     });
     [this.$('uGraficos'), this.$('uTabela')].forEach(el => el.querySelectorAll('div[data-dobra]').forEach(d => d.onclick = () => {
       this.state.dobra[d.dataset.dobra] = !this.state.dobra[d.dataset.dobra];
@@ -1117,8 +1203,11 @@ class Component extends DCLogic {
       a['bu:' + bu] = true;
       this._marcas(bu).forEach(m => a['m:' + bu + '|' + m] = true);
     });
-    this._redes().forEach(r => { a['c:' + r] = true; this._busEscopo().forEach(bu => a['c:' + r + '|' + bu] = true); });
-    CANAIS.forEach(c => { a['n:' + c] = true; this._busEscopo().forEach(bu => a['n:' + c + '|' + bu] = true); });
+    CANAIS.forEach(c => {
+      a['n:' + c] = true;
+      this._busEscopo().forEach(bu => a['n:' + c + '|' + bu] = true);
+      this._redes().forEach(r => { a['n:' + c + '|' + r] = true; this._busEscopo().forEach(bu => a['n:' + c + '|' + r + '|' + bu] = true); });
+    });
     this.state.abertos = a;
     this._pintar();
   }
