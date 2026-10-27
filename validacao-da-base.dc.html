@@ -163,7 +163,8 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
           <div style="width:8px; height:8px; border-radius:50%; background:{{ o.cor }}; flex:none;"></div>
           <div style="flex:1 1 auto; min-width:0; font-size:15.5px; color:#434445;">{{ o.marca }} <span style="color:#8A8C8E;">em</span> {{ o.rede }}</div>
           <div style="flex:none; font-size:13px; color:#8A8C8E;">{{ o.bu }}</div>
-          <div style="flex:none; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:{{ o.cor }}; min-width:110px; text-align:right;">{{ o.crescTxt }}</div>
+          <div style="flex:none; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:#292A2B; min-width:110px; text-align:right;">{{ o.desvioTxt }}</div>
+          <div style="flex:none; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; color:{{ o.cor }}; min-width:90px; text-align:right;">{{ o.crescTxt }}</div>
         </div>
       </sc-for>
       <div style="padding:14px 20px; font-size:14px; color:#8A8C8E;">{{ outliersNota }}</div>
@@ -265,14 +266,17 @@ class Component extends DCLogic {
 
     // --- cruzamentos produto × cliente fora de faixa
     const cruz = linhas.filter(l => BUS.indexOf(l.bu) >= 0 && !AGREG.has(l.marca) && !excl.has(l.rede) && l.cresc != null);
-    const foraFaixa = cruz.filter(l => Math.abs(l.cresc) >= limite).sort((a, b) => Math.abs(b.cresc) - Math.abs(a.cresc));
-    const outliers = foraFaixa.slice(0, 8).map(l => ({
+    const desvio = l => (l.proj != null && l.realAA != null) ? l.proj - l.realAA : 0;
+    const foraFaixa = cruz.filter(l => Math.abs(l.cresc) >= limite)
+      .sort((a, b) => Math.abs(desvio(b)) - Math.abs(desvio(a)) || Math.abs(b.cresc) - Math.abs(a.cresc));
+    const outliers = foraFaixa.slice(0, 10).map(l => ({
       bu: l.bu, marca: l.marca, rede: l.rede, crescTxt: this._sgn(l.cresc),
+      desvioTxt: (desvio(l) > 0 ? '+' : '') + this._mi(+desvio(l).toFixed(1)),
       cor: Math.abs(l.cresc) >= 1000 ? '#B42318' : '#B54708'
     }));
     const outliersNota = foraFaixa.length === 0
       ? 'Nenhum cruzamento acima de ' + limite + '% nesta base.'
-      : foraFaixa.length + ' de ' + cruz.length + ' cruzamentos acima de ' + limite + '%' + (foraFaixa.length > 8 ? ' — os 8 maiores acima.' : '.');
+      : foraFaixa.length + ' de ' + cruz.length + ' cruzamentos acima de ' + limite + '%' + (foraFaixa.length > 10 ? ' — os 10 maiores desvios em valor absoluto acima.' : ', ordenados pelo desvio em valor absoluto.');
 
     // --- revisão de projeção (inicial → atual)
     const totIni = linhas.find(l => l.marca === 'TOTAL' && l.rede === 'TOTAL' && l.bu === 'Total s/ Cobertura');
@@ -320,7 +324,7 @@ class Component extends DCLogic {
       push('Crítico', c.nome, 'Checagem estrutural reprovada (' + c.valor + '). O envio fica bloqueado até a correção na origem.'));
 
     if (foraFaixa.length) {
-      const pior = foraFaixa[0];
+      const pior = foraFaixa.slice().sort((a, b) => Math.abs(b.cresc) - Math.abs(a.cresc))[0];
       push(foraFaixa.some(l => Math.abs(l.cresc) >= 1000) ? 'Crítico' : 'Atenção',
         'Variação implausível em ' + pior.marca + ' / ' + pior.rede,
         pior.marca + ' aparece com ' + this._sgn(pior.cresc) + ' em ' + pior.rede + '. Ao todo ' + foraFaixa.length +
